@@ -5,8 +5,8 @@
 **Clone this repo**
 
 ```bash
-git clone [insert-repo]
-cd [repo-name]
+git clone https://github.com/mcgingras/noms-monorepo
+cd noms-monorepo
 ```
 
 **Install app dependencies**
