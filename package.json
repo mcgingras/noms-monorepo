@@ -1,0 +1,21 @@
+{
+  "name": "noms",
+  "version": "0.0.1",
+  "description": "ERC 6551 for Nouns",
+  "scripts": {
+    "build": "lerna run build --stream",
+    "dev": "lerna run dev",
+    "start": "lerna run start",
+    "start-directory": "lerna run start --scope directory",
+    "start-ponder": "lerna run start --scope ponder"
+  },
+  "author": "frog, mrtn98",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "lerna": "^8.0.2"
+  }
+}
