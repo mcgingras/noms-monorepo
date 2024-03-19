@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-const { theme } = require("./groupos.config.ts");
 
 const config: Config = {
   content: [
@@ -14,9 +13,6 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-      },
-      colors: {
-        ...theme.colors,
       },
       keyframes: {
         "accordion-down": {
