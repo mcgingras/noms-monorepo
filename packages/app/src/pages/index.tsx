@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "@/components/ui/Button";
+import { ConnectKitButton } from "connectkit";
 
 const ScreenCard = () => {
   return (
@@ -21,7 +21,7 @@ export default function App() {
         <div className="w-[400px]">
           <ScreenCard />
         </div>
-        <button className="self-start">login</button>
+        <ConnectKitButton />
       </div>
 
       <button className="bg-blue-500 border-4 border-blue-400 rounded-full px-6 py-2 text-white font-bold fixed bottom-8 left-[calc(50%-50px)]">
