@@ -1,5 +1,6 @@
 import React from "react";
 import { ConnectKitButton } from "connectkit";
+import NomIcon from "../components/icons/NomIcon";
 
 const ScreenCard = () => {
   return (
@@ -14,7 +15,9 @@ export default function App() {
     <main className="h-screen max-w-screen-2xl mx-auto p-8">
       <div className="flex flex-row justify-between">
         <div className="flex flex-col space-y-8">
-          <span className="bg-blue-500 h-24 w-24 rounded-full block"></span>
+          <span className="bg-blue-500 h-24 w-24 rounded-full flex items-center justify-center pr-2 pb-2">
+            <NomIcon className="h-16 w-16 text-white" />
+          </span>
           <span className="bg-gray-100 h-24 w-24 rounded-full block border-4"></span>
           <span className="bg-gray-100 h-24 w-24 rounded-full block border-4"></span>
         </div>
