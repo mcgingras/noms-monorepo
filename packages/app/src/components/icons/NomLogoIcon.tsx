@@ -1,4 +1,4 @@
-const NomIcon = ({ className }: { className: string }) => {
+const NomLogoIcon = ({ className }: { className: string }) => {
   return (
     <svg
       className={className}
@@ -20,4 +20,4 @@ const NomIcon = ({ className }: { className: string }) => {
   );
 };
 
-export default NomIcon;
+export default NomLogoIcon;

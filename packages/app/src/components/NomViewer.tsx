@@ -1,4 +1,4 @@
-import EmptyNom from "./icons/EmptyNom";
+import EmptyNom from "./icons/EmptyNomIcon";
 
 const NomViewer = ({ id }: { id: number }) => {
   return (
