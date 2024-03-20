@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import { ConnectKitButton } from "connectkit";
 import NomIcon from "../components/icons/NomIcon";
 import PrimaryLayout from "@/layouts/PrimaryLayout";
@@ -12,6 +13,7 @@ const ScreenCard = () => {
 };
 
 export default function App() {
+  const router = useRouter();
   return (
     <PrimaryLayout>
       <>
@@ -20,7 +22,14 @@ export default function App() {
             <span className="bg-blue-500 h-24 w-24 rounded-full flex items-center justify-center pr-2 pb-2">
               <NomIcon className="h-16 w-16 text-white" />
             </span>
-            <span className="bg-gray-100 h-24 w-24 rounded-full block border-4"></span>
+            <span
+              className="bg-gray-100 h-24 w-24 rounded-full border-4 text-gray-500 flex items-center justify-center text-xs"
+              onClick={() => {
+                router.push("/myNoms");
+              }}
+            >
+              my noms
+            </span>
             <span className="bg-gray-100 h-24 w-24 rounded-full block border-4"></span>
           </div>
           <div className="w-[400px]">
