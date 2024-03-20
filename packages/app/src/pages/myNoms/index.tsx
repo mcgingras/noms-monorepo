@@ -5,11 +5,13 @@ import { deploys } from "@/utils/constants";
 import EmptyNom from "@/components/icons/EmptyNom";
 import ArrowLeftIcon from "@/components/icons/ArrowLeft";
 import ArrowRightIcon from "@/components/icons/ArrowRightIcon";
+import { useNoms } from "@/models/noms/hooks";
 
 import { ERC721Abi } from "@/abis/ERC721";
 
 const MyNoms = () => {
   const { address } = useAccount();
+  const { noms } = useNoms();
   const { data } = useReadContract({
     address: deploys["NPC(721)"] as `0x${string}`,
     abi: ERC721Abi,
@@ -17,7 +19,7 @@ const MyNoms = () => {
     args: [address as `0x${string}`],
   });
 
-  const noms = [1, 2, 3, 4, 5];
+  console.log(noms);
 
   return (
     <div className="w-2/3 mx-auto rounded-lg p-6 bg-gray-100 h-full flex flex-col">

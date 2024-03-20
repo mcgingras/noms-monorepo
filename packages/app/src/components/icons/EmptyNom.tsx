@@ -6,6 +6,7 @@ const EmptyNom = ({ className }: { className?: string }) => {
       viewBox="0 0 47 62"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      shapeRendering="crispEdges"
       className={className}
     >
       <rect
