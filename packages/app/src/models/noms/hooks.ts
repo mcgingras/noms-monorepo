@@ -45,6 +45,12 @@ async function SWRGetNoms({
     query GetNomsQuery($owner: String!) {
         noms(where: { owner: $owner }) {
             id
+            deployed
+            ownedTraits {
+                id
+
+            }
+
         }
     }
  `;

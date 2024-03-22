@@ -1,9 +1,9 @@
 import PrimaryLayout from "@/layouts/PrimaryLayout";
 import { ConnectKitButton } from "connectkit";
-import EmptyNom from "@/components/icons/EmptyNomIcon";
 import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
 import ArrowRightIcon from "@/components/icons/ArrowRightIcon";
 import { useNoms } from "@/models/noms/hooks";
+import Nom from "@/components/Nom";
 
 const MyNoms = () => {
   const { noms } = useNoms();
@@ -29,7 +29,7 @@ const MyNoms = () => {
           return (
             // @ts-ignore
             <div style={{ width: widthMap[idx] }}>
-              <EmptyNom className="h-full w-full" />
+              <Nom nom={nom} />
             </div>
           );
         })}

@@ -1,14 +1,7 @@
 import { Context, ponder } from "@/generated";
 import { configAddresses } from "../ponder.config";
-import { eventNames } from "process";
-import {
-  Address,
-  getContractAddress,
-  isAddressEqual,
-  keccak256,
-  toBytes,
-} from "viem";
-import { computeAccount, createFullSVG } from "./utils";
+import { Address, isAddressEqual } from "viem";
+import { createFullSVG } from "./utils";
 
 // Can check that the transfer is coming from the 0x0 address to know that it's a mint
 // Otherwise it's an address to address transfer, in which we update the owner.
@@ -38,15 +31,14 @@ ponder.on("NFTContract:Transfer", async ({ event, context }) => {
     const token = await Nom.create({
       id: TBAAddress,
       data: {
-        tokenID: event.args.tokenId,
+        tokenId: event.args.tokenId,
         created: event.block.timestamp,
         owner: event.args.to,
         deployed: false,
-        equippedTraits: [],
         fullSVG: fullSVG,
       },
     });
-    console.log(`Added token #${token.tokenID} @ ${token.id}`);
+    console.log(`Added token #${token.tokenId} @ ${token.id}`);
   } else {
     const existingNom = await Nom.findUnique({
       id: TBAAddress,
@@ -63,18 +55,23 @@ ponder.on("NFTContract:Transfer", async ({ event, context }) => {
   }
 });
 
-/* ERC6651 REGISTRY */
+/**
+ * ERC6651 REGISTRY
+ * This event is emitted when an account is created in the ERC6551 registry.
+ * This means that the nom can be considered "deployed".
+ * The account owner now has the ability to take actions on the nom (enabled traits)
+ */
 ponder.on(
   "ERC6551Registry:ERC6551AccountCreated",
   async ({ event, context }) => {
     const { Nom } = context.db;
     const { NFTContract } = context.contracts;
     if (isAddressEqual(event.args.tokenContract, NFTContract.address)) {
-      const existingNpc = await Nom.findUnique({
+      const existingNom = await Nom.findUnique({
         id: event.args.account,
       });
 
-      if (existingNpc) {
+      if (existingNom) {
         const npc = await Nom.update({
           id: event.args.account,
           data: {
@@ -138,6 +135,15 @@ ponder.on("ERC1155Contract:TransferBatch", async ({ event, context }) => {
   }
 });
 
+/**
+ * transferTraitOwnership
+ * @param from
+ * @param to
+ * @param id
+ * @param value
+ * @param context
+ * @description Transfer a trait from one address to another.
+ */
 async function transferTraitOwnership(
   from: Address,
   to: Address,
@@ -149,55 +155,76 @@ async function transferTraitOwnership(
   await increaseTraitQuantity(to, id, value, context);
 }
 
+/**
+ * increaseTraitQuantity
+ * @param to
+ * @param id
+ * @param value
+ * @param context
+ * @description Increase the quantity of a trait for a given address.
+ */
 async function increaseTraitQuantity(
   to: Address,
   id: bigint,
   value: bigint,
   context: Context
 ) {
-  const { OwnedTrait } = context.db;
+  const { NomTrait } = context.db;
+  // id scheme -- tbaAddress-traitTokenId
   const concatID = to.concat("-").concat(id.toString());
-  const ownedTrait = await OwnedTrait.findUnique({
+  const existingNomTrait = await NomTrait.findUnique({
     id: concatID,
   });
-  if (ownedTrait == null) {
+
+  if (existingNomTrait == null) {
     // NPC owns 0 of this trait so far, so need to add an OT object
-    await OwnedTrait.create({
+    await NomTrait.create({
       id: concatID,
       data: {
         quantity: Number(value),
-        ownerID: to,
-        tokenID: id,
+        equipped: false,
+        nomId: to,
+        traitId: id,
       },
     });
   } else {
-    await OwnedTrait.update({
+    await NomTrait.update({
       id: concatID,
       data: {
-        quantity: (ownedTrait.quantity += Number(value)),
+        quantity: (existingNomTrait.quantity += Number(value)),
       },
     });
   }
   return;
 }
 
+/**
+ * reduceTraitQuantity
+ * @param from
+ * @param id
+ * @param value
+ * @param context
+ * @description Reduce the quantity of a trait for a given address.
+ */
 async function reduceTraitQuantity(
   from: Address,
   id: bigint,
   value: bigint,
   context: Context
 ) {
-  const { OwnedTrait } = context.db;
+  const { NomTrait } = context.db;
+  // id scheme -- tbaAddress-traitTokenId
   const concatID = from.concat("-").concat(id.toString());
-  const ownedTrait = await OwnedTrait.findUnique({
+  const existingNomTrait = await NomTrait.findUnique({
     id: concatID,
   });
-  if (ownedTrait) {
+
+  if (existingNomTrait) {
     // if null, don't track since it didn't't belong to an NPC before
-    await OwnedTrait.update({
+    await NomTrait.update({
       id: concatID,
       data: {
-        quantity: (ownedTrait.quantity -= Number(value)),
+        quantity: (existingNomTrait.quantity -= Number(value)),
       },
     });
   }
@@ -205,18 +232,39 @@ async function reduceTraitQuantity(
 }
 
 ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
-  const { Nom, Trait } = await context.db;
-  const npc = await Nom.findUnique({
-    id: event.args.owner,
+  const { Nom, NomTrait } = await context.db;
+
+  const nomTraitId = event.args.owner
+    .concat("-")
+    .concat(event.args.tokenId.toString());
+
+  const nomTrait = await NomTrait.findUnique({
+    id: nomTraitId,
   });
-  if (npc) {
-    // no reason NPC shouldn't be defined if it's equipping traits?
-    const newEquippedTraits = [...npc.equippedTraits, event.args.tokenId];
-    const fullSVG = await createFullSVG(newEquippedTraits, context);
-    const newNPC = await Nom.update({
-      id: npc.id,
+
+  if (nomTrait) {
+    const existingEquippedNomTraits = await NomTrait.findMany({
+      where: {
+        nomId: event.args.owner,
+        equipped: true,
+      },
+    });
+
+    const existingEquippedTraitIds = existingEquippedNomTraits.map(
+      (trait) => trait.traitId
+    );
+
+    const fullSVG = await createFullSVG(existingEquippedTraitIds, context);
+    NomTrait.update({
+      id: nomTraitId,
       data: {
-        equippedTraits: newEquippedTraits,
+        equipped: true,
+      },
+    });
+
+    Nom.update({
+      id: event.args.owner,
+      data: {
         fullSVG: fullSVG,
       },
     });
@@ -224,24 +272,40 @@ ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
 });
 
 ponder.on("ERC1155Contract:TokenUnequipped", async ({ event, context }) => {
-  const { Nom, Trait } = await context.db;
-  const npc = await Nom.findUnique({
-    id: event.args.owner,
+  const { Nom, NomTrait } = await context.db;
+  const nomTraitId = event.args.owner
+    .concat("-")
+    .concat(event.args.tokenId.toString());
+
+  const nomTrait = await NomTrait.findUnique({
+    id: nomTraitId,
   });
-  console.log("current:", npc?.equippedTraits);
-  console.log("unequipping:", event.args.tokenId);
-  if (npc) {
-    // no reason NPC shouldn't be defined if it's equipping traits?
-    const newEquipped = [...npc.equippedTraits];
-    newEquipped.splice(newEquipped.indexOf(event.args.tokenId), 1);
-    const fullSVG = await createFullSVG(newEquipped, context);
-    const newNPC = await Nom.update({
-      id: npc.id,
+
+  if (nomTrait) {
+    const existingEquippedNomTraits = await NomTrait.findMany({
+      where: {
+        nomId: event.args.owner,
+        equipped: true,
+      },
+    });
+
+    const equippedTraitIds = existingEquippedNomTraits
+      .map((trait) => trait.traitId)
+      .filter((traitId) => traitId !== event.args.tokenId);
+
+    const fullSVG = await createFullSVG(equippedTraitIds, context);
+    NomTrait.update({
+      id: nomTraitId,
       data: {
-        equippedTraits: newEquipped,
+        equipped: false,
+      },
+    });
+
+    Nom.update({
+      id: event.args.owner,
+      data: {
         fullSVG: fullSVG,
       },
     });
-    console.log("new equipped", newNPC.equippedTraits);
   }
 });
