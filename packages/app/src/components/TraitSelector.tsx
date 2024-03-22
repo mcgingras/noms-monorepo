@@ -56,7 +56,7 @@ const TraitSelector = () => {
   }
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg h-full">
+    <div className="bg-gray-100/90 p-6 rounded-lg h-full">
       <div className="flex flex-row justify-between">
         <SelectTraitIcon
           traitType={TraitType.BACKGROUND}
