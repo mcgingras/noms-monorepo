@@ -5,6 +5,7 @@ import TraitSelector from "@/components/TraitSelector";
 import { useWriteContract, useAccount } from "wagmi";
 import { deploys } from "@/utils/constants";
 import { ERC721Abi } from "@/abis/ERC721";
+import BackButton from "@/components/ui/BackButton";
 
 const NewNomPage = () => {
   const { address } = useAccount();
@@ -25,7 +26,7 @@ const NewNomPage = () => {
     <PrimaryLayout>
       <div className="h-full">
         <nav className="flex flex-row justify-between mb-12">
-          <span></span>
+          <BackButton />
           <ConnectKitButton />
         </nav>
         <section className="grid grid-cols-3 gap-6 h-[calc(100vh-30%)]">

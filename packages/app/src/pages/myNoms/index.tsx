@@ -4,6 +4,7 @@ import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
 import ArrowRightIcon from "@/components/icons/ArrowRightIcon";
 import { useNoms } from "@/models/noms/hooks";
 import Nom from "@/components/Nom";
+import BackButton from "@/components/ui/BackButton";
 
 const MyNoms = () => {
   const { noms } = useNoms();
@@ -50,7 +51,7 @@ const MyNomsPage = () => {
     <PrimaryLayout>
       <div className="h-full">
         <nav className="flex flex-row justify-between mb-12">
-          <span></span>
+          <BackButton />
           <ConnectKitButton />
         </nav>
         <section className="w-full h-[calc(100vh-30%)]">
