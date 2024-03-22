@@ -7,6 +7,7 @@ import Nom from "@/components/Nom";
 
 const MyNoms = () => {
   const { noms } = useNoms();
+  console.log(noms);
 
   return (
     <div className="w-2/3 mx-auto rounded-lg p-6 bg-gray-100 h-full flex flex-col">

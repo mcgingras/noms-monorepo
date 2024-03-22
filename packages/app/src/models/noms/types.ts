@@ -1,10 +1,19 @@
+import { Trait } from "../traits/types";
+
 export type Nom = {
   id: string;
+  tokenId: string;
+  created: number;
+  owner: string;
   deployed: boolean;
-  ownedTraits: OwnedTrait[];
+  fullSVG: string;
+  traits: NomTrait[];
 };
 
-type OwnedTrait = {
+type NomTrait = {
   id: string;
-  rleBytes: string;
+  equipped: boolean;
+  quantity: number;
+  trait: Trait;
+  nom: Nom;
 };

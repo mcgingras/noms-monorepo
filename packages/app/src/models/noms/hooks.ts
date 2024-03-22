@@ -46,11 +46,14 @@ async function SWRGetNoms({
         noms(where: { owner: $owner }) {
             id
             deployed
-            ownedTraits {
-                id
-
+            fullSVG
+            traits {
+                equipped
+                trait {
+                    id
+                    name
+                }
             }
-
         }
     }
  `;
