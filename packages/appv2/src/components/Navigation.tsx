@@ -19,6 +19,23 @@ const Navigation = () => {
           </Link>
         </div>
       </div>
+      {true && (
+        <div className="flex flex-row mt-[2px] space-x-4">
+          <Link href="/">
+            <span className="text-[#8E8E8E] pangram-sans font-bold">Nom 1</span>
+          </Link>
+          <Link href="/">
+            <span className="text-[#8E8E8E] pangram-sans font-bold">
+              Closet
+            </span>
+          </Link>
+          <Link href="/traits">
+            <span className="text-[#8E8E8E] pangram-sans font-bold">
+              Changing room
+            </span>
+          </Link>
+        </div>
+      )}
       <CustomConnectKit />
     </div>
   );

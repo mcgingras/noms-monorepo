@@ -19,7 +19,7 @@ export default function RootLayout({
       <body className="bg-black">
         {/* <PageTransitionLoader /> */}
         <OnChainProvider>
-          <div className="flex flex-col min-h-screen max-h-screen p-4">
+          <div className="flex flex-col min-h-screen max-h-screen p-4 text-white">
             <Navigation />
             {children}
           </div>
