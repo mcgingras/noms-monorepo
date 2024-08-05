@@ -1,8 +1,10 @@
 const NomIdPage = () => {
   return (
-    <div className="w-full flex flex-row space-x-2 h-full">
-      <div className="flex-1 bg-gradient-to-t from-[#222] h-full rounded-lg"></div>
-      <div className="h-full flex flex-col space-y-2">
+    <>
+      <div className="flex-grow basis-0 bg-gradient-to-t from-[#222] h-full rounded-lg flex items-center justify-center">
+        <div className="w-1/2 bg-gray-100 aspect-square"></div>
+      </div>
+      <div className="h-full flex flex-col space-y-2 w-auto">
         <h3 className="oziksoft text-4xl">Nom 1</h3>
         <div className="bg-[#222] w-full rounded-lg p-2 flex-1 relative">
           <h4 className="pangram-sans font-bold">Current fit</h4>
@@ -25,7 +27,7 @@ const NomIdPage = () => {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
