@@ -1,13 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { ConnectKitButton } from "connectkit";
 import { useDisconnect } from "wagmi";
-import { useRouter } from "next/navigation";
 // import { truncateEthAddress } from "@/lib/utils";
 
 const CustomConnectKit = () => {
-  const router = useRouter();
   const { disconnect } = useDisconnect();
 
   return (
@@ -24,8 +21,8 @@ const CustomConnectKit = () => {
               } rounded-md px-2 py-1 transition-all`}
             >
               {isConnected ? (
-                <span className="flex flex-row items-center space-x-1">
-                  <span className="pangram-sans">
+                <span className="flex flex-row items-center space-x-1 text-sm">
+                  <span className="pangram-sans-compact font-medium">
                     {ensName ?? truncatedAddress}
                   </span>
                 </span>

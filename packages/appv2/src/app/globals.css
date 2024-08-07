@@ -30,10 +30,6 @@
     font-style: normal;
 }
 
-.oziksoft {
-    font-family: 'Oziksoft'
-}
-
 @font-face {
     font-family: 'PangramSans';
     src: url('/fonts/PangramSans/PPPangramSansRounded-Bold.otf') format('opentype');
@@ -55,8 +51,72 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactBold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactBoldItalic.otf') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactMedium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactMediumItalic.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactRegular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactRegularItalic.otf') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactLight.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PangramSansCompact';
+    src: url('/fonts/CompactSub/PPPangramSansRounded-CompactLightItalic.otf') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+.oziksoft {
+    font-family: 'Oziksoft'
+}
+
 .pangram-sans {
     font-family: 'PangramSans'
+}
+
+.pangram-sans-compact {
+    font-family: 'PangramSansCompact'
 }
 
 

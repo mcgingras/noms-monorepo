@@ -41,3 +41,8 @@ npm run dev
 
 You can now view the app at [localhost:3000](http://localhost:3000/)
 In dev mode, you can view a GraphQL client at [localhost:42069](http://localhost:42069/)
+
+
+### Todo
+- upgrade ponder
+- deploy contracts to base

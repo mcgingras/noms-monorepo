@@ -6,9 +6,9 @@ const NomViewLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <main className="h-[calc(100vh-34px)] w-full">
-      <section className="pt-12 px-4 flex flex-row space-x-4 h-full w-full">
-        <div className="flex-1 basis-[436px]">
+    <main className="h-[calc(100vh-66px)] w-full">
+      <section className="pt-12 flex flex-row space-x-2 h-full w-full">
+        <div className="flex-[0_1_288px] min-w-0 only:flex-grow">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-2">
               <h2 className="oziksoft text-2xl">All Noms</h2>
@@ -18,7 +18,7 @@ const NomViewLayout = ({
             </div>
             <div className="pangram-sans text-sm">page 1 of 6</div>
           </div>
-          {/* 140 x 3 + 16 (2 cols of gap-2) */}
+
           <div className="mt-4 flex flex-row gap-2 flex-wrap">
             <NomCard />
             <NomCard nomId={1} />
