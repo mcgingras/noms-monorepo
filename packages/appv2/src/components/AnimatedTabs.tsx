@@ -1,5 +1,6 @@
 "use client";
 
+import { Tab, TabList } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -13,9 +14,9 @@ function AnimatedTabs() {
   let [activeTab, setActiveTab] = useState(tabs[0].id);
 
   return (
-    <div className="flex space-x-1 bg-gray-900 rounded-full">
+    <TabList className="flex space-x-1 bg-gray-900 rounded-full">
       {tabs.map((tab) => (
-        <button
+        <Tab
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`${
@@ -35,9 +36,9 @@ function AnimatedTabs() {
             />
           )}
           {tab.label}
-        </button>
+        </Tab>
       ))}
-    </div>
+    </TabList>
   );
 }
 
