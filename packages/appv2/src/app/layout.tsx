@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { OnChainProvider } from "@/components/OnChainProvider";
 import Navigation from "@/components/Navigation";
 import PageTransitionLoader from "@/components/PageTransitionLoader";
+import PageTransitionLoaderTwo from "@/components/PageTransitionLoaderTwo";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-black">
-        {/* <PageTransitionLoader /> */}
+        {/* <PageTransitionLoader />
+        <PageTransitionLoaderTwo /> */}
         <OnChainProvider>
           <div className="flex flex-col min-h-screen max-h-screen p-4 text-white">
             <Navigation />

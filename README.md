@@ -45,4 +45,5 @@ In dev mode, you can view a GraphQL client at [localhost:42069](http://localhost
 
 ### Todo
 - upgrade ponder
-- deploy contracts to base
+- deploy contracts to base / base sepolia
+- deploy 0xrails or bloks to base / base sepolia
