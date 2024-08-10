@@ -143,9 +143,10 @@ const PageTransitionLoaderTwo = () => {
       }
 
       if (progress > 0.99) {
-        console.log("no more rendering");
         setIsLoading(false);
-        setShouldRender(false);
+        setTimeout(() => {
+          setShouldRender(false);
+        }, 500);
       }
     };
 
@@ -163,16 +164,16 @@ const PageTransitionLoaderTwo = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 h-full w-full bg-white transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 h-full w-full bg-blue-500 transition-opacity duration-300 ${
         isLoading ? "opacity-100" : "opacity-0"
       }`}
     >
       <div className="relative w-full h-full">
-        <div
+        {/* <div
           className={`absolute inset-0 bg-blue-500 transition-transform duration-500 ${
             isFadeIn ? "animate-slide-in" : "animate-slide-out"
           }`}
-        />
+        /> */}
         {noms.slice(0, stop).map((nom) => (
           <Nom key={nom.index} x={nom.x} y={nom.y} r={nom.r} c={nom.c} />
         ))}

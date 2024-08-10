@@ -18,8 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-black">
-        {/* <PageTransitionLoader />
-        <PageTransitionLoaderTwo /> */}
+        {/* <PageTransitionLoader /> */}
+        {/* <PageTransitionLoaderTwo /> */}
         <OnChainProvider>
           <div className="flex flex-col min-h-screen max-h-screen p-4 text-white">
             <Navigation />
