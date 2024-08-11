@@ -2,6 +2,7 @@ import { Context, ponder } from "@/generated";
 import { configAddresses } from "../ponder.config";
 import { Address, isAddressEqual } from "viem";
 import { createFullSVG } from "./utils";
+import { EaselAbi } from "../abis/Easel";
 
 // Can check that the transfer is coming from the 0x0 address to know that it's a mint
 // Otherwise it's an address to address transfer, in which we update the owner.
@@ -88,12 +89,11 @@ ponder.on(
 /* TRAIT 1155 */
 ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
   const { client } = context;
-  const { Easel } = context.contracts;
   const { Trait } = context.db;
 
   const svg = await client.readContract({
-    abi: Easel.abi,
-    address: Easel.address,
+    abi: EaselAbi,
+    address: configAddresses.Easel,
     functionName: "generateSVGForParts",
     args: [[event.args.rleBytes]],
   });
@@ -250,7 +250,7 @@ ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
       },
     });
 
-    const existingEquippedTraitIds = existingEquippedNomTraits.map(
+    const existingEquippedTraitIds = existingEquippedNomTraits.items.map(
       (trait) => trait.traitId
     );
 
@@ -289,7 +289,7 @@ ponder.on("ERC1155Contract:TokenUnequipped", async ({ event, context }) => {
       },
     });
 
-    const equippedTraitIds = existingEquippedNomTraits
+    const equippedTraitIds = existingEquippedNomTraits.items
       .map((trait) => trait.traitId)
       .filter((traitId) => traitId !== event.args.tokenId);
 

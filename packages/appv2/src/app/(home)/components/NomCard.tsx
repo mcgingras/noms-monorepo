@@ -29,7 +29,7 @@ const NomCard = ({ nomId }: { nomId?: number }) => {
             className="bottom-0 absolute left-[26px]"
           />
         </div>
-        <p className="pangram-sans mt-2 text-sm">
+        <p className="pangram-sans mt-2 text-sm text-left">
           {nomId ? `Nom ${nomId}` : "New Nom"}
         </p>
       </div>

@@ -206,5 +206,6 @@ export const usePixelGrid = (initialWidth: number, initialHeight: number) => {
     currentColor: state.currentColor,
     brushSize: state.brushSize,
     drawMode: state.drawMode,
+    color: state.currentColor,
   };
 };

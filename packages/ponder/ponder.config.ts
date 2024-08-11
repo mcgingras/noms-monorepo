@@ -5,44 +5,46 @@ import { ERC1155Abi } from "./abis/ERC1155";
 import { ERC6551Abi } from "./abis/ERC6551";
 import { EaselAbi } from "./abis/Easel";
 
-const startBlock = 5300000;
+const startBlock = 13760000;
 
+// BASE SEPOLIA
 export const configAddresses = {
-  NFTContract: "0xF1eFc9e4C5238C5bCf3d30774480325893435a2A" as Address,
-  ERC1155Contract: "0x8F071320A60E4Aac7dA5FBA5F201F9bcc66f86e9" as Address,
+  NFTContract: "0x0AEA8ce800c5609e61E799648195620d1B62B3fd" as Address,
+  ERC1155Contract: "0xb185d82B82257994c4f252Cc094385657370083b" as Address,
   ERC6551Registry: "0x000000006551c19487814612e58FE06813775758" as Address,
   AccountImpl: "0x41C8f39463A868d3A88af00cd0fe7102F30E44eC" as Address,
-  Easel: "0x74c3DbC26278bc2Ef8C7ff1cb7ece926c17adB0a" as Address,
+  Easel: "0x9320Fc9A6DE47A326fBd12795Ba731859360cdaD" as Address,
 };
 
 export default createConfig({
   networks: {
-    sepolia: {
-      chainId: 11155111,
-      transport: http(process.env.PONDER_RPC_URL_11155111),
+    baseSepolia: {
+      chainId: 84532,
+      // @ts-ignore
+      transport: http(process.env.PONDER_RPC_URL_84532!),
     },
   },
   contracts: {
     Easel: {
-      network: "sepolia",
+      network: "baseSepolia",
       abi: EaselAbi,
       address: configAddresses.Easel,
       startBlock: startBlock,
     },
     NFTContract: {
-      network: "sepolia",
+      network: "baseSepolia",
       abi: ERC721Abi,
       address: configAddresses.NFTContract,
       startBlock: startBlock,
     },
     ERC1155Contract: {
-      network: "sepolia",
+      network: "baseSepolia",
       abi: ERC1155Abi,
       address: configAddresses.ERC1155Contract,
       startBlock: startBlock,
     },
     ERC6551Registry: {
-      network: "sepolia",
+      network: "baseSepolia",
       abi: ERC6551Abi,
       address: configAddresses.ERC6551Registry,
       startBlock: startBlock,

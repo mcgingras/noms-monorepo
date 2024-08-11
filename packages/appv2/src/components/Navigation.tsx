@@ -4,6 +4,7 @@ import StackIcon from "@/components/icons/Stack";
 import TraitsIcon from "./icons/Traits";
 import HomeIcon from "./icons/Home";
 import ActiveNavItem from "./ActiveNavItem";
+import Link from "next/link";
 
 const Navigation = () => {
   return (
@@ -52,8 +53,13 @@ const Navigation = () => {
           </ActiveNavItem>
         </div>
       )}
-      <div className="w-[110px]">
-        <CustomConnectKit />
+      <div className="flex flex-row items-center">
+        <Link href="/traits/new">
+          <button>New trait</button>
+        </Link>
+        <div className="w-[110px]">
+          <CustomConnectKit />
+        </div>
       </div>
     </div>
   );

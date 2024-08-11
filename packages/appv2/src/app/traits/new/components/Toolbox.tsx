@@ -1,5 +1,6 @@
-import PaintbrushIcon from "@/components/icons/paintbrush";
-import UndoIcon from "@/components/icons/undo";
+import PaintbrushIcon from "@/components/icons/Paintbrush";
+import UndoIcon from "@/components/icons/Undo";
+import TrashIcon from "@/components/icons/Trash";
 import { DrawMode } from "../hooks/usePixelGrid";
 
 const Toolbox = ({
@@ -28,15 +29,18 @@ const Toolbox = ({
   drawMode: DrawMode;
 }) => {
   return (
-    <div className="h-full w-full p-2 overflow-hidden">
+    <div className="h-full w-full p-2 overflow-hidden flex flex-col">
       <h3 className="text-white text-lg oziksoft">Preview</h3>
       <div className="w-full aspect-square bg-gray-900 mt-1 ml-[2px]"></div>
       <h3 className="text-white text-lg oziksoft mt-2">Tools</h3>
-      <div className="grid grid-cols-3 mt-2">
+      <div className="grid grid-cols-3 gap-2 mt-2 flex-1">
         <div className="h-full flex flex-col justify-between">
           <div className="h-1/3 w-full rounded-2xl bg-gray-900"></div>
-          <button className="p-2 rounded-md" onClick={clear}>
-            <p>clear</p>
+          <button
+            className="w-full aspect-square bg-gray-900 rounded-xl flex items-center justify-center transition-colors hover:bg-gray-1000"
+            onClick={clear}
+          >
+            <TrashIcon className="h-6 w-6" />
           </button>
         </div>
         <div className="flex flex-col space-y-4 items-center">

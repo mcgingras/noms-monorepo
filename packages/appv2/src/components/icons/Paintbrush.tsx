@@ -1,10 +1,4 @@
-const PaintbrushIcon = ({
-  className,
-  height,
-}: {
-  className?: string;
-  height?: string | number;
-}) => {
+const PaintbrushIcon = ({ className }: { className?: string }) => {
   return (
     <svg
       viewBox="0 0 19 17"

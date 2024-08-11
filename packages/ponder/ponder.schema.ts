@@ -10,7 +10,7 @@ export default createSchema((p) => ({
     tokenId: p.bigint(),
     // timestamp
     created: p.bigint(),
-    owner: p.bytes(),
+    owner: p.hex(),
     deployed: p.boolean(),
     fullSVG: p.string(),
     // relations
@@ -22,7 +22,7 @@ export default createSchema((p) => ({
   Trait: p.createTable({
     // tokenId
     id: p.bigint(),
-    rleBytes: p.bytes(),
+    rleBytes: p.hex(),
     name: p.string(),
     // "body" | "glasses" | "accessory" | "head" | "bg"
     type: p.string(),
