@@ -1,10 +1,7 @@
 import emptyNom from "/public/images/empty-nom.svg";
 import Image from "next/image";
 import Link from "next/link";
-
-const NewNomAction = ({ children }: { children: React.ReactNode }) => {
-  return <button className="">{children}</button>;
-};
+import NewNomAction from "./NewNomAction";
 
 const NomAction = ({
   nomId,

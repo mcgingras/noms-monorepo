@@ -13,9 +13,8 @@ type Trait = {
 
 const TraitGridUI = ({ traits }: { traits: Trait[] }) => {
   const searchParams = useSearchParams();
-  const addSearchParam = useAddSearchParam();
-
   const traitId = searchParams.get("trait");
+  const addSearchParam = useAddSearchParam();
 
   return (
     <div className="flex flex-row flex-wrap gap-2">
