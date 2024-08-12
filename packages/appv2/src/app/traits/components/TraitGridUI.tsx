@@ -1,8 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useAddSearchParam } from "@/hooks/useAddSearchParam";
-
 type Trait = {
   id: bigint;
   rleBytes: `0x${string}`;
@@ -11,23 +8,27 @@ type Trait = {
   svg: string;
 };
 
-const TraitGridUI = ({ traits }: { traits: Trait[] }) => {
-  const searchParams = useSearchParams();
-  const traitId = searchParams.get("trait");
-  const addSearchParam = useAddSearchParam();
-
+const TraitGridUI = ({
+  traits,
+  selectedTrait,
+  setSelectedTrait,
+}: {
+  traits: Trait[];
+  selectedTrait: Trait;
+  setSelectedTrait: (trait: Trait) => void;
+}) => {
   return (
     <div className="flex flex-row flex-wrap gap-2">
       {traits.map((trait) => (
         <div
           key={trait.id}
           className={`w-[100px] h-[100px] rounded-lg p-1 bg-gray-900 cursor-pointer border-2  ${
-            traitId === trait.id.toString()
+            selectedTrait.id.toString() === trait.id.toString()
               ? "border-[#FDCB3F] "
               : "border-transparent"
           }`}
           onClick={() => {
-            addSearchParam("trait", trait.id.toString());
+            setSelectedTrait(trait);
           }}
         >
           <img

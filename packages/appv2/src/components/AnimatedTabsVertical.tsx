@@ -15,6 +15,7 @@ let tabs = [
 ];
 
 function AnimatedTabs() {
+  let [transitionComplete, setTransitionComplete] = useState(false);
   let [activeTab, setActiveTab] = useState(tabs[0].id);
   const addSearchParam = useAddSearchParam();
 
@@ -24,25 +25,31 @@ function AnimatedTabs() {
         <button
           key={tab.id}
           onClick={() => {
+            setTransitionComplete(false);
             setActiveTab(tab.id);
             addSearchParam("type", tab.id);
+            setTimeout(() => {
+              setTransitionComplete(true);
+            }, 100);
           }}
           className={`${
-            activeTab === tab.id ? "" : "hover:text-white/60"
-          } relative rounded-full px-3 py-1.5 text-white transition focus-visible:outline-2 pangram-sans-compact font-bold text-sm`}
+            activeTab === tab.id && transitionComplete
+              ? "text-black"
+              : "text-white hover:text-white/60"
+          } relative rounded-full px-3 py-1.5 transition focus-visible:outline-2 pangram-sans-compact font-bold text-sm`}
           style={{
             WebkitTapHighlightColor: "transparent",
           }}
         >
+          <p className="relative z-10">{tab.label}</p>
           {activeTab === tab.id && (
             <motion.span
               layoutId="tabsVerticalBubble"
-              className="absolute inset-0 z-0 bg-blue-500 text-black mix-blend-lighten"
+              className="absolute inset-0 z-0 bg-[#FDCB3F]"
               style={{ borderRadius: 4 }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
           )}
-          {tab.label}
         </button>
       ))}
     </div>

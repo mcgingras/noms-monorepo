@@ -11,6 +11,7 @@ let tabs = [
 ];
 
 function AnimatedTabs() {
+  let [transitionComplete, setTransitionComplete] = useState(false);
   let [activeTab, setActiveTab] = useState(tabs[0].id);
 
   return (
@@ -18,24 +19,31 @@ function AnimatedTabs() {
       {tabs.map((tab) => (
         <Tab
           key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
+          onClick={() => {
+            setTransitionComplete(false);
+            setActiveTab(tab.id);
+            setTimeout(() => {
+              setTransitionComplete(true);
+            }, 100);
+          }}
           className={`${
-            activeTab === tab.id ? "" : "hover:text-white/60"
-          } relative rounded-full px-3 py-1.5 font-medium text-white transition focus-visible:outline-2 oziksoft text-xl`}
+            activeTab === tab.id && transitionComplete
+              ? "text-black"
+              : "text-white hover:text-white/60"
+          } relative rounded-full px-3 py-1.5 font-medium transition oziksoft text-xl`}
           style={{
             WebkitTapHighlightColor: "transparent",
           }}
         >
+          <p className="relative z-10">{tab.label}</p>
           {activeTab === tab.id && (
             <motion.span
               layoutId="bubble"
-              //   bg-[#FDCB3F]
-              className="absolute inset-0 z-0 bg-blue-500 text-black mix-blend-lighten"
+              className="absolute inset-0 z-0 bg-[#FDCB3F]"
               style={{ borderRadius: 9999 }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
           )}
-          {tab.label}
         </Tab>
       ))}
     </TabList>

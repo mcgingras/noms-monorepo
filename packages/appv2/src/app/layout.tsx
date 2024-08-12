@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { OnChainProvider } from "@/components/OnChainProvider";
 import Navigation from "@/components/Navigation";
-import PageTransitionLoader from "@/components/PageTransitionLoader";
-import PageTransitionLoaderTwo from "@/components/PageTransitionLoaderTwo";
+// import PageTransitionLoader from "@/components/PageTransitionLoader";
+// import PageTransitionLoaderTwo from "@/components/PageTransitionLoaderTwo";
 import "./globals.css";
 
 export const metadata: Metadata = {
