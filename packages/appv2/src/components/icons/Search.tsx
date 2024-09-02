@@ -11,18 +11,18 @@ const SearchIcon = ({ className }: { className?: string }) => {
         aspectRatio: "16 / 16",
       }}
     >
-      <g clip-path="url(#clip0_2600_157609)">
+      <g clipPath="url(#clip0_2600_157609)">
         <path
           d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z"
           stroke="white"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
           d="M10.5352 10.5352L13.9995 13.9995"
           stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </g>
       <defs>

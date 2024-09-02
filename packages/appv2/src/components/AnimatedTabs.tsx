@@ -11,7 +11,7 @@ let tabs = [
 ];
 
 function AnimatedTabs() {
-  let [transitionComplete, setTransitionComplete] = useState(false);
+  let [transitionComplete, setTransitionComplete] = useState(true);
   let [activeTab, setActiveTab] = useState(tabs[0].id);
 
   return (

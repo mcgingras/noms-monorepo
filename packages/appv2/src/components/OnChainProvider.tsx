@@ -1,18 +1,14 @@
 "use client";
 
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { mainnet, baseSepolia } from "wagmi/chains";
+import { baseSepolia } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 
 const config = createConfig(
   getDefaultConfig({
-    chains: [mainnet, baseSepolia],
+    chains: [baseSepolia],
     transports: {
-      [mainnet.id]: http(
-        `https://eth-mainnet.g.alchemy.com/v2/${process.env
-          .NEXT_PUBLIC_ALCHEMY_API_KEY!}`
-      ),
       [baseSepolia.id]: http(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC!),
     },
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,

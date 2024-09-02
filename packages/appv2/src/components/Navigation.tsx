@@ -57,7 +57,7 @@ const Navigation = () => {
         <Link href="/traits/new">
           <button>New trait</button>
         </Link>
-        <div className="w-[110px]">
+        <div className="">
           <CustomConnectKit />
         </div>
       </div>

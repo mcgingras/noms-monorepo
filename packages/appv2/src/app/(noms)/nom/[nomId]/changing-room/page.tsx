@@ -6,7 +6,6 @@ import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
 import ChangingRoomRow from "../../components/ChangingRoomRow";
 import LayerStack from "../../components/LayerStack";
 import WavyTab from "../../components/WavyTab";
-import SoftArrow from "@/components/icons/SoftArrow";
 import { TabGroup, TabPanel, TabPanels } from "@headlessui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -23,7 +22,7 @@ const ChangingRoom = () => {
               className="h-full w-full rounded-[20px] p-4"
               style={{
                 backgroundColor: "#222222",
-                // backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.08' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")`,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.08' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")`,
               }}
             >
               <h3 className="oziksoft text-xl">Nom 1</h3>
@@ -50,15 +49,7 @@ const ChangingRoom = () => {
                       transition={{ duration: 0.2 }}
                       className="mt-4 h-full flex flex-row space-x-2 w-full"
                     >
-                      <div className="w-[140px] h-full bg-gray-900 rounded-lg p-2 flex flex-col space-y-2">
-                        <span className="bg-gray-800 rounded-full flex items-center justify-center py-1">
-                          <SoftArrow direction="up" />
-                        </span>
-                        <AnimatedTabsVertical />
-                        <span className="bg-gray-800 rounded-full flex items-center justify-center py-1">
-                          <SoftArrow direction="down" />
-                        </span>
-                      </div>
+                      <AnimatedTabsVertical />
                       <div className="flex-1 flex flex-col">
                         <input
                           type="text"

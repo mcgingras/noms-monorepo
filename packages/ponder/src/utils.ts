@@ -1,4 +1,4 @@
-import { type Context, ponder } from "@/generated";
+import { type Context } from "@/generated";
 import { concat, encodeAbiParameters, getContractAddress, pad } from "viem";
 
 export function computeAccount(

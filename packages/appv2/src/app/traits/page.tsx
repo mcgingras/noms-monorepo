@@ -33,17 +33,7 @@ const TraitsPage = ({ searchParams }: { searchParams: any }) => {
           <TraitTab />
         </div>
         <div className="flex-grow flex flex-row space-x-2 overflow-hidden">
-          <div className="w-[140px] bg-gray-900 rounded-lg p-2 flex flex-col">
-            <span className="bg-gray-800 rounded-full flex items-center justify-center py-1 mb-2">
-              <SoftArrow direction="up" />
-            </span>
-            <div className="flex-grow overflow-y-auto">
-              <AnimatedTabsVertical />
-            </div>
-            <span className="bg-gray-800 rounded-full flex items-center justify-center py-1 mt-2">
-              <SoftArrow direction="down" />
-            </span>
-          </div>
+          <AnimatedTabsVertical />
           <div className="flex-1 flex flex-col space-y-2 overflow-hidden">
             <div className="flex flex-row justify-between items-center">
               <Searchbar />

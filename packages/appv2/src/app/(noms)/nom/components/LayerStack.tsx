@@ -17,8 +17,8 @@ const LayerItem = ({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          <div className="flex flex-row items-center bg-gray-1000 hover:bg-gray-900 transition-all p-2 rounded-lg gap-x-2">
-            <span className="bg-gray-800 border border-gray-800 h-5 w-5">
+          <div className="flex flex-row items-center bg-gray-1000 hover:bg-gray-900 transition-all p-2 rounded-lg gap-x-3">
+            <span className="bg-gray-800 border border-gray-800 h-5 w-5 self-start mt-[2px]">
               <img
                 src={`data:image/svg+xml;base64,${part.svg}`}
                 alt={part.name}
@@ -53,7 +53,6 @@ const LayerStack = ({
     const newParts = Array.from(parts);
     const [reorderedItem] = newParts.splice(result.source.index, 1);
     newParts.splice(result.destination.index, 0, reorderedItem);
-
     setParts(newParts);
   };
 
@@ -90,16 +89,18 @@ const LayerStack = ({
         </div>
 
         <div className="bg-gray-900 p-1 rounded-lg flex flex-col space-y-2">
-          <div className="flex flex-row items-center space-x-2">
+          <div className="flex flex-row items-center space-x-1">
             <h3 className="pangram-sans px-1 py-1 text-gray-300">
               Pending changes
             </h3>
-            <span>2</span>
+            <span className="h-5 w-5 text-sm flex items-center justify-center bg-gray-400 rounded-full">
+              {parts.length}
+            </span>
           </div>
           <button className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2">
             <span className="pangram-sans font-bold">Save changes</span>
             <span className="pangram-sans-compact font-bold text-sm bg-black/30 px-2 py-1 rounded">
-              2.2 ETH
+              0 ETH
             </span>
           </button>
         </div>

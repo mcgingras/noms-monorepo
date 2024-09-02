@@ -1,146 +1,227 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Fragment } from "react";
+import { useState, Fragment } from "react";
+import { AnimatePresence } from "framer-motion";
+import { TabGroup, TabPanel, TabPanels } from "@headlessui/react";
 import AnimatedTabs from "@/components/AnimatedTabs";
-import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
-import ChangingRoomRow from "../components/ChangingRoomRow";
 import LayerStack from "../components/LayerStack";
 import WavyTab from "../components/WavyTab";
-import SoftArrow from "@/components/icons/SoftArrow";
-import { TabGroup, TabPanel, TabPanels } from "@headlessui/react";
-import { motion, AnimatePresence } from "framer-motion";
 import MallTab from "../components/MallTab";
-import { useReadContract } from "wagmi";
-import { EaselAbi } from "@/abis/Easel";
-import { configAddresses } from "@/lib/utils";
+import ClosetTab from "../components/ClosetTab";
+import NomViewer from "../components/NomViewer";
+import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
+import CaratDownIcon from "@/components/icons/CaratDownIcon";
+import CaratUpIcon from "@/components/icons/CaratUpIcon";
+import { useAccount } from "wagmi";
+import { createNom } from "@/lib/viem/createNom";
+
+const Nav = ({ children }: { children: React.ReactNode }) => {
+  return <nav className="flex flex-row justify-between w-full">{children}</nav>;
+};
+
+const Cart = ({
+  pendingParts,
+  onClick,
+}: {
+  pendingParts: any[];
+  onClick?: () => void;
+}) => {
+  return (
+    <span
+      className="oziksoft text-2xl cursor-pointer gap-x-2 flex flex-row items-center justify-center"
+      onClick={onClick}
+    >
+      <span>Cart</span>
+      <span className="bg-blue-500 h-6 w-6 flex items-center justify-center rounded-full">
+        {pendingParts.length}
+      </span>
+    </span>
+  );
+};
+
+const ItemAccordion = ({
+  title,
+  number,
+  description,
+  children,
+}: {
+  title: string;
+  number: number;
+  description?: string;
+  children: React.ReactNode;
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-[#222] p-2 rounded-2xl">
+      <div
+        className="flex flex-row justify-between items-center cursor-pointer"
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <div className="flex flex-row items-center gap-x-2">
+          <span className="text-lg text-white pangram-sans font-bold">
+            {title}
+          </span>
+          <span className="h-6 w-6 flex items-center justify-center rounded-full bg-[#333] text-white">
+            {number}
+          </span>
+        </div>
+
+        <button className="h-6 w-6 flex items-center justify-center rounded-full bg-[#333] text-white">
+          {open ? <CaratUpIcon /> : <CaratDownIcon />}
+        </button>
+      </div>
+      {description && (
+        <p className="text-sm pangram-sans text-[#707070]">{description}</p>
+      )}
+      {open && children}
+    </div>
+  );
+};
 
 const NewNomPage = () => {
-  const [nomSVG, setNomSVG] = useState<string | null>(null);
-  const [selectedParts, setSelectedParts] = useState<any[]>([]);
+  const { address } = useAccount();
+  const [pendingParts, setPendingParts] = useState<any[]>([]);
+  const [page, setPage] = useState<"builder" | "cart">("builder");
   const addPart = (part: any) => {
-    setSelectedParts([...selectedParts, part]);
+    setPendingParts([...pendingParts, part]);
   };
-
-  const { data, isLoading } = useReadContract({
-    chainId: 84532,
-    abi: EaselAbi,
-    address: configAddresses.Easel,
-    functionName: "generateSVGForParts",
-    args: [selectedParts.map((part) => part.rleBytes) as any],
-  });
-
-  useEffect(() => {
-    if (data) {
-      setNomSVG(data);
-    }
-  }, [data]);
 
   return (
     <main className="h-[calc(100vh-66px)] w-full">
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
-        <div className="w-[288px]">
-          <LayerStack parts={selectedParts} setParts={setSelectedParts} />
-        </div>
-        <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row">
-          <div className="p-1 h-full flex-1">
-            <div
-              className="h-full w-full rounded-[20px] p-4 flex-col flex"
-              style={{
-                backgroundColor: "#222222",
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.08' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")`,
-              }}
-            >
-              <h3 className="oziksoft text-xl">New Nom</h3>
-              <span className="text-sm text-[#818080] pangram-sans font-semibold">
-                Not yet finalized
-              </span>
-              <div className="flex-1 flex items-center justify-center overflow-hidden">
-                <div className="w-3/4 aspect-square bg-gray-800 min-w-[320px] mt-[-50px] relative">
-                  <div
-                    className={`w-full h-full absolute transition-colors ${
-                      isLoading ? "bg-black/30" : "bg-black/0"
-                    }`}
-                  />
-                  {nomSVG && (
-                    <img
-                      src={`data:image/svg+xml;base64,${btoa(nomSVG!)}`}
-                      className="w-full"
-                    />
-                  )}
+        {page === "cart" ? (
+          <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-col p-4 gap-y-2 h-full">
+            <nav className="flex flex-row justify-between w-full items-center">
+              <div
+                className="cursor-pointer flex flex-row gap-x-2 items-center"
+                onClick={() => {
+                  setPage("builder");
+                }}
+              >
+                <ArrowLeftIcon className="h-5 w-5" />
+                <span className="oziksoft text-2xl">Back to editing</span>
+              </div>
+              <Cart pendingParts={pendingParts} />
+            </nav>
+            <div className="flex flex-row gap-4 h-full">
+              <div className="flex-1 flex flex-col gap-y-2">
+                <ItemAccordion title="Purchasing" number={pendingParts.length}>
+                  <div className="flex flex-row gap-x-4 mt-4">
+                    {pendingParts.map((part) => (
+                      <div
+                        key={part.id}
+                        className="flex flex-row items-center gap-x-2"
+                      >
+                        <span className="h-20 w-20 self-start mt-[2px]">
+                          <img
+                            src={`data:image/svg+xml;base64,${part.svg}`}
+                            alt={part.name}
+                            className="w-full h-full rounded"
+                          />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </ItemAccordion>
+                <ItemAccordion
+                  title="Changing"
+                  number={pendingParts.length}
+                  description="Any un-equipped items go into a nom's closet."
+                >
+                  <p></p>
+                </ItemAccordion>
+              </div>
+              <div className="min-w-[500px] flex flex-col h-full">
+                <div className="flex flex-col space-y-2 flex-1">
+                  <div className="flex flex-row items-center gap-x-2">
+                    <span className="pangram-sans font-bold">
+                      Purchasing {pendingParts.length} items
+                    </span>
+                    <hr className="flex-1 border-b border-dotted border-[#595959]" />
+                    <span className="pangram-sans font-bold">0.0 ETH</span>
+                  </div>
+                  <div className="flex flex-row items-center gap-x-2">
+                    <span className="pangram-sans font-bold">
+                      3 layer changes
+                    </span>
+                    <hr className="flex-1 border-b border-dotted border-[#595959]" />
+                    <span className="pangram-sans font-bold">FREE</span>
+                  </div>
                 </div>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex flex-row items-center gap-x-2">
+                    <span className="pangram-sans font-bold">Network fee</span>
+                    <hr className="flex-1 border-b border-dotted border-[#595959]" />
+                    <span className="pangram-sans font-bold">0.0 ETH</span>
+                  </div>
+                  <div className="flex flex-row items-center gap-x-2">
+                    <span className="pangram-sans font-bold">Total</span>
+                    <hr className="flex-1 border-b border-dotted border-[#595959]" />
+                    <span className="pangram-sans font-bold">FREE</span>
+                  </div>
+                </div>
+                <button
+                  className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2 mt-2"
+                  onClick={async () => {
+                    if (!address) {
+                      return;
+                    }
+                    // 2. init TBA (depends on tokenId of 1)
+                    // 3. mint all parts to TBA address
+                    // 4. equip all parts
+
+                    const results = createNom({ address });
+                    console.log("results", results);
+                  }}
+                >
+                  <span className="pangram-sans font-bold">
+                    Mint and save changes
+                  </span>
+                  <span className="pangram-sans-compact font-bold text-sm bg-black/30 px-2 py-1 rounded">
+                    0 ETH
+                  </span>
+                </button>
               </div>
             </div>
           </div>
-          <div className="relative p-4 w-[700px] h-full overflow-hidden">
-            <WavyTab />
-            <TabGroup className="flex flex-col h-full">
-              <div className="flex flex-row justify-between w-full">
-                <AnimatedTabs />
-                <span className="oziksoft text-2xl cursor-pointer">Cart</span>
+        ) : (
+          <>
+            <div className="w-[288px]">
+              <LayerStack parts={pendingParts} setParts={setPendingParts} />
+            </div>
+            <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row">
+              <NomViewer pendingParts={pendingParts} />
+              <div className="relative p-4 w-[700px] h-full overflow-hidden">
+                <WavyTab />
+                <TabGroup className="flex flex-col h-full">
+                  <Nav>
+                    <AnimatedTabs />
+                    <Cart
+                      pendingParts={pendingParts}
+                      onClick={() => {
+                        setPage("cart");
+                      }}
+                    />
+                  </Nav>
+                  <TabPanels as={Fragment}>
+                    <TabPanel as={Fragment} unmount={true}>
+                      <AnimatePresence mode="wait">
+                        <ClosetTab pendingParts={pendingParts} />
+                      </AnimatePresence>
+                    </TabPanel>
+                    <TabPanel as={Fragment} unmount={true}>
+                      <AnimatePresence mode="wait">
+                        <MallTab onPartClick={addPart} />
+                      </AnimatePresence>
+                    </TabPanel>
+                  </TabPanels>
+                </TabGroup>
               </div>
-              <TabPanels as={Fragment}>
-                <TabPanel as={Fragment} unmount={true}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={"tab-1"}
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -10, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-4 h-full flex flex-row space-x-2 w-full"
-                    >
-                      <div className="w-[140px] h-full bg-gray-900 rounded-lg p-2 flex flex-col space-y-2">
-                        <span className="bg-gray-800 rounded-full flex items-center justify-center py-1">
-                          <SoftArrow direction="up" />
-                        </span>
-                        <AnimatedTabsVertical />
-                        <span className="bg-gray-800 rounded-full flex items-center justify-center py-1">
-                          <SoftArrow direction="down" />
-                        </span>
-                      </div>
-                      <div className="flex-1 flex flex-col">
-                        <input
-                          type="text"
-                          className="bg-gray-900 w-[200px] h-6 block rounded"
-                        />
-                        <div className="w-full bg-gray-900 p-2 rounded-lg mt-2">
-                          <h3 className="pangram-sans-compact font-bold">
-                            Changing room
-                          </h3>
-                          <div className="mt-2 flex flex-row flex-wrap gap-2">
-                            <div className="min-w-20 w-1/8 aspect-square rounded-lg bg-gray-800"></div>
-                            <div className="min-w-20 w-1/8 aspect-square rounded-lg bg-gray-800"></div>
-                            <div className="min-w-20 w-1/8 aspect-square rounded-lg bg-gray-800"></div>
-                          </div>
-                        </div>
-                        <hr className="mt-2 border-gray-900" />
-                        <div className="pt-2">
-                          <h3 className="pangram-sans-compact font-bold">
-                            Closet
-                          </h3>
-                          <ChangingRoomRow />
-                          <ChangingRoomRow />
-                          <ChangingRoomRow />
-                        </div>
-                        <div className="bg-gray-900 mt-2 rounded-lg p-2 flex-1">
-                          <h3 className="pangram-sans font-bold">
-                            Glasses blue green square
-                          </h3>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                </TabPanel>
-                <TabPanel as={Fragment} unmount={true}>
-                  <AnimatePresence mode="wait">
-                    <MallTab onPartClick={addPart} />
-                  </AnimatePresence>
-                </TabPanel>
-              </TabPanels>
-            </TabGroup>
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </section>
     </main>
   );

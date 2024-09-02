@@ -21,7 +21,7 @@ const CustomConnectKit = () => {
               } rounded-md px-2 py-1 transition-all`}
             >
               {isConnected ? (
-                <span className="flex flex-row items-center space-x-1 text-sm">
+                <span className="flex flex-row items-center space-x-1">
                   <span className="pangram-sans-compact font-medium">
                     {ensName ?? truncatedAddress}
                   </span>
