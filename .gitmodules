@@ -7,3 +7,6 @@
 [submodule "packages/contracts/lib/solady"]
 	path = packages/contracts/lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "packages/contracts/lib/ERC721A"]
+	path = packages/contracts/lib/ERC721A
+	url = https://github.com/chiru-labs/ERC721A
