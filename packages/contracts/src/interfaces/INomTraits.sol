@@ -5,9 +5,10 @@ interface INomTraits {
     struct Trait {
         string name;
         bytes rleBytes;
+        address creator;
     }
 
-    event TraitRegistered(uint256 traitId, bytes rleBytes, string name);
+    event TraitRegistered(uint256 traitId, bytes rleBytes, string name, address creator);
     event TokenEquipped(uint256 indexed tokenId, address indexed owner);
     event TokenUnequipped(uint256 indexed tokenId, address indexed owner);
 
@@ -19,4 +20,6 @@ interface INomTraits {
     function addTokenId(address owner, uint256 tokenId, uint256 precedingTokenId) external;
     function removeTokenId(address owner, uint256 tokenId) external;
     function getEquippedTokenIds(address owner) external view returns (uint256[] memory);
+    function mintTo(address recipient, uint256 traitId, uint256 quantity) external returns (bool);
+    function setTraitMintModule(uint256 traitId, address module) external;
 }

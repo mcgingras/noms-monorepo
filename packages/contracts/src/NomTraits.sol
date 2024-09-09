@@ -7,8 +7,9 @@ import { IEasel } from "./interfaces/IEasel.sol";
 import { INomTraits } from "./interfaces/INomTraits.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NomTraits is ERC1155, INomTraits {
+contract NomTraits is ERC1155, INomTraits, Ownable {
     using Strings for uint256;
 
     uint256 traitIdCount;
@@ -20,12 +21,22 @@ contract NomTraits is ERC1155, INomTraits {
     mapping(address => uint256) counts;
     uint256 constant SENTINEL_TOKEN_ID = 0;
 
+    // Minting module system
+    address public defaultMintModule;
+    mapping(uint256 => address) public traitMintModules;
+
+
+    // events
+    event MintModuleSet(uint256 indexed traitId, address indexed module);
+    event DefaultMintModuleSet(address indexed module);
+    event TraitMinted(address indexed recipient, uint256 indexed traitId, uint256 quantity);
+
     /// ------------------------
     /// ERC1155 functions
     /// ------------------------
 
     /// @dev No need to set URI because the URI is not a static URL -- we define it below.
-    constructor() ERC1155("") {}
+    constructor() ERC1155("") Ownable(msg.sender) {}
 
     function uri(uint256 tokenId) public view override returns (string memory) {
       bytes[] memory parts = new bytes[](1);
@@ -53,10 +64,11 @@ contract NomTraits is ERC1155, INomTraits {
       uint256 newTraitIdCount = traitIdCount + 1;
       traits[newTraitIdCount] = Trait({
           name: name,
-          rleBytes: rleBytes
+          rleBytes: rleBytes,
+          creator: msg.sender
       });
       traitIdCount = newTraitIdCount;
-      emit TraitRegistered(newTraitIdCount, rleBytes, name);
+      emit TraitRegistered(newTraitIdCount, rleBytes, name, msg.sender);
     }
 
     function getImageDataForTrait(uint256 traitId) public view returns (bytes memory) {
@@ -64,8 +76,40 @@ contract NomTraits is ERC1155, INomTraits {
       return trait.rleBytes;
     }
 
-    function setEasel(address _easel) public {
+    /// ------------------------
+    /// Admin specific functions
+    /// ------------------------
+
+    function setEasel(address _easel) public onlyOwner {
       easel = _easel;
+    }
+
+    function setDefaultMintModule(address _defaultMintModule) external onlyOwner {
+        defaultMintModule = _defaultMintModule;
+        emit DefaultMintModuleSet(_defaultMintModule);
+    }
+
+     /// ------------------------
+    /// Mint specific functions
+    /// ------------------------
+
+    function setTraitMintModule(uint256 traitId, address module) external {
+        require(traits[traitId].rleBytes.length > 0, "Trait does not exist");
+        require(msg.sender == owner() || msg.sender == traits[traitId].creator, "Not authorized");
+        traitMintModules[traitId] = module;
+        emit MintModuleSet(traitId, module);
+    }
+
+    function mintTo(address recipient, uint256 traitId, uint256 quantity) external returns (bool) {
+        address module = traitMintModules[traitId];
+        if (module == address(0)) {
+            module = defaultMintModule;
+        }
+        require(msg.sender == module, "Only authorized module can mint");
+
+        _mint(recipient, traitId, quantity, "");
+        emit TraitMinted(recipient, traitId, quantity);
+        return true;
     }
 
     /// ------------------------
@@ -161,9 +205,5 @@ contract NomTraits is ERC1155, INomTraits {
     /// Future updates
     /// ------------------------
 
-    /// equip state?
     /// equipGuard on transfer
-    /// ownable for updates to easel etc.
-    /// mint + mint controller
-    /// fee + fee controller
 }

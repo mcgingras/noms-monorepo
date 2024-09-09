@@ -28,6 +28,7 @@ contract Nom is ERC721A {
 
     /// @dev No need to protect minting ability
     /// anyone should be able to mint a nom for free.
+    /// should these be safe mint?
     function mint(uint256 quantity) external payable {
         _mint(msg.sender, quantity);
     }
