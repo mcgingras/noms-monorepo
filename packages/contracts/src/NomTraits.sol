@@ -60,6 +60,8 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     /// Trait specific functions
     /// ------------------------
 
+    // It's possible we want to be able to override the creator in the future
+    // For example, uploading nouns traits and crediting them to nouners
     function registerTrait(bytes memory rleBytes, string memory name) public {
       uint256 newTraitIdCount = traitIdCount + 1;
       traits[newTraitIdCount] = Trait({

@@ -6,7 +6,6 @@ import { IEasel } from "./interfaces/IEasel.sol";
 import { IERC6551Registry } from "./interfaces/IERC6551Registry.sol";
 import { INomTraits } from "./interfaces/INomTraits.sol";
 
-
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -19,8 +18,16 @@ contract Nom is ERC721A {
     address public easel;
     bytes32 salt = 0;
 
-
-    constructor() ERC721A("Noms", "NOM") {}
+    constructor(
+            address _accountRegistry,
+            address _accountImplementation,
+            address _traitContractAddress,
+            address _easel) ERC721A("Noms", "NOM") {
+        accountImplementation = _accountImplementation;
+        traitContractAddress = _traitContractAddress;
+        erc6551Registry = _accountRegistry;
+        easel = _easel;
+    }
 
     /// ------------------------
     /// ERC721 functions
