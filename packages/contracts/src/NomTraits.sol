@@ -63,19 +63,27 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     // It's possible we want to be able to override the creator in the future
     // For example, uploading nouns traits and crediting them to nouners
     function registerTrait(bytes memory rleBytes, string memory name) public {
-      uint256 newTraitIdCount = traitIdCount + 1;
-      traits[newTraitIdCount] = Trait({
+      traitIdCount = traitIdCount + 1;
+      traits[traitIdCount] = Trait({
           name: name,
           rleBytes: rleBytes,
           creator: msg.sender
       });
-      traitIdCount = newTraitIdCount;
-      emit TraitRegistered(newTraitIdCount, rleBytes, name, msg.sender);
+      emit TraitRegistered(traitIdCount, rleBytes, name, msg.sender);
+    }
+
+    function getTraitData(uint256 traitId) public view returns (Trait memory) {
+      return traits[traitId];
     }
 
     function getImageDataForTrait(uint256 traitId) public view returns (bytes memory) {
       Trait memory trait = traits[traitId];
       return trait.rleBytes;
+    }
+
+    function getNameForTrait(uint256 traitId) public view returns (string memory) {
+      Trait memory trait = traits[traitId];
+      return trait.name;
     }
 
     /// ------------------------
@@ -91,7 +99,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         emit DefaultMintModuleSet(_defaultMintModule);
     }
 
-     /// ------------------------
+     /// -----------------------
     /// Mint specific functions
     /// ------------------------
 

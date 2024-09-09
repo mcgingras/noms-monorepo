@@ -50,124 +50,113 @@ contract NomTest is Test {
         assertFalse(bytes(uri).length == 0, "Contract URI should not be empty");
     }
 
-    // function test_MintNom() public {
-    //     uint256 initialBalance = nom.balanceOf(caller);
-    //     vm.prank(caller);
-    //     nom.mint(1);
-    //     assertEq(nom.balanceOf(caller), initialBalance + 1, "Minting should increase balance by 1");
-    // }
+    function test_MintNom() public {
+        uint256 initialBalance = nom.balanceOf(caller);
+        vm.prank(caller);
+        nom.mint(1);
+        assertEq(nom.balanceOf(caller), initialBalance + 1, "Minting should increase balance by 1");
+    }
 
-    // function test_MintNomTo() public {
-    //     uint256 initialBalance = nom.balanceOf(user1);
-    //     vm.prank(caller);
-    //     nom.mintTo(user1, 1);
-    //     assertEq(nom.balanceOf(user1), initialBalance + 1, "Minting to address should increase balance by 1");
-    // }
+    function test_MintNomTo() public {
+        uint256 initialBalance = nom.balanceOf(user1);
+        vm.prank(caller);
+        nom.mintTo(user1, 1);
+        assertEq(nom.balanceOf(user1), initialBalance + 1, "Minting to address should increase balance by 1");
+    }
 
-    // function test_RegisterTrait() public {
-    //     uint256 initialTraitCount = traits.traitIdCount();
-    //     bytes memory rleBytes = hex"0001020304"; // Example RLE bytes
-    //     vm.prank(caller);
-    //     traits.registerTrait(rleBytes, "Test Trait");
-    //     assertEq(traits.traitIdCount(), initialTraitCount + 1, "Registering trait should increase trait count");
-    // }
+    // we should probably test register trait in some more depth
+    // right now we are relying on the trait deployer to do this
+    // but eventually users will be able to register their own traits
+    // function test_RegisterTrait() public {}
 
-    // function test_MintTrait() public {
-    //     // First, register a trait
-    //     bytes memory rleBytes = hex"0001020304";
-    //     vm.prank(caller);
-    //     traits.registerTrait(rleBytes, "Test Trait");
-    //     uint256 traitId = traits.traitIdCount();
 
-    //     // Set up paid mint module
-    //     uint256 price = 0.1 ether;
-    //     paidMintModule.setPrice(traitId, price);
-    //     traits.setTraitMintModule(traitId, address(paidMintModule));
+    function test_MintTrait() public {
+        // Set up paid mint module
+        uint256 traitId = 1;
+        uint256 price = 0.1 ether;
+        paidMintModule.setMintPrice(traitId, price);
+        traits.setTraitMintModule(traitId, address(paidMintModule));
 
-    //     // Mint the trait
-    //     vm.deal(user1, 1 ether); // Give user1 some ETH
-    //     vm.prank(user1);
-    //     paidMintModule.mint{value: price}(user1, traitId, 1);
+        // Mint the trait
+        vm.deal(user1, 1 ether); // Give user1 some ETH
+        vm.prank(user1);
+        paidMintModule.mint{value: price}(user1, traitId, 1);
 
-    //     assertEq(traits.balanceOf(user1, traitId), 1, "User should have 1 of the minted trait");
-    // }
+        assertEq(traits.balanceOf(user1, traitId), 1, "User should have 1 of the minted trait");
+    }
 
-    // function test_EquipTrait() public {
-    //     // Mint a Nom
-    //     vm.prank(user1);
-    //     nom.mint(1);
-    //     uint256 nomId = 0; // Assuming this is the first Nom minted
+    function test_EquipTrait() public {
+        // Mint a Nom
+        vm.prank(user1);
+        nom.mint(1);
+        uint256 nomId = 0; // Assuming this is the first Nom minted
 
-    //     // Register and mint a trait
-    //     bytes memory rleBytes = hex"0001020304";
-    //     vm.prank(caller);
-    //     traits.registerTrait(rleBytes, "Test Trait");
-    //     uint256 traitId = traits.traitIdCount();
+        uint256 traitId = 1;
+        uint256 price = 0.1 ether;
+        paidMintModule.setMintPrice(traitId, price);
+        traits.setTraitMintModule(traitId, address(paidMintModule));
 
-    //     uint256 price = 0.1 ether;
-    //     paidMintModule.setPrice(traitId, price);
-    //     traits.setTraitMintModule(traitId, address(paidMintModule));
+        // Get the TBA address for the Nom
+        address tba = registry.account(
+            address(accountImpl),
+            bytes32(0),
+            block.chainid,
+            address(nom),
+            nomId
+        );
 
-    //     vm.deal(user1, 1 ether);
-    //     vm.prank(user1);
-    //     paidMintModule.mint{value: price}(user1, traitId, 1);
+        // we want to mint to the TBA
+        vm.deal(user1, 1 ether);
+        vm.prank(user1);
+        paidMintModule.mint{value: price}(tba, traitId, 1);
 
-    //     // Get the TBA address for the Nom
-    //     address tba = registry.account(
-    //         address(accountImpl),
-    //         bytes32(0),
-    //         block.chainid,
-    //         address(nom),
-    //         nomId
-    //     );
 
-    //     // Equip the trait
-    //     uint256[] memory tokenIds = new uint256[](1);
-    //     tokenIds[0] = traitId;
-    //     vm.prank(user1);
-    //     traits.setEquipped(tba, tokenIds);
+        // Equip the trait
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = traitId;
+        vm.prank(user1);
+        traits.setEquipped(tba, tokenIds);
 
-    //     // Check if the trait is equipped
-    //     assertTrue(traits.isTokenIdEquipped(tba, traitId), "Trait should be equipped");
-    // }
+        // Check if the trait is equipped
+        assertTrue(traits.isTokenIdEquipped(tba, traitId), "Trait should be equipped");
+    }
 
-    // function test_TokenURI() public {
-    //     // Mint a Nom and equip a trait (reusing logic from previous tests)
-    //     vm.prank(user1);
-    //     nom.mint(1);
-    //     uint256 nomId = 0;
+    function test_TokenURI() public {
+        vm.prank(user1);
+        nom.mint(1);
+        uint256 nomId = 0;
 
-    //     bytes memory rleBytes = hex"0001020304";
-    //     vm.prank(caller);
-    //     traits.registerTrait(rleBytes, "Test Trait");
-    //     uint256 traitId = traits.traitIdCount();
+        uint256 traitId = 1;
+        uint256 price = 0.1 ether;
+        paidMintModule.setMintPrice(traitId, price);
+        traits.setTraitMintModule(traitId, address(paidMintModule));
 
-    //     uint256 price = 0.1 ether;
-    //     paidMintModule.setPrice(traitId, price);
-    //     traits.setTraitMintModule(traitId, address(paidMintModule));
+         address tba = registry.account(
+            address(accountImpl),
+            bytes32(0),
+            block.chainid,
+            address(nom),
+            nomId
+        );
 
-    //     vm.deal(user1, 1 ether);
-    //     vm.prank(user1);
-    //     paidMintModule.mint{value: price}(user1, traitId, 1);
+        vm.deal(user1, 1 ether);
+        vm.prank(user1);
+        paidMintModule.mint{value: price}(tba, traitId, 1);
 
-    //     address tba = registry.account(
-    //         address(accountImpl),
-    //         bytes32(0),
-    //         block.chainid,
-    //         address(nom),
-    //         nomId
-    //     );
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = traitId;
+        vm.prank(user1);
+        traits.setEquipped(tba, tokenIds);
 
-    //     uint256[] memory tokenIds = new uint256[](1);
-    //     tokenIds[0] = traitId;
-    //     vm.prank(user1);
-    //     traits.setEquipped(tba, tokenIds);
+        console.log("Trait name", traits.getNameForTrait(traitId));
 
-    //     // Get and check the token URI
-    //     string memory uri = nom.tokenURI(nomId);
-    //     assertTrue(bytes(uri).length > 0, "Token URI should not be empty");
-    //     // You might want to add more specific checks on the URI content
-    // }
+        // Get and check the token URI
+        string memory uri = nom.tokenURI(nomId);
+        assertTrue(bytes(uri).length > 0, "Token URI should not be empty");
+    }
+
+    // function try-to-equip-from-wrong-account
+    // function try-to-equip-trait-I-dont-own
 
     // function testFuzz_MintMultipleNoms(uint8 quantity) public {
     //     vm.assume(quantity > 0 && quantity <= 100); // Reasonable bounds for fuzzing

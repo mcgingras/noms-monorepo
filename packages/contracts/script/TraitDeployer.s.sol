@@ -15,8 +15,8 @@ contract TraitDeployer is Script {
     uint256 public constant BATCH_SIZE = 20;
 
     struct Trait {
-        string filename;
         bytes data;
+        string filename;
     }
 
     constructor(address _easel, address _traits) {
@@ -62,7 +62,7 @@ contract TraitDeployer is Script {
 
         string memory path = string(abi.encodePacked(".images.", category));
         bytes memory parsedData = vm.parseJson(jsonContent, path);
-        (Trait[] memory traits) = abi.decode(parsedData, (Trait[]));
+        Trait[] memory traits = abi.decode(parsedData, (Trait[]));
 
         uint256 traitCount = traits.length;
         console2.log("Total traits for category", category, ":", traitCount);
