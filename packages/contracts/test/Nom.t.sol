@@ -32,12 +32,12 @@ contract NomTest is Test {
         easel = new Easel();
         registry = new ERC6551Registry();
         accountImpl = new ERC6551Account();
-        traits = new NomTraits();
-        nom = new Nom(address(registry), address(accountImpl), address(traits), address(easel));
+        traits = new NomTraits(address(registry), address(accountImpl), address(easel));
+        nom = new Nom(address(traits), address(easel));
         paidMintModule = new PaidMintModule(address(traits));
 
         // Setup initial state
-        traits.setEasel(address(easel));
+        traits.setNomContractAddress(address(nom));
         traits.setDefaultMintModule(address(paidMintModule));
 
         // upload traits and colors
@@ -115,10 +115,10 @@ contract NomTest is Test {
         uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = traitId;
         vm.prank(user1);
-        traits.setEquipped(tba, tokenIds);
+        traits.setEquipped(nomId, tokenIds);
 
         // Check if the trait is equipped
-        assertTrue(traits.isTokenIdEquipped(tba, traitId), "Trait should be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId), "Trait should be equipped");
     }
 
     function test_TokenURI() public {
@@ -146,24 +146,108 @@ contract NomTest is Test {
         uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = traitId;
         vm.prank(user1);
-        traits.setEquipped(tba, tokenIds);
-
-        console.log("Trait name", traits.getNameForTrait(traitId));
+        traits.setEquipped(nomId, tokenIds);
 
         // Get and check the token URI
         string memory uri = nom.tokenURI(nomId);
         assertTrue(bytes(uri).length > 0, "Token URI should not be empty");
     }
 
-    // function try-to-equip-from-wrong-account
-    // function try-to-equip-trait-I-dont-own
+    function test_EquipManyTraits () public {
+        // Mint a Nom
+        vm.prank(user1);
+        nom.mint(1);
+        uint256 nomId = 0; // Assuming this is the first Nom minted
 
-    // function testFuzz_MintMultipleNoms(uint8 quantity) public {
-    //     vm.assume(quantity > 0 && quantity <= 100); // Reasonable bounds for fuzzing
-    //     uint256 initialBalance = nom.balanceOf(caller);
-    //     vm.prank(caller);
-    //     nom.mint(quantity);
-    //     assertEq(nom.balanceOf(caller), initialBalance + quantity, "Minting should increase balance by the correct quantity");
+        uint256 traitId1 = 1;
+        uint256 traitId2 = 44;
+        uint256 price = 0.1 ether;
+        paidMintModule.setMintPrice(traitId1, price);
+        paidMintModule.setMintPrice(traitId2, price);
+        traits.setTraitMintModule(traitId1, address(paidMintModule));
+        traits.setTraitMintModule(traitId2, address(paidMintModule));
+
+        // Get the TBA address for the Nom
+        address tba = registry.account(
+            address(accountImpl),
+            bytes32(0),
+            block.chainid,
+            address(nom),
+            nomId
+        );
+
+        // we want to mint to the TBA
+        vm.deal(user1, 1 ether);
+        vm.prank(user1);
+        paidMintModule.mint{value: price}(tba, traitId1, 1);
+        paidMintModule.mint{value: price}(tba, traitId2, 1);
+
+        // Equip the traits
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = traitId1;
+        tokenIds[1] = traitId2;
+        vm.prank(user1);
+        traits.setEquipped(nomId, tokenIds);
+
+        // Check if the traits are equipped
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId1), "Trait 1 should be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId2), "Trait 2 should be equipped");
+
+        string memory uri = nom.tokenURI(nomId);
+        console.log("Token URI:", uri);
+        assertTrue(bytes(uri).length > 0, "Token URI should not be empty");
+    }
+
+    function test_SetEquippedOnlyCallableByTBAOwner() public {
+        // Mint a Nom
+        vm.prank(user1);
+        nom.mint(1);
+        uint256 nomId = 0; // Assuming this is the first Nom minted
+
+        uint256 traitId = 1;
+        uint256 price = 0.1 ether;
+        paidMintModule.setMintPrice(traitId, price);
+        traits.setTraitMintModule(traitId, address(paidMintModule));
+
+        // Get the TBA address for the Nom
+        address tba = registry.account(
+            address(accountImpl),
+            bytes32(0),
+            block.chainid,
+            address(nom),
+            nomId
+        );
+
+        // we want to mint to the TBA
+        vm.deal(user1, 1 ether);
+        vm.prank(user1);
+        paidMintModule.mint{value: price}(tba, traitId, 1);
+
+        // Equip the trait
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = traitId;
+        vm.prank(user1);
+        traits.setEquipped(nomId, tokenIds);
+
+        // Check if the trait is equipped
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId), "Trait should be equipped");
+
+        // Try to equip the trait from a different address
+        vm.prank(user2);
+        vm.expectRevert("Only the owner of this nom can call this function.");
+        traits.setEquipped(nomId, tokenIds);
+    }
+
+    // function test_OnlyOwnerSetsTraitMintModule() public {
+    //     uint256 traitId = 1;
+    //     address module = address(1);
+    //     traits.setTraitMintModule(traitId, module);
+
+    //     vm.prank(user1);
+    //     vm.expectAssertFailure();
+    //     traits.setTraitMintModule(traitId, module);
     // }
 
+    // function try-to-equip-from-wrong-account
+    // function try-to-equip-trait-I-dont-own
 }

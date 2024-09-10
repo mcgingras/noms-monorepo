@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+
 import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC6551Registry } from "./interfaces/IERC6551Registry.sol";
 import { IEasel } from "./interfaces/IEasel.sol";
 import { INomTraits } from "./interfaces/INomTraits.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
@@ -14,11 +17,15 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
 
     uint256 traitIdCount;
     address public easel;
+    address public accountImplementation;
+    address public nomContractAddress;
+    address public erc6551Registry;
+    bytes32 salt = 0;
     mapping (uint256 => Trait) traits;
 
     // for equipping
-    mapping(address => mapping(uint256 => uint256)) equippedByOwner;
-    mapping(address => uint256) counts;
+    mapping(uint256 => mapping(uint256 => uint256)) equippedByOwner; // nomId => (tokenId => tokenId) [linked list]
+    mapping(uint256 => uint256) counts; // nomId => count
     uint256 constant SENTINEL_TOKEN_ID = 0;
 
     // Minting module system
@@ -36,7 +43,13 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     /// ------------------------
 
     /// @dev No need to set URI because the URI is not a static URL -- we define it below.
-    constructor() ERC1155("") Ownable(msg.sender) {}
+    constructor(address _erc6551Registry,  address _accountImplementation, address _easel) ERC1155("") Ownable(msg.sender) {
+        easel = _easel;
+        accountImplementation = _accountImplementation;
+        erc6551Registry = _erc6551Registry;
+    }
+
+
 
     function uri(uint256 tokenId) public view override returns (string memory) {
       bytes[] memory parts = new bytes[](1);
@@ -90,8 +103,8 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     /// Admin specific functions
     /// ------------------------
 
-    function setEasel(address _easel) public onlyOwner {
-      easel = _easel;
+    function setNomContractAddress(address _nomContractAddress) public onlyOwner {
+        nomContractAddress = _nomContractAddress;
     }
 
     function setDefaultMintModule(address _defaultMintModule) external onlyOwner {
@@ -126,89 +139,112 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     /// Equip specific functions
     /// ------------------------
 
-    function setEquipped(address owner, uint256[] memory _tokenIds) public {
-      uint256 currentTokenId = SENTINEL_TOKEN_ID;
+    function setEquipped(uint256 nomTokenId, uint256[] memory _tokenIds) public onlyNomOwner(nomTokenId) {
+        require(_tokenIds.length > 0, "Must equip at least one token.");
+        uint256 currentTokenId = SENTINEL_TOKEN_ID;
+        address nomTBA = getTBAForTokenId(nomTokenId);
 
-      for (uint256 i = 0; i < _tokenIds.length; i++) {
-          uint256 tokenId = _tokenIds[i];
-          require(IERC1155(address(this)).balanceOf(owner, tokenId) > 0, "Address must own token.");
-          require(tokenId != SENTINEL_TOKEN_ID && currentTokenId != tokenId, "No cycles.");
-          equippedByOwner[owner][currentTokenId] = tokenId;
-          currentTokenId = tokenId;
-      }
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            require(IERC1155(address(this)).balanceOf(nomTBA, tokenId) > 0, "Address must own token.");
+            require(tokenId != SENTINEL_TOKEN_ID && currentTokenId != tokenId, "No cycles.");
+            equippedByOwner[nomTokenId][currentTokenId] = tokenId;
+            currentTokenId = tokenId;
+        }
 
-      equippedByOwner[owner][currentTokenId] = SENTINEL_TOKEN_ID;
-      counts[owner] = _tokenIds.length;
+        equippedByOwner[nomTokenId][currentTokenId] = SENTINEL_TOKEN_ID;
+        counts[nomTokenId] = _tokenIds.length;
     }
 
-    function isTokenIdEquipped(address owner, uint256 tokenId) public view returns (bool) {
-      uint256 currentTokenId = equippedByOwner[owner][SENTINEL_TOKEN_ID];
+    function isTokenIdEquipped(uint256 nomTokenId, uint256 tokenId) public view returns (bool) {
+      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
       while (currentTokenId != SENTINEL_TOKEN_ID) {
           if (currentTokenId == tokenId) {
               return true;
           }
-          currentTokenId = equippedByOwner[owner][currentTokenId];
+          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
       }
       return false;
     }
 
     // seems like sentinal is not being set on the first add
-    function addTokenId(address owner, uint256 tokenId, uint256 precedingTokenId) public {
-      require(IERC1155(address(this)).balanceOf(owner, tokenId) > 0, "Address must own token.");
+    function addTokenId(uint256 nomTokenId, uint256 tokenId, uint256 precedingTokenId) public {
+      address nomTBA = getTBAForTokenId(nomTokenId);
+      require(IERC1155(address(this)).balanceOf(nomTBA, tokenId) > 0, "Address must own token.");
       require(tokenId != SENTINEL_TOKEN_ID, "No cycles.");
 
-      uint256 currentTokenId = equippedByOwner[owner][SENTINEL_TOKEN_ID];
+      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
       while (currentTokenId != precedingTokenId) {
           require(currentTokenId != tokenId, "Token already equipped.");
           require(currentTokenId != SENTINEL_TOKEN_ID, "Preceding token not found.");
-          currentTokenId = equippedByOwner[owner][currentTokenId];
+          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
       }
 
-      uint256 precedingTokenIdNext = equippedByOwner[owner][precedingTokenId];
-      equippedByOwner[owner][precedingTokenId] = tokenId;
-      equippedByOwner[owner][tokenId] = precedingTokenIdNext;
-      counts[owner]++;
+      uint256 precedingTokenIdNext = equippedByOwner[nomTokenId][precedingTokenId];
+      equippedByOwner[nomTokenId][precedingTokenId] = tokenId;
+      equippedByOwner[nomTokenId][tokenId] = precedingTokenIdNext;
+      counts[nomTokenId]++;
 
-      emit TokenEquipped(tokenId, owner);
+      emit TokenEquipped(tokenId, nomTokenId);
     }
 
-    function removeTokenId(address owner, uint256 tokenId) public {
-      uint256 currentTokenId = equippedByOwner[owner][SENTINEL_TOKEN_ID];
-      uint256 nextTokenId = equippedByOwner[owner][currentTokenId];
+    function removeTokenId(uint256 nomTokenId, uint256 tokenId) public {
+      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
+      uint256 nextTokenId = equippedByOwner[nomTokenId][currentTokenId];
 
       if (currentTokenId == tokenId) {
-          equippedByOwner[owner][SENTINEL_TOKEN_ID] = nextTokenId;
-          counts[owner]--;
-          emit TokenUnequipped(tokenId, owner);
+          equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID] = nextTokenId;
+          counts[nomTokenId]--;
+          emit TokenUnequipped(tokenId, nomTokenId);
           return;
       }
 
       while (nextTokenId != SENTINEL_TOKEN_ID) {
           if (nextTokenId == tokenId) {
-              equippedByOwner[owner][currentTokenId] = equippedByOwner[owner][nextTokenId];
-              counts[owner]--;
-              emit TokenUnequipped(tokenId, owner);
+              equippedByOwner[nomTokenId][currentTokenId] = equippedByOwner[nomTokenId][nextTokenId];
+              counts[nomTokenId]--;
+              emit TokenUnequipped(tokenId, nomTokenId);
               return;
           }
-          currentTokenId = equippedByOwner[owner][currentTokenId];
-          nextTokenId = equippedByOwner[owner][nextTokenId];
+          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
+          nextTokenId = equippedByOwner[nomTokenId][nextTokenId];
       }
 
       revert("Token not found.");
     }
 
-    function getEquippedTokenIds(address owner) public view returns (uint256[] memory) {
-      uint256[] memory array = new uint256[](counts[owner]);
+    function getEquippedTokenIds(uint256 nomTokenId) public view returns (uint256[] memory) {
+      uint256[] memory array = new uint256[](counts[nomTokenId]);
 
       uint256 index = 0;
-      uint256 currentTokenId = equippedByOwner[owner][SENTINEL_TOKEN_ID];
+      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
       while (currentTokenId != SENTINEL_TOKEN_ID) {
           array[index] = currentTokenId;
-          currentTokenId = equippedByOwner[owner][currentTokenId];
+          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
           index++;
       }
 
       return array;
+    }
+
+    /// ------------------------
+    /// TBA helpers
+    /// ------------------------
+
+
+    function getTBAForTokenId (uint256 tokenId) public view returns (address) {
+        return IERC6551Registry(erc6551Registry).account(
+            accountImplementation,
+            salt,
+            block.chainid,
+            nomContractAddress,
+            tokenId
+        );
+    }
+
+    modifier onlyNomOwner(uint256 nomTokenId) {
+        require(IERC721(nomContractAddress).ownerOf(nomTokenId) == msg.sender, "Only the owner of this nom can call this function.");
+        _;
     }
 
     /// ------------------------

@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import { ERC721A } from "erc721a/contracts/ERC721A.sol";
 import { IEasel } from "./interfaces/IEasel.sol";
-import { IERC6551Registry } from "./interfaces/IERC6551Registry.sol";
 import { INomTraits } from "./interfaces/INomTraits.sol";
 
 import "@openzeppelin/contracts/utils/Base64.sol";
@@ -11,21 +10,12 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Nom is ERC721A {
     using Strings for uint256;
-
-    address public accountImplementation;
     address public traitContractAddress;
-    address public erc6551Registry;
     address public easel;
     bytes32 salt = 0;
 
-    constructor(
-            address _accountRegistry,
-            address _accountImplementation,
-            address _traitContractAddress,
-            address _easel) ERC721A("Noms", "NOM") {
-        accountImplementation = _accountImplementation;
+    constructor(address _traitContractAddress, address _easel) ERC721A("Noms", "NOM") {
         traitContractAddress = _traitContractAddress;
-        erc6551Registry = _accountRegistry;
         easel = _easel;
     }
 
@@ -45,15 +35,7 @@ contract Nom is ERC721A {
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        address tbaAddressForToken = IERC6551Registry(erc6551Registry).account(
-            accountImplementation,
-            salt,
-            block.chainid,
-            address(this),
-            tokenId
-        );
-
-        uint256[] memory tokens = INomTraits(traitContractAddress).getEquippedTokenIds(tbaAddressForToken);
+        uint256[] memory tokens = INomTraits(traitContractAddress).getEquippedTokenIds(tokenId);
 
         bytes[] memory traitParts = new bytes[](tokens.length);
         for (uint256 i = 0; i < tokens.length; i++) {
