@@ -9,16 +9,14 @@ interface INomTraits {
     }
 
     event TraitRegistered(uint256 traitId, bytes rleBytes, string name, address creator);
-    event TokenEquipped(uint256 indexed traitTokenId, uint256 indexed nomTokenId);
-    event TokenUnequipped(uint256 indexed traitTokenId, uint256 indexed nomTokenId);
+    event TokenEquipped(address indexed owner, uint256 indexed traitTokenId, uint256 indexed nomTokenId);
+    event TokenUnequipped(address indexed owner, uint256 indexed traitTokenId, uint256 indexed nomTokenId);
 
     function registerTrait(bytes memory rleBytes, string memory name) external;
     function getImageDataForTrait(uint256 traitId) external view returns (bytes memory);
     function setNomContractAddress(address _nomContractAddress) external;
     function setEquipped(uint256 nomTokenId, uint256[] memory _tokenIds) external;
     function isTokenIdEquipped(uint256 nomTokenId, uint256 tokenId) external view returns (bool);
-    function addTokenId(uint256 nomTokenId, uint256 tokenId, uint256 precedingTokenId) external;
-    function removeTokenId(uint256 nomTokenId, uint256 tokenId) external;
     function getEquippedTokenIds(uint256 nomTokenId) external view returns (uint256[] memory);
     function mintTo(address recipient, uint256 traitId, uint256 quantity) external returns (bool);
     function setTraitMintModule(uint256 traitId, address module) external;

@@ -1,52 +1,52 @@
 import { createConfig } from "@ponder/core";
-import { Address, http } from "viem";
-import { ERC721Abi } from "./abis/ERC721";
-import { ERC1155Abi } from "./abis/ERC1155";
-import { ERC6551Abi } from "./abis/ERC6551";
-import { EaselAbi } from "./abis/Easel";
+import { http, getAddress } from "viem";
+import { ERC6551RegistryAbi } from "./abis/ERC6551Registry";
+import { easelAbi, nomAbi, nomTraitsAbi } from "./foundry/abis";
+import NomDeploy from "../contracts/broadcast/Nom.s.sol/31337/run-latest.json";
 
-const startBlock = 13760000;
-
-// BASE SEPOLIA
-export const configAddresses = {
-  NFTContract: "0x0AEA8ce800c5609e61E799648195620d1B62B3fd" as Address,
-  ERC1155Contract: "0xb185d82B82257994c4f252Cc094385657370083b" as Address,
-  ERC6551Registry: "0x000000006551c19487814612e58FE06813775758" as Address,
-  AccountImpl: "0x41C8f39463A868d3A88af00cd0fe7102F30E44eC" as Address,
-  Easel: "0x9320Fc9A6DE47A326fBd12795Ba731859360cdaD" as Address,
-};
+const txs = NomDeploy.transactions;
+const receipts = NomDeploy.receipts;
+const easelAddress = getAddress(txs[1]!.contractAddress);
+const traitsAddress = getAddress(txs[2]!.contractAddress);
+const nomAddress = getAddress(txs[3]!.contractAddress);
+const erc6551Registry = getAddress(
+  "0x000000006551c19487814612e58fe06813775758"
+);
+const startBlock = parseInt(receipts[0]!.blockNumber);
+console.log(startBlock);
 
 export default createConfig({
   networks: {
-    baseSepolia: {
-      chainId: 84532,
+    anvil: {
+      chainId: 31337,
       // @ts-ignore
-      transport: http(process.env.PONDER_RPC_URL_84532!),
+      transport: http("http://127.0.0.1:8545"),
+      disableCache: true,
     },
   },
   contracts: {
     Easel: {
-      network: "baseSepolia",
-      abi: EaselAbi,
-      address: configAddresses.Easel,
+      network: "anvil",
+      abi: easelAbi,
+      address: easelAddress,
       startBlock: startBlock,
     },
     NFTContract: {
-      network: "baseSepolia",
-      abi: ERC721Abi,
-      address: configAddresses.NFTContract,
+      network: "anvil",
+      abi: nomAbi,
+      address: nomAddress,
       startBlock: startBlock,
     },
     ERC1155Contract: {
-      network: "baseSepolia",
-      abi: ERC1155Abi,
-      address: configAddresses.ERC1155Contract,
+      network: "anvil",
+      abi: nomTraitsAbi,
+      address: traitsAddress,
       startBlock: startBlock,
     },
     ERC6551Registry: {
-      network: "baseSepolia",
-      abi: ERC6551Abi,
-      address: configAddresses.ERC6551Registry,
+      network: "anvil",
+      abi: ERC6551RegistryAbi,
+      address: erc6551Registry,
       startBlock: startBlock,
     },
   },

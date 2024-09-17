@@ -1,4 +1,4 @@
-export const ERC6551Abi = [
+export const ERC6551RegistryAbi = [
   {
     inputs: [],
     name: "AccountCreationFailed",

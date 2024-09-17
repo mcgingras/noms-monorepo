@@ -24,8 +24,8 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     mapping (uint256 => Trait) traits;
 
     // for equipping
-    mapping(uint256 => mapping(uint256 => uint256)) equippedByOwner; // nomId => (tokenId => tokenId) [linked list]
-    mapping(uint256 => uint256) counts; // nomId => count
+    mapping(address => mapping(uint256 => uint256)) equippedByOwner; // nom (tbaAddress) => (tokenId => tokenId) [linked list]
+    mapping(address => uint256) counts; // nom (tbaAddres) => count
     uint256 constant SENTINEL_TOKEN_ID = 0;
 
     // Minting module system
@@ -139,88 +139,79 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     /// Equip specific functions
     /// ------------------------
 
-    function setEquipped(uint256 nomTokenId, uint256[] memory _tokenIds) public onlyNomOwner(nomTokenId) {
-        require(_tokenIds.length > 0, "Must equip at least one token.");
-        uint256 currentTokenId = SENTINEL_TOKEN_ID;
-        address nomTBA = getTBAForTokenId(nomTokenId);
+    function setEquipped(uint256 nomTokenId, uint256[] memory newTokenIds) public onlyNomOwner(nomTokenId) {
+    require(newTokenIds.length > 0, "Must equip at least one token.");
+    address nomTBA = getTBAForTokenId(nomTokenId);
 
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            uint256 tokenId = _tokenIds[i];
-            require(IERC1155(address(this)).balanceOf(nomTBA, tokenId) > 0, "Address must own token.");
-            require(tokenId != SENTINEL_TOKEN_ID && currentTokenId != tokenId, "No cycles.");
-            equippedByOwner[nomTokenId][currentTokenId] = tokenId;
-            currentTokenId = tokenId;
+    uint256[] memory prevTokenIds = getEquippedTokenIds(nomTokenId);
+    validateTokens(nomTBA, newTokenIds);
+    updateEquippedTokens(nomTBA, newTokenIds, prevTokenIds, nomTokenId);
+    updateLinkedList(nomTBA, newTokenIds);
+    counts[nomTBA] = newTokenIds.length;
+}
+
+function validateTokens(address nomTBA, uint256[] memory tokenIds) internal view {
+    for (uint256 i = 0; i < tokenIds.length; i++) {
+        require(IERC1155(address(this)).balanceOf(nomTBA, tokenIds[i]) > 0, "Address must own token.");
+        require(tokenIds[i] != SENTINEL_TOKEN_ID, "Invalid token.");
+    }
+}
+
+function updateEquippedTokens(address nomTBA, uint256[] memory newTokenIds, uint256[] memory prevTokenIds, uint256 nomTokenId) internal {
+    // Check for removed tokens
+    for (uint256 i = 0; i < prevTokenIds.length; i++) {
+        if (!contains(newTokenIds, prevTokenIds[i])) {
+            emit TokenUnequipped(nomTBA, prevTokenIds[i], nomTokenId);
         }
-
-        equippedByOwner[nomTokenId][currentTokenId] = SENTINEL_TOKEN_ID;
-        counts[nomTokenId] = _tokenIds.length;
     }
 
+    // Check for added tokens
+    for (uint256 i = 0; i < newTokenIds.length; i++) {
+        if (!contains(prevTokenIds, newTokenIds[i])) {
+            emit TokenEquipped(nomTBA, newTokenIds[i], nomTokenId);
+        }
+    }
+}
+
+function updateLinkedList(address nomTBA, uint256[] memory tokenIds) internal {
+    uint256 currentTokenId = SENTINEL_TOKEN_ID;
+    for (uint256 i = 0; i < tokenIds.length; i++) {
+        equippedByOwner[nomTBA][currentTokenId] = tokenIds[i];
+        currentTokenId = tokenIds[i];
+    }
+    equippedByOwner[nomTBA][currentTokenId] = SENTINEL_TOKEN_ID;
+}
+
+function contains(uint256[] memory array, uint256 value) internal pure returns (bool) {
+    for (uint256 i = 0; i < array.length; i++) {
+        if (array[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
+
     function isTokenIdEquipped(uint256 nomTokenId, uint256 tokenId) public view returns (bool) {
-      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
+      address nomTBA = getTBAForTokenId(nomTokenId);
+      uint256 currentTokenId = equippedByOwner[nomTBA][SENTINEL_TOKEN_ID];
       while (currentTokenId != SENTINEL_TOKEN_ID) {
           if (currentTokenId == tokenId) {
               return true;
           }
-          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
+          currentTokenId = equippedByOwner[nomTBA][currentTokenId];
       }
       return false;
     }
 
-    // seems like sentinal is not being set on the first add
-    function addTokenId(uint256 nomTokenId, uint256 tokenId, uint256 precedingTokenId) public {
-      address nomTBA = getTBAForTokenId(nomTokenId);
-      require(IERC1155(address(this)).balanceOf(nomTBA, tokenId) > 0, "Address must own token.");
-      require(tokenId != SENTINEL_TOKEN_ID, "No cycles.");
-
-      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
-      while (currentTokenId != precedingTokenId) {
-          require(currentTokenId != tokenId, "Token already equipped.");
-          require(currentTokenId != SENTINEL_TOKEN_ID, "Preceding token not found.");
-          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
-      }
-
-      uint256 precedingTokenIdNext = equippedByOwner[nomTokenId][precedingTokenId];
-      equippedByOwner[nomTokenId][precedingTokenId] = tokenId;
-      equippedByOwner[nomTokenId][tokenId] = precedingTokenIdNext;
-      counts[nomTokenId]++;
-
-      emit TokenEquipped(tokenId, nomTokenId);
-    }
-
-    function removeTokenId(uint256 nomTokenId, uint256 tokenId) public {
-      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
-      uint256 nextTokenId = equippedByOwner[nomTokenId][currentTokenId];
-
-      if (currentTokenId == tokenId) {
-          equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID] = nextTokenId;
-          counts[nomTokenId]--;
-          emit TokenUnequipped(tokenId, nomTokenId);
-          return;
-      }
-
-      while (nextTokenId != SENTINEL_TOKEN_ID) {
-          if (nextTokenId == tokenId) {
-              equippedByOwner[nomTokenId][currentTokenId] = equippedByOwner[nomTokenId][nextTokenId];
-              counts[nomTokenId]--;
-              emit TokenUnequipped(tokenId, nomTokenId);
-              return;
-          }
-          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
-          nextTokenId = equippedByOwner[nomTokenId][nextTokenId];
-      }
-
-      revert("Token not found.");
-    }
-
     function getEquippedTokenIds(uint256 nomTokenId) public view returns (uint256[] memory) {
-      uint256[] memory array = new uint256[](counts[nomTokenId]);
+      address nomTBA = getTBAForTokenId(nomTokenId);
+      uint256[] memory array = new uint256[](counts[nomTBA]);
 
       uint256 index = 0;
-      uint256 currentTokenId = equippedByOwner[nomTokenId][SENTINEL_TOKEN_ID];
+      uint256 currentTokenId = equippedByOwner[nomTBA][SENTINEL_TOKEN_ID];
       while (currentTokenId != SENTINEL_TOKEN_ID) {
           array[index] = currentTokenId;
-          currentTokenId = equippedByOwner[nomTokenId][currentTokenId];
+          currentTokenId = equippedByOwner[nomTBA][currentTokenId];
           index++;
       }
 

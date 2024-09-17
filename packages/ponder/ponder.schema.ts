@@ -35,6 +35,8 @@ export default createSchema((p) => ({
   // OwnedTrait -- Joined table for Noms and Traits
   // --------------------------------------------------
   NomTrait: p.createTable({
+    // what should this id be?
+    // nomTBA-traitTokenId
     id: p.string(),
     quantity: p.int(),
     equipped: p.boolean(),
