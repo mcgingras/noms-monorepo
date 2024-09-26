@@ -2,7 +2,7 @@ import { Context, ponder } from "@/generated";
 import { Address, isAddressEqual, getAddress } from "viem";
 import { createFullSVG } from "./utils";
 import { easelAbi } from "../foundry/abis";
-import NomDeploy from "../../contracts/broadcast/Nom.s.sol/31337/run-latest.json";
+import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json";
 
 const txs = NomDeploy.transactions;
 const accountImplAddress = getAddress(txs[0]!.contractAddress);

@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { useReadContract } from "wagmi";
-import { EaselAbi } from "@/abis/Easel";
-import { configAddresses } from "@/lib/utils";
+import { easelAbi } from "../../../../../../ponder/foundry/abis";
+import { CHAIN_ID, EASEL_ADDRESS } from "@/lib/constants";
 
 const NomViewer = ({ pendingParts }: { pendingParts: any[] }) => {
   const [nomSVG, setNomSVG] = useState<string | null>(null);
 
   const { data, isLoading } = useReadContract({
-    chainId: 84532,
-    abi: EaselAbi,
-    address: configAddresses.Easel,
+    chainId: CHAIN_ID,
+    abi: easelAbi,
+    address: EASEL_ADDRESS,
     functionName: "generateSVGForParts",
     args: [pendingParts.map((part) => part.rleBytes) as any],
   });

@@ -8,7 +8,7 @@ import { NomTraits } from "../src/NomTraits.sol";
 import { PaidMintModule } from "../src/modules/PaidMintModule.sol";
 import { TraitDeployer } from "../script/TraitDeployer.s.sol";
 import { ERC6551Registry } from "erc6551/ERC6551Registry.sol";
-import { ERC6551Account } from "erc6551/examples/simple/ERC6551Account.sol";
+import { SimpleERC6551Account } from "../src/SimpleERC6551Account.sol";
 
 contract NomTest is Test {
     address public caller = address(1);
@@ -17,7 +17,7 @@ contract NomTest is Test {
 
     // Dependencies
     ERC6551Registry public registry;
-    ERC6551Account public accountImpl;
+    SimpleERC6551Account public accountImpl;
 
     // Contracts under test
     Nom public nom;
@@ -31,9 +31,9 @@ contract NomTest is Test {
     function setUp() public {
         easel = new Easel();
         registry = new ERC6551Registry();
-        accountImpl = new ERC6551Account();
-        traits = new NomTraits(address(registry), address(accountImpl), address(easel));
-        nom = new Nom(address(traits), address(easel));
+        accountImpl = new SimpleERC6551Account();
+        traits = new NomTraits(address(easel));
+        nom = new Nom(address(traits), address(easel), address(registry), address(accountImpl));
         paidMintModule = new PaidMintModule(address(traits));
 
         // Setup initial state
@@ -53,14 +53,14 @@ contract NomTest is Test {
     function test_MintNom() public {
         uint256 initialBalance = nom.balanceOf(caller);
         vm.prank(caller);
-        nom.mint(1);
+        nom.mint();
         assertEq(nom.balanceOf(caller), initialBalance + 1, "Minting should increase balance by 1");
     }
 
     function test_MintNomTo() public {
         uint256 initialBalance = nom.balanceOf(user1);
         vm.prank(caller);
-        nom.mintTo(user1, 1);
+        nom.mintTo(user1);
         assertEq(nom.balanceOf(user1), initialBalance + 1, "Minting to address should increase balance by 1");
     }
 
@@ -88,7 +88,7 @@ contract NomTest is Test {
     function test_EquipTrait() public {
         // Mint a Nom
         vm.prank(user1);
-        nom.mint(1);
+        nom.mint();
         uint256 nomId = 0; // Assuming this is the first Nom minted
 
         uint256 traitId = 1;
@@ -123,7 +123,7 @@ contract NomTest is Test {
 
     function test_TokenURI() public {
         vm.prank(user1);
-        nom.mint(1);
+        nom.mint();
         uint256 nomId = 0;
 
         uint256 traitId = 1;
@@ -156,7 +156,7 @@ contract NomTest is Test {
     function test_EquipManyTraits () public {
         // Mint a Nom
         vm.prank(user1);
-        nom.mint(1);
+        nom.mint();
         uint256 nomId = 0; // Assuming this is the first Nom minted
 
         uint256 traitId1 = 1;
@@ -201,7 +201,7 @@ contract NomTest is Test {
     function test_SetEquippedOnlyCallableByTBAOwner() public {
         // Mint a Nom
         vm.prank(user1);
-        nom.mint(1);
+        nom.mint();
         uint256 nomId = 0; // Assuming this is the first Nom minted
 
         uint256 traitId = 1;
@@ -234,9 +234,25 @@ contract NomTest is Test {
 
         // Try to equip the trait from a different address
         vm.prank(user2);
-        vm.expectRevert("Only the owner of this nom can call this function.");
+        vm.expectRevert("Not authorized: only the owner of this nom or the nom contract itself can call this function.");
         traits.setEquipped(nomId, tokenIds);
     }
+
+    function test_mintAndInitialize() public {
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = 1;
+        uint256[] memory quantities = new uint256[](1);
+        quantities[0] = 1;
+
+        // address of traits means anyone can mint
+        traits.setTraitMintModule(1, address(traits));
+
+        vm.prank(user1);
+        nom.mintAndInitialize(user1, tokenIds, quantities);
+    }
+
+    // function test_mintTraitThatDoesNotExist() public {
+    // }
 
     // function test_OnlyOwnerSetsTraitMintModule() public {
     //     uint256 traitId = 1;

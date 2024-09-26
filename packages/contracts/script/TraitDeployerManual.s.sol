@@ -5,9 +5,11 @@ import {Script, console2} from "forge-std/Script.sol";
 import {IEasel} from "../src/interfaces/IEasel.sol";
 import {INomTraits} from "../src/interfaces/INomTraits.sol";
 
-contract TraitDeployer is Script {
-    IEasel public easel;
-    INomTraits public traitsContract;
+// forge script script/TraitDeployerManual.s.sol:Deploy --broadcast --fork-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+contract Deploy is Script {
+    IEasel public easel = IEasel(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+    INomTraits public traitsContract = INomTraits(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
     string public constant FILE_NAME = "traits.json";
     uint8 public constant PALETTE_INDEX = 0;
     uint256 public constant BATCH_SIZE = 20;
@@ -17,10 +19,6 @@ contract TraitDeployer is Script {
         string filename;
     }
 
-    constructor(address _easel, address _traits) {
-        easel = IEasel(_easel);
-        traitsContract = INomTraits(_traits);
-    }
 
     function streamJsonFile(string memory filePath) internal view returns (string memory) {
         string memory jsonContent = vm.readFile(filePath);
@@ -80,5 +78,11 @@ contract TraitDeployer is Script {
         addTraitsToContract("accessories");
         addTraitsToContract("heads");
         addTraitsToContract("glasses");
+    }
+
+    function run() public {
+        vm.startBroadcast();
+        uploadAll();
+        vm.stopBroadcast();
     }
 }

@@ -2,13 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "./interfaces/IERC6551Account.sol";
 import "./interfaces/IERC6551Executable.sol";
 
-contract SimpleERC6551Account is IERC165, IERC1271, IERC6551Account, IERC6551Executable {
+contract SimpleERC6551Account is IERC165, IERC1271, IERC6551Account, IERC6551Executable, IERC721Receiver, IERC1155Receiver {
     uint256 public state;
 
     receive() external payable {}
@@ -57,10 +59,43 @@ contract SimpleERC6551Account is IERC165, IERC1271, IERC6551Account, IERC6551Exe
         return "";
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
-        return (interfaceId == type(IERC165).interfaceId ||
-            interfaceId == type(IERC6551Account).interfaceId ||
-            interfaceId == type(IERC6551Executable).interfaceId);
+   function onERC721Received(address, address, uint256 receivedTokenId, bytes memory)
+        external
+        view
+        virtual
+        returns (bytes4)
+    {
+        _revertIfOwnershipCycle(msg.sender, receivedTokenId);
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
+    function onERC1155Received(address, address, uint256, uint256, bytes memory)
+        external
+        view
+        virtual
+        returns (bytes4)
+    {
+        return IERC1155Receiver.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) external pure virtual returns (bytes4) {
+        return IERC1155Receiver.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public pure virtual returns (bool) {
+        return (
+            interfaceId == type(IERC6551Account).interfaceId
+                || interfaceId == type(IERC6551Executable).interfaceId
+                || interfaceId == type(IERC1155Receiver).interfaceId
+                || interfaceId == type(IERC721Receiver).interfaceId
+                || interfaceId == type(IERC165).interfaceId
+        );
     }
 
     function token()
@@ -90,5 +125,47 @@ contract SimpleERC6551Account is IERC165, IERC1271, IERC6551Account, IERC6551Exe
 
     function _isValidSigner(address signer) internal view returns (bool) {
       return signer == owner();
+    }
+
+    /**
+     * @dev Helper method to check if a received token is in the ownership chain of the wallet.
+     * @param receivedTokenAddress The address of the token being received.
+     * @param receivedTokenId The ID of the token being received.
+     */
+    function _revertIfOwnershipCycle(address receivedTokenAddress, uint256 receivedTokenId)
+        internal
+        view
+        virtual
+    {
+        (uint256 _chainId, address _contractAddress, uint256 _tokenId) = token();
+        require(
+            _chainId != block.chainid || receivedTokenAddress != _contractAddress
+                || receivedTokenId != _tokenId,
+            "Cannot own yourself"
+        );
+
+        address currentOwner = owner();
+        require(currentOwner != address(this), "Token in ownership chain");
+        uint256 depth = 0;
+        while (currentOwner.code.length > 0) {
+            try IERC6551Account(payable(currentOwner)).token() returns (
+                uint256 chainId, address contractAddress, uint256 tokenId
+            ) {
+                require(
+                    chainId != block.chainid || contractAddress != receivedTokenAddress
+                        || tokenId != receivedTokenId,
+                    "Token in ownership chain"
+                );
+                // Advance up the ownership chain
+                currentOwner = IERC721(contractAddress).ownerOf(tokenId);
+                require(currentOwner != address(this), "Token in ownership chain");
+            } catch {
+                break;
+            }
+            unchecked {
+                ++depth;
+            }
+            if (depth == 5) revert("Ownership chain too deep");
+        }
     }
 }

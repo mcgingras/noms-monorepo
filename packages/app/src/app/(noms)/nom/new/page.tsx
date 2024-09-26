@@ -13,7 +13,7 @@ import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
 import CaratDownIcon from "@/components/icons/CaratDownIcon";
 import CaratUpIcon from "@/components/icons/CaratUpIcon";
 import { useAccount } from "wagmi";
-import { createNom, createSingleNom } from "@/lib/viem/createNom";
+import { createSingleNom } from "@/lib/viem/createNom";
 
 const Nav = ({ children }: { children: React.ReactNode }) => {
   return <nav className="flex flex-row justify-between w-full">{children}</nav>;
@@ -172,8 +172,8 @@ const NewNomPage = () => {
                     // 3. mint all parts to TBA address
                     // 4. equip all parts
 
-                    // const results = createSingleNom({ account: address });
-                    // console.log("results", results);
+                    const results = await createSingleNom({ account: address });
+                    console.log("results", results);
                   }}
                 >
                   <span className="pangram-sans font-bold">

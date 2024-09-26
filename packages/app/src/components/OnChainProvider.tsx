@@ -1,19 +1,19 @@
 "use client";
 
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
+import { localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 
 const config = createConfig(
   getDefaultConfig({
-    chains: [baseSepolia],
+    chains: [localhost],
     transports: {
-      [baseSepolia.id]: http(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC!),
+      [localhost.id]: http("http://127.0.0.1:8545"),
     },
     walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
-    appName: "Prop Lot Protocol",
-    appDescription: "PropLot Protocol gets your ideas on-chain.",
+    appName: "Noms",
+    appDescription: "Build your nom and collect traits.",
     ssr: true,
     // appUrl: "", // TODO: add this when we have it
     // appIcon: "", // TODO: add this when we have it
