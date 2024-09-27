@@ -35,6 +35,7 @@ contract Deploy is Script {
         freeMintModule = new FreeMintModule(address(traits));
 
         traits.setNomContractAddress(address(nom));
+        // could also just set to address(this) which is essentially the free mint module
         traits.setDefaultMintModule(address(freeMintModule));
         vm.stopBroadcast();
     }

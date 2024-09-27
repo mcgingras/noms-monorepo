@@ -35,12 +35,21 @@ contract Nom is ERC721 {
     /// @dev No need to protect minting ability
     /// anyone should be able to mint a nom for free.
     /// should these be safe mint?
+    /**
+     * @notice Mints a new nom.
+     * @dev Mints a new nom.
+     */
     function mint() external payable {
         // want to return the tokenId
         uint256 tokenId = tokenIdCount;
         _mint(msg.sender, tokenId);
     }
 
+    /**
+     * @notice Mints a new nom to a specific address.
+     * @dev Mints a new nom to a specific address.
+     * @param to The address to mint the nom to.
+     */
     function mintTo(address to) external payable {
         uint256 tokenId = tokenIdCount;
         _mint(to, tokenId);
@@ -50,6 +59,13 @@ contract Nom is ERC721 {
     /// necessary to perform as a single transaction because multicall writes cannot delegatecall
     /// and we want to enable mint nom + traits as the first experience for users.
     /// the trait tokenIds must be part of the default collection which have a permissive mint module.
+    /**
+     * @notice Mints a new nom and initializes the ERC6551Account.
+     * @dev Mints a new nom and initializes the ERC6551Account.
+     * @param to The address to mint the nom to.
+     * @param traitTokenIds The token IDs of the traits to mint.
+     * @param quantities The quantities of the traits to mint.
+     */
     function mintAndInitialize(address to, uint256[] memory traitTokenIds, uint256[] memory quantities) external payable {
         uint256 tokenId = tokenIdCount;
         _mint(to, tokenId);
@@ -61,10 +77,16 @@ contract Nom is ERC721 {
             tokenId  // tokenId
         );
 
-        INomTraits(traitContractAddress).batchMintTo(tokenboundAccount, traitTokenIds, quantities);
+        INomTraits(traitContractAddress).batchMintViaModules(tokenboundAccount, traitTokenIds, quantities);
         INomTraits(traitContractAddress).setEquipped(tokenId, traitTokenIds);
     }
 
+    /**
+     * @notice Gets the token URI for a token.
+     * @dev Gets the token URI for a token.
+     * @param tokenId The ID of the token.
+     * @return string memory The token URI.
+     */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         uint256[] memory tokens = INomTraits(traitContractAddress).getEquippedTokenIds(tokenId);
 
@@ -82,6 +104,11 @@ contract Nom is ERC721 {
     }
 
     /// @notice https://eips.ethereum.org/EIPS/eip-7572
+    /**
+     * @notice Gets the contract URI.
+     * @dev Gets the contract URI.
+     * @return string memory The contract URI.
+     */
     function contractURI() public pure returns (string memory) {
         string memory json = '{"name":"Noms","description":"Noms are ERC6551 tokenbound Nouns.""image":"","external_link": ""}';
         return string.concat("data:application/json;utf8,", json);
@@ -91,6 +118,12 @@ contract Nom is ERC721 {
     /// TBA helpers
     /// ------------------------
 
+    /**
+     * @notice Gets the TBA for a token ID.
+     * @dev Gets the TBA for a token ID.
+     * @param tokenId The ID of the token.
+     * @return address The TBA for the token ID.
+     */
     function getTBAForTokenId(uint256 tokenId) public view returns (address) {
         return IERC6551Registry(erc6551RegistryAddress).account(
             erc6551AccountImplementation,

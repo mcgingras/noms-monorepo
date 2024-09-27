@@ -19,6 +19,7 @@ interface INomTraits {
     function isTokenIdEquipped(uint256 nomTokenId, uint256 tokenId) external view returns (bool);
     function getEquippedTokenIds(uint256 nomTokenId) external view returns (uint256[] memory);
     function mintTo(address recipient, uint256 traitId, uint256 quantity) external returns (bool);
-    function batchMintTo(address recipient, uint256[] memory traitIds, uint256[] memory quantities) external returns (bool);
+    function mintViaModule(address recipient, uint256 traitId, uint256 quantity) payable external returns (bool);
+    function batchMintViaModules(address recipient, uint256[] memory traitIds, uint256[] memory quantities) payable external returns (bool);
     function setTraitMintModule(uint256 traitId, address module) external;
 }

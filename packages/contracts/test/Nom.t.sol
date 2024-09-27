@@ -6,9 +6,11 @@ import { Nom } from "../src/Nom.sol";
 import { Easel } from "../src/Easel.sol";
 import { NomTraits } from "../src/NomTraits.sol";
 import { PaidMintModule } from "../src/modules/PaidMintModule.sol";
+import { FreeMintModule } from "../src/modules/FreeMintModule.sol";
 import { TraitDeployer } from "../script/TraitDeployer.s.sol";
 import { ERC6551Registry } from "erc6551/ERC6551Registry.sol";
 import { SimpleERC6551Account } from "../src/SimpleERC6551Account.sol";
+import { Multicall3 } from "../src/lib/Multicall3.sol";
 
 contract NomTest is Test {
     address public caller = address(1);
@@ -24,6 +26,8 @@ contract NomTest is Test {
     Easel public easel;
     NomTraits public traits;
     PaidMintModule public paidMintModule;
+    FreeMintModule public freeMintModule;
+    Multicall3 public multicall;
 
     // Trait deployer
     TraitDeployer public traitDeployer;
@@ -35,6 +39,8 @@ contract NomTest is Test {
         traits = new NomTraits(address(easel));
         nom = new Nom(address(traits), address(easel), address(registry), address(accountImpl));
         paidMintModule = new PaidMintModule(address(traits));
+        freeMintModule = new FreeMintModule(address(traits));
+        multicall = new Multicall3();
 
         // Setup initial state
         traits.setNomContractAddress(address(nom));
@@ -97,13 +103,7 @@ contract NomTest is Test {
         traits.setTraitMintModule(traitId, address(paidMintModule));
 
         // Get the TBA address for the Nom
-        address tba = registry.account(
-            address(accountImpl),
-            bytes32(0),
-            block.chainid,
-            address(nom),
-            nomId
-        );
+        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         // we want to mint to the TBA
         vm.deal(user1, 1 ether);
@@ -131,13 +131,7 @@ contract NomTest is Test {
         paidMintModule.setMintPrice(traitId, price);
         traits.setTraitMintModule(traitId, address(paidMintModule));
 
-         address tba = registry.account(
-            address(accountImpl),
-            bytes32(0),
-            block.chainid,
-            address(nom),
-            nomId
-        );
+        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         vm.deal(user1, 1 ether);
         vm.prank(user1);
@@ -168,13 +162,7 @@ contract NomTest is Test {
         traits.setTraitMintModule(traitId2, address(paidMintModule));
 
         // Get the TBA address for the Nom
-        address tba = registry.account(
-            address(accountImpl),
-            bytes32(0),
-            block.chainid,
-            address(nom),
-            nomId
-        );
+        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         // we want to mint to the TBA
         vm.deal(user1, 1 ether);
@@ -210,13 +198,7 @@ contract NomTest is Test {
         traits.setTraitMintModule(traitId, address(paidMintModule));
 
         // Get the TBA address for the Nom
-        address tba = registry.account(
-            address(accountImpl),
-            bytes32(0),
-            block.chainid,
-            address(nom),
-            nomId
-        );
+        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         // we want to mint to the TBA
         vm.deal(user1, 1 ether);
@@ -239,16 +221,102 @@ contract NomTest is Test {
     }
 
     function test_mintAndInitialize() public {
-        uint256[] memory tokenIds = new uint256[](1);
-        tokenIds[0] = 1;
-        uint256[] memory quantities = new uint256[](1);
+        uint256 traitId1 = 1;
+        uint256 traitId2 = 44;
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = traitId1;
+        tokenIds[1] = traitId2;
+        uint256[] memory quantities = new uint256[](2);
         quantities[0] = 1;
+        quantities[1] = 1;
 
         // address of traits means anyone can mint
         traits.setTraitMintModule(1, address(traits));
+        traits.setTraitMintModule(44, address(traits));
 
         vm.prank(user1);
         nom.mintAndInitialize(user1, tokenIds, quantities);
+
+        assertTrue(traits.isTokenIdEquipped(0, traitId1), "Trait 1 should be equipped");
+        assertTrue(traits.isTokenIdEquipped(0, traitId2), "Trait 2 should be equipped");
+
+        string memory uri = nom.tokenURI(0);
+        console.log("Token URI:", uri);
+        assertTrue(bytes(uri).length > 0, "Token URI should not be empty");
+    }
+
+    function test_setEquippedAfterCreatingNom() public {
+        // initialize the nom
+        uint256 traitId1 = 1;
+        uint256 traitId2 = 44;
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = traitId1;
+        tokenIds[1] = traitId2;
+        uint256[] memory quantities = new uint256[](2);
+        quantities[0] = 1;
+        quantities[1] = 1;
+
+        // address of traits means anyone can mint
+        traits.setTraitMintModule(1, address(traits));
+        traits.setTraitMintModule(44, address(traits));
+
+        vm.prank(user1);
+        nom.mintAndInitialize(user1, tokenIds, quantities);
+
+        uint256 nomId = 0; // Assuming this is the first Nom minted
+        address tba = Nom(nom).getTBAForTokenId(nomId);
+
+        uint256 traitId3 = 45;
+        traits.setTraitMintModule(traitId3, address(traits));
+        traits.mintTo(tba, traitId3, 1);
+
+        // trait 1 is the same
+        // unequips trait 2
+        // equips trait 3
+        uint256[] memory newTraitsToEquip = new uint256[](2);
+        newTraitsToEquip[0] = traitId1;
+        newTraitsToEquip[1] = traitId3;
+        vm.prank(user1);
+        traits.setEquipped(nomId, newTraitsToEquip);
+
+        assertTrue(traits.isTokenIdEquipped(0, traitId1), "Trait 1 should be equipped");
+        assertFalse(traits.isTokenIdEquipped(0, traitId2), "Trait 2 should not be equipped");
+        assertTrue(traits.isTokenIdEquipped(0, traitId3), "Trait 3 should be equipped");
+    }
+
+    function test_setEquippedWithVarietyOfMintModules() public {
+        uint256 nomId = 0; // Assuming this is the first Nom minted
+        address tba = Nom(nom).getTBAForTokenId(nomId);
+
+        // initialize the nom
+        uint256 traitId1 = 1;
+        uint256 traitId2 = 44;
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = traitId1;
+        tokenIds[1] = traitId2;
+        uint256[] memory quantities = new uint256[](2);
+        quantities[0] = 1;
+        quantities[1] = 1;
+
+        // address of traits means anyone can mint
+        traits.setTraitMintModule(1, address(traits));
+        traits.setTraitMintModule(44, address(traits));
+
+        vm.prank(user1);
+        nom.mintAndInitialize(user1, tokenIds, quantities);
+
+        uint256 traitId3 = 2;
+        uint256 price = 0.1 ether;
+        paidMintModule.setMintPrice(traitId3, price);
+        traits.setTraitMintModule(traitId3, address(paidMintModule));
+
+        uint256 traitId4 = 3;
+        traits.setTraitMintModule(traitId4, address(freeMintModule));
+
+        uint256[] memory newTraitsToEquip = new uint256[](2);
+        newTraitsToEquip[0] = traitId3;
+        newTraitsToEquip[1] = traitId4;
+        traits.batchMintViaModules{value: price}(tba, newTraitsToEquip, quantities);
     }
 
     // function test_mintTraitThatDoesNotExist() public {
@@ -267,3 +335,21 @@ contract NomTest is Test {
     // function try-to-equip-from-wrong-account
     // function try-to-equip-trait-I-dont-own
 }
+
+
+// Multicall example
+// -----------------
+// // want to sim a multicall write where we mint and equip in the same batch
+// // prep calldata
+// bytes memory mintTrait3Calldata = abi.encodeWithSignature("mint(address,uint256,uint256)", tba, traitId3, 1);
+// bytes memory mintTrait4Calldata = abi.encodeWithSignature("mint(address,uint256,uint256)", tba, traitId4, 1);
+// bytes memory setEquippedCalldata = abi.encodeWithSignature("setEquipped(uint256,uint256[])", nomId, newTraitsToEquip);
+
+// // multicall
+// Multicall3.Call3Value[] memory calls = new Multicall3.Call3Value[](3);
+// calls[0] = Multicall3.Call3Value(address(paidMintModule), false, price, mintTrait3Calldata);
+// calls[1] = Multicall3.Call3Value(address(freeMintModule), false, 0 ether, mintTrait4Calldata);
+// calls[2] = Multicall3.Call3Value(address(traits), false, 0 ether, setEquippedCalldata);
+// vm.deal(user1, 1 ether); // Give user1 some ETH
+// vm.prank(user1);
+// multicall.aggregate3Value{value: price}(calls);
