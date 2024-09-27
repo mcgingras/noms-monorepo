@@ -66,7 +66,12 @@ contract Nom is ERC721 {
      * @param traitTokenIds The token IDs of the traits to mint.
      * @param quantities The quantities of the traits to mint.
      */
-    function mintAndInitialize(address to, uint256[] memory traitTokenIds, uint256[] memory quantities) external payable {
+    function mintAndInitialize(
+        address to,
+        uint256[] memory traitTokenIds,
+        uint256[] memory quantities,
+        uint256[] memory prices
+    ) external payable {
         uint256 tokenId = tokenIdCount;
         _mint(to, tokenId);
         address tokenboundAccount = IERC6551Registry(erc6551RegistryAddress).createAccount(
@@ -77,7 +82,7 @@ contract Nom is ERC721 {
             tokenId  // tokenId
         );
 
-        INomTraits(traitContractAddress).batchMintViaModules(tokenboundAccount, traitTokenIds, quantities);
+        INomTraits(traitContractAddress).batchMintViaModules(tokenboundAccount, traitTokenIds, quantities, prices);
         INomTraits(traitContractAddress).setEquipped(tokenId, traitTokenIds);
     }
 

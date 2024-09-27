@@ -18,13 +18,13 @@ contract PaidMintModule is IMintModule {
         mintPrice[traitId] = price;
     }
 
-    function mint(address recipient, uint256 traitId, uint256 quantity) payable external override returns (bool) {
+    function mintTo(address recipient, uint256 traitId, uint256 quantity) payable external override returns (bool) {
         uint256 totalPrice = mintPrice[traitId] * quantity;
-        require(msg.value >= totalPrice, "Insufficient payment");
+        require(msg.value >= totalPrice, "PaidMintModule: Insufficient payment");
 
         // Call mintTo on the NomTraits contract
         bool success = nomTraits.mintTo(recipient, traitId, quantity);
-        require(success, "Minting failed");
+        require(success, "PaidMintModule: Minting failed");
 
         // Handle any excess payment
         if (msg.value > totalPrice) {

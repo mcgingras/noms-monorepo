@@ -11,7 +11,7 @@ contract FreeMintModule is IMintModule {
         nomTraits = INomTraits(_nomTraits);
     }
 
-    function mint(address recipient, uint256 traitId, uint256 quantity) payable external override returns (bool) {
+    function mintTo(address recipient, uint256 traitId, uint256 quantity) payable external override returns (bool) {
         // Call mintTo on the NomTraits contract
         bool success = nomTraits.mintTo(recipient, traitId, quantity);
         require(success, "Minting failed");

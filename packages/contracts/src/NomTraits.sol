@@ -73,7 +73,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @return string memory The contract URI.
      */
     function contractURI() public pure returns (string memory) {
-        string memory json = '{"name":"Noms Traits","description":"Noms traits are compatible with all noms and are tradable, equippable, sellable.""image":"","external_link":""}';
+        string memory json = '{"name":"Noms Traits","description":"Noms traits are compatible with all noms and are tradable, equippable, sellable.","image":"","external_link":""}';
         return string.concat("data:application/json;utf8,", json);
     }
 
@@ -174,7 +174,10 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param traitId The ID of the trait.
      * @param module The address of the mint module.
      */
-    function setTraitMintModule(uint256 traitId, address module) external {
+    function setTraitMintModule(
+        uint256 traitId,
+        address module
+    ) external {
         require(traits[traitId].rleBytes.length > 0, "Trait does not exist");
         require(msg.sender == owner() || msg.sender == traits[traitId].creator, "Not authorized to set mint module");
         traitMintModules[traitId] = module;
@@ -189,7 +192,11 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param quantity The quantity of the trait to mint.
      * @return bool True if minting is successful, false otherwise.
      */
-    function mintTo(address recipient, uint256 traitId, uint256 quantity) public returns (bool) {
+    function mintTo(
+        address recipient,
+        uint256 traitId,
+        uint256 quantity
+    ) public returns (bool) {
         address module = traitMintModules[traitId];
         if (module == address(0)) {
             module = defaultMintModule;
@@ -211,12 +218,17 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param quantity The quantity of the trait to mint.
      * @return bool True if minting is successful, false otherwise.
      */
-    function mintViaModule(address recipient, uint256 traitId, uint256 quantity) public payable returns (bool) {
+    function mintViaModule(
+        address recipient,
+        uint256 traitId,
+        uint256 quantity,
+        uint256 price
+    ) public payable returns (bool) {
         address module = traitMintModules[traitId];
         if (module == address(0)) {
             module = defaultMintModule;
         }
-        IMintModule(module).mint(recipient, traitId, quantity);
+        IMintModule(module).mintTo{value: price}(recipient, traitId, quantity);
         return true;
     }
 
@@ -228,10 +240,15 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param quantities The quantities of the traits to mint.
      * @return bool True if minting is successful, false otherwise.
      */
-    function batchMintViaModules(address recipient, uint256[] memory traitIds, uint256[] memory quantities) public payable returns (bool) {
+    function batchMintViaModules(
+        address recipient,
+        uint256[] memory traitIds,
+        uint256[] memory quantities,
+        uint256[] memory prices
+    ) public payable returns (bool) {
         require(traitIds.length == quantities.length, "Arrays must be the same length");
         for (uint256 i = 0; i < traitIds.length; i++) {
-            mintViaModule(recipient, traitIds[i], quantities[i]);
+            mintViaModule(recipient, traitIds[i], quantities[i], prices[i]);
         }
         return true;
     }
@@ -246,7 +263,10 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param nomTokenId The ID of the nom.
      * @param newTokenIds The IDs of the tokens to equip.
      */
-    function setEquipped(uint256 nomTokenId, uint256[] memory newTokenIds) public onlyAuthorized(nomTokenId) {
+    function setEquipped(
+        uint256 nomTokenId,
+        uint256[] memory newTokenIds
+    ) public onlyAuthorized(nomTokenId) {
         require(newTokenIds.length > 0, "Must equip at least one token.");
         address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
 
@@ -263,7 +283,10 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param nomTBA The address of the nom.
      * @param tokenIds The IDs of the tokens to equip.
      */
-    function validateTokens(address nomTBA, uint256[] memory tokenIds) internal view {
+    function validateTokens(
+        address nomTBA,
+        uint256[] memory tokenIds
+    ) internal view {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             require(IERC1155(address(this)).balanceOf(nomTBA, tokenIds[i]) > 0, "Address must own token.");
             require(tokenIds[i] != SENTINEL_TOKEN_ID, "Invalid token.");
@@ -278,7 +301,12 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param prevTokenIds The previous IDs of the tokens to equip.
      * @param nomTokenId The ID of the nom.
      */
-    function updateEquippedTokens(address nomTBA, uint256[] memory newTokenIds, uint256[] memory prevTokenIds, uint256 nomTokenId) internal {
+    function updateEquippedTokens(
+        address nomTBA,
+        uint256[] memory newTokenIds,
+        uint256[] memory prevTokenIds,
+        uint256 nomTokenId
+    ) internal {
         // Check for removed tokens
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
             if (!contains(newTokenIds, prevTokenIds[i])) {
@@ -300,7 +328,10 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param nomTBA The address of the nom.
      * @param tokenIds The IDs of the tokens to equip.
      */
-    function updateLinkedList(address nomTBA, uint256[] memory tokenIds) internal {
+    function updateLinkedList(
+        address nomTBA,
+        uint256[] memory tokenIds
+    ) internal {
         uint256 currentTokenId = SENTINEL_TOKEN_ID;
         for (uint256 i = 0; i < tokenIds.length; i++) {
             equippedByOwner[nomTBA][currentTokenId] = tokenIds[i];
@@ -316,7 +347,10 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param value The value to check for.
      * @return bool True if the value is found, false otherwise.
      */
-    function contains(uint256[] memory array, uint256 value) internal pure returns (bool) {
+    function contains(
+        uint256[] memory array,
+        uint256 value
+    ) internal pure returns (bool) {
         for (uint256 i = 0; i < array.length; i++) {
             if (array[i] == value) {
                 return true;
@@ -332,7 +366,10 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param tokenId The ID of the token to check.
      * @return bool True if the token is equipped, false otherwise.
      */
-    function isTokenIdEquipped(uint256 nomTokenId, uint256 tokenId) public view returns (bool) {
+    function isTokenIdEquipped(
+        uint256 nomTokenId,
+        uint256 tokenId
+    ) public view returns (bool) {
       address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
       uint256 currentTokenId = equippedByOwner[nomTBA][SENTINEL_TOKEN_ID];
       while (currentTokenId != SENTINEL_TOKEN_ID) {
@@ -350,7 +387,9 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param nomTokenId The ID of the nom.
      * @return uint256[] memory The equipped token IDs.
      */
-    function getEquippedTokenIds(uint256 nomTokenId) public view returns (uint256[] memory) {
+    function getEquippedTokenIds(
+        uint256 nomTokenId
+    ) public view returns (uint256[] memory) {
       address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
       uint256[] memory array = new uint256[](counts[nomTBA]);
 
