@@ -13,6 +13,7 @@ interface INomTraits {
     event TokenUnequipped(address indexed owner, uint256 indexed traitTokenId, uint256 indexed nomTokenId);
 
     function registerTrait(bytes memory rleBytes, string memory name) external;
+    function registerBatchTraits(Trait[] memory _traits) external;
     function getImageDataForTrait(uint256 traitId) external view returns (bytes memory);
     function setNomContractAddress(address _nomContractAddress) external;
     function setEquipped(uint256 nomTokenId, uint256[] memory _tokenIds) external;

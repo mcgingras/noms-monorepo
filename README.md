@@ -47,9 +47,6 @@ In dev mode, you can view a GraphQL client at [localhost:42069](http://localhost
 https://github.com/ponder-sh/ponder/tree/main/examples/with-foundry
 
 ```
-anvil --block-time 1 --chain-id 1337
-forge build
-forge script script/Nom.s.sol:Deploy --broadcast --fork-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 npx wagmi generate
 npx ponder dev
 ```

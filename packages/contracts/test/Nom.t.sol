@@ -10,7 +10,6 @@ import { FreeMintModule } from "../src/modules/FreeMintModule.sol";
 import { TraitDeployer } from "../script/TraitDeployer.s.sol";
 import { ERC6551Registry } from "erc6551/ERC6551Registry.sol";
 import { SimpleERC6551Account } from "../src/SimpleERC6551Account.sol";
-import { Multicall3 } from "../src/lib/Multicall3.sol";
 
 contract NomTest is Test {
     address public caller = address(1);
@@ -27,7 +26,6 @@ contract NomTest is Test {
     NomTraits public traits;
     PaidMintModule public paidMintModule;
     FreeMintModule public freeMintModule;
-    Multicall3 public multicall;
 
     // Trait deployer
     TraitDeployer public traitDeployer;
@@ -40,7 +38,6 @@ contract NomTest is Test {
         nom = new Nom(address(traits), address(easel), address(registry), address(accountImpl));
         paidMintModule = new PaidMintModule(address(traits));
         freeMintModule = new FreeMintModule(address(traits));
-        multicall = new Multicall3();
 
         // Setup initial state
         traits.setNomContractAddress(address(nom));
@@ -363,21 +360,3 @@ contract NomTest is Test {
     // function try-to-equip-from-wrong-account
     // function try-to-equip-trait-I-dont-own
 }
-
-
-// Multicall example
-// -----------------
-// // want to sim a multicall write where we mint and equip in the same batch
-// // prep calldata
-// bytes memory mintTrait3Calldata = abi.encodeWithSignature("mint(address,uint256,uint256)", tba, traitId3, 1);
-// bytes memory mintTrait4Calldata = abi.encodeWithSignature("mint(address,uint256,uint256)", tba, traitId4, 1);
-// bytes memory setEquippedCalldata = abi.encodeWithSignature("setEquipped(uint256,uint256[])", nomId, newTraitsToEquip);
-
-// // multicall
-// Multicall3.Call3Value[] memory calls = new Multicall3.Call3Value[](3);
-// calls[0] = Multicall3.Call3Value(address(paidMintModule), false, price, mintTrait3Calldata);
-// calls[1] = Multicall3.Call3Value(address(freeMintModule), false, 0 ether, mintTrait4Calldata);
-// calls[2] = Multicall3.Call3Value(address(traits), false, 0 ether, setEquippedCalldata);
-// vm.deal(user1, 1 ether); // Give user1 some ETH
-// vm.prank(user1);
-// multicall.aggregate3Value{value: price}(calls);

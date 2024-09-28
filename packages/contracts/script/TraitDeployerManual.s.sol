@@ -5,11 +5,9 @@ import {Script, console2} from "forge-std/Script.sol";
 import {IEasel} from "../src/interfaces/IEasel.sol";
 import {INomTraits} from "../src/interfaces/INomTraits.sol";
 
-// forge script script/TraitDeployerManual.s.sol:Deploy --broadcast --fork-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-
 contract Deploy is Script {
-    IEasel public easel = IEasel(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
-    INomTraits public traitsContract = INomTraits(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
+    IEasel public easel;
+    INomTraits public traitsContract;
     string public constant FILE_NAME = "traits.json";
     uint8 public constant PALETTE_INDEX = 0;
     uint256 public constant BATCH_SIZE = 20;
@@ -19,17 +17,58 @@ contract Deploy is Script {
         string filename;
     }
 
+    function setUp() public {
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/broadcast/Nom.s.sol/1337/run-latest.json");
+        string memory json = vm.readFile(path);
 
-    function streamJsonFile(string memory filePath) internal view returns (string memory) {
-        string memory jsonContent = vm.readFile(filePath);
-        return jsonContent;
+        console2.log("JSON file path:", path);
+
+        address easelAddress = _findContractAddress(json, "Easel");
+        address traitsAddress = _findContractAddress(json, "NomTraits");
+
+        console2.log("Easel address:", easelAddress);
+        console2.log("NomTraits address:", traitsAddress);
+
+        require(easelAddress != address(0), "Easel address not found");
+        require(traitsAddress != address(0), "NomTraits address not found");
+
+        easel = IEasel(easelAddress);
+        traitsContract = INomTraits(traitsAddress);
     }
 
-    function readAndLogJson() public view {
-        string memory filePath = string.concat(vm.projectRoot(), "/script/data/", FILE_NAME);
-        string memory jsonContent = vm.readFile(filePath);
-        console2.log("JSON Content:");
-        console2.log(jsonContent);
+    function _bytesToHexString(bytes memory data) internal pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint256 i = 0; i < data.length; i++) {
+            str[2 + i * 2] = alphabet[uint8(data[i] >> 4)];
+            str[3 + i * 2] = alphabet[uint8(data[i] & 0x0f)];
+        }
+        return string(str);
+    }
+
+    function _findContractAddress(string memory json, string memory contractName) internal view returns (address) {
+        string memory query = string(abi.encodePacked(
+            "$.transactions[?(@.contractName=='",
+            contractName,
+            "' && @.transactionType=='CREATE')].contractAddress"
+        ));
+        console2.log("JSON query:", query);
+
+        bytes memory result = vm.parseJson(json, query);
+        console2.log("Result length:", result.length);
+        console2.log("Result:", _bytesToHexString(result));
+
+        if (result.length > 0) {
+            address addr = abi.decode(result, (address));
+            console2.log("Decoded address:", addr);
+            return addr;
+        }
+
+        console2.log("Contract address not found for:", contractName);
+        return address(0);
     }
 
     function addColorsToEasel() public {
@@ -64,15 +103,22 @@ contract Deploy is Script {
         console2.log("Total traits for category", category, ":", traitCount);
 
         for (uint256 i = 0; i < traitCount; i += BATCH_SIZE) {
-            uint256 end = i + BATCH_SIZE > traitCount ? traitCount : i + BATCH_SIZE;
-            for (uint256 j = i; j < end; j++) {
-                traitsContract.registerTrait(traits[j].data, traits[j].filename);
+            uint256 batchEnd = (i + BATCH_SIZE < traitCount) ? i + BATCH_SIZE : traitCount;
+            INomTraits.Trait[] memory batch = new INomTraits.Trait[](batchEnd - i);
+
+            for (uint256 j = i; j < batchEnd; j++) {
+                batch[j - i] = INomTraits.Trait({
+                    rleBytes: traits[j].data,
+                    name: traits[j].filename,
+                    creator: address(0)
+                });
             }
+
+            traitsContract.registerBatchTraits(batch);
         }
     }
 
     function uploadAll() public {
-        // readAndLogJson();
         addColorsToEasel();
         addTraitsToContract("bodies");
         addTraitsToContract("accessories");

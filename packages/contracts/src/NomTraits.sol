@@ -21,7 +21,6 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     uint256 traitIdCount;
     address public easel;
     address public nomContractAddress;
-    bytes32 salt = 0;
     mapping (uint256 => Trait) traits;
 
     // for equipping
@@ -98,6 +97,13 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
           creator: msg.sender
       });
       emit TraitRegistered(traitIdCount, rleBytes, name, msg.sender);
+    }
+
+
+    function registerBatchTraits(Trait[] memory _traits) public {
+      for (uint256 i = 0; i < _traits.length; i++) {
+        registerTrait(_traits[i].rleBytes, _traits[i].name);
+      }
     }
 
     /**
@@ -271,9 +277,9 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
 
         uint256[] memory prevTokenIds = getEquippedTokenIds(nomTokenId);
-        validateTokens(nomTBA, newTokenIds);
-        updateEquippedTokens(nomTBA, newTokenIds, prevTokenIds, nomTokenId);
-        updateLinkedList(nomTBA, newTokenIds);
+        _validateTokens(nomTBA, newTokenIds);
+        _updateEquippedTokens(nomTBA, newTokenIds, prevTokenIds, nomTokenId);
+        _updateLinkedList(nomTBA, newTokenIds);
         counts[nomTBA] = newTokenIds.length;
     }
 
@@ -283,7 +289,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param nomTBA The address of the nom.
      * @param tokenIds The IDs of the tokens to equip.
      */
-    function validateTokens(
+    function _validateTokens(
         address nomTBA,
         uint256[] memory tokenIds
     ) internal view {
@@ -301,7 +307,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param prevTokenIds The previous IDs of the tokens to equip.
      * @param nomTokenId The ID of the nom.
      */
-    function updateEquippedTokens(
+    function _updateEquippedTokens(
         address nomTBA,
         uint256[] memory newTokenIds,
         uint256[] memory prevTokenIds,
@@ -309,14 +315,14 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     ) internal {
         // Check for removed tokens
         for (uint256 i = 0; i < prevTokenIds.length; i++) {
-            if (!contains(newTokenIds, prevTokenIds[i])) {
+            if (!_contains(newTokenIds, prevTokenIds[i])) {
                 emit TokenUnequipped(nomTBA, prevTokenIds[i], nomTokenId);
             }
         }
 
         // Check for added tokens
         for (uint256 i = 0; i < newTokenIds.length; i++) {
-            if (!contains(prevTokenIds, newTokenIds[i])) {
+            if (!_contains(prevTokenIds, newTokenIds[i])) {
                 emit TokenEquipped(nomTBA, newTokenIds[i], nomTokenId);
             }
         }
@@ -328,7 +334,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param nomTBA The address of the nom.
      * @param tokenIds The IDs of the tokens to equip.
      */
-    function updateLinkedList(
+    function _updateLinkedList(
         address nomTBA,
         uint256[] memory tokenIds
     ) internal {
@@ -347,7 +353,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param value The value to check for.
      * @return bool True if the value is found, false otherwise.
      */
-    function contains(
+    function _contains(
         uint256[] memory array,
         uint256 value
     ) internal pure returns (bool) {
