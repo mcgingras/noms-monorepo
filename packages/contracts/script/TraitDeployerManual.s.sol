@@ -22,13 +22,8 @@ contract Deploy is Script {
         string memory path = string.concat(root, "/broadcast/Nom.s.sol/1337/run-latest.json");
         string memory json = vm.readFile(path);
 
-        console2.log("JSON file path:", path);
-
         address easelAddress = _findContractAddress(json, "Easel");
         address traitsAddress = _findContractAddress(json, "NomTraits");
-
-        console2.log("Easel address:", easelAddress);
-        console2.log("NomTraits address:", traitsAddress);
 
         require(easelAddress != address(0), "Easel address not found");
         require(traitsAddress != address(0), "NomTraits address not found");
@@ -55,11 +50,8 @@ contract Deploy is Script {
             contractName,
             "' && @.transactionType=='CREATE')].contractAddress"
         ));
-        console2.log("JSON query:", query);
 
         bytes memory result = vm.parseJson(json, query);
-        console2.log("Result length:", result.length);
-        console2.log("Result:", _bytesToHexString(result));
 
         if (result.length > 0) {
             address addr = abi.decode(result, (address));
