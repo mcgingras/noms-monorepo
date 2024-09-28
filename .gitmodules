@@ -4,3 +4,6 @@
 [submodule "packages/contracts/lib/reference"]
 	path = packages/contracts/lib/reference
 	url = https://github.com/erc6551/reference
+[submodule "packages/contracts/lib/openzeppelin-contracts"]
+	path = packages/contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
