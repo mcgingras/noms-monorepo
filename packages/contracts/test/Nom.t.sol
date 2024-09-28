@@ -75,7 +75,6 @@ contract NomTest is Test {
     // but eventually users will be able to register their own traits
     // function test_RegisterTrait() public {}
 
-
     function test_MintTrait() public {
         // Set up paid mint module
         uint256 traitId = 1;
@@ -94,8 +93,7 @@ contract NomTest is Test {
     function test_EquipTrait() public {
         // Mint a Nom
         vm.prank(user1);
-        nom.mint();
-        uint256 nomId = 0; // Assuming this is the first Nom minted
+        uint256 nomId = nom.mint();
 
         uint256 traitId = 1;
         uint256 price = 0.1 ether;
@@ -123,8 +121,7 @@ contract NomTest is Test {
 
     function test_TokenURI() public {
         vm.prank(user1);
-        nom.mint();
-        uint256 nomId = 0;
+        uint256 nomId = nom.mint();
 
         uint256 traitId = 1;
         uint256 price = 0.1 ether;
@@ -150,8 +147,7 @@ contract NomTest is Test {
     function test_EquipManyTraits () public {
         // Mint a Nom
         vm.prank(user1);
-        nom.mint();
-        uint256 nomId = 0; // Assuming this is the first Nom minted
+        uint256 nomId = nom.mint();
 
         uint256 traitId1 = 1;
         uint256 traitId2 = 44;
@@ -189,8 +185,7 @@ contract NomTest is Test {
     function test_SetEquippedOnlyCallableByTBAOwner() public {
         // Mint a Nom
         vm.prank(user1);
-        nom.mint();
-        uint256 nomId = 0; // Assuming this is the first Nom minted
+        uint256 nomId = nom.mint();
 
         uint256 traitId = 1;
         uint256 price = 0.1 ether;
@@ -229,21 +224,22 @@ contract NomTest is Test {
         uint256[] memory quantities = new uint256[](2);
         quantities[0] = 1;
         quantities[1] = 1;
-        uint256[] memory prices = new uint256[](2);
-        prices[0] = 0 ether;
-        prices[1] = 0 ether;
 
         // address of traits means anyone can mint
         traits.setTraitMintModule(1, address(traits));
         traits.setTraitMintModule(44, address(traits));
 
+        uint256[] memory prices = new uint256[](2);
+        prices[0] = 0 ether;
+        prices[1] = 0 ether;
+
         vm.prank(user1);
-        nom.mintAndInitialize(user1, tokenIds, quantities, prices);
+        uint256 nomId = nom.mintAndInitialize(user1, tokenIds, quantities, prices);
 
-        assertTrue(traits.isTokenIdEquipped(0, traitId1), "Trait 1 should be equipped");
-        assertTrue(traits.isTokenIdEquipped(0, traitId2), "Trait 2 should be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId1), "Trait 1 should be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId2), "Trait 2 should be equipped");
 
-        string memory uri = nom.tokenURI(0);
+        string memory uri = nom.tokenURI(nomId);
         console.log("Token URI:", uri);
         assertTrue(bytes(uri).length > 0, "Token URI should not be empty");
     }
@@ -258,18 +254,17 @@ contract NomTest is Test {
         uint256[] memory quantities = new uint256[](2);
         quantities[0] = 1;
         quantities[1] = 1;
-        uint256[] memory prices = new uint256[](2);
-        prices[0] = 0 ether;
-        prices[1] = 0 ether;
 
         // address of traits means anyone can mint
         traits.setTraitMintModule(1, address(traits));
         traits.setTraitMintModule(44, address(traits));
 
-        vm.prank(user1);
-        nom.mintAndInitialize(user1, tokenIds, quantities, prices);
+        uint256[] memory prices = new uint256[](2);
+        prices[0] = 0 ether;
+        prices[1] = 0 ether;
 
-        uint256 nomId = 0; // Assuming this is the first Nom minted
+        vm.prank(user1);
+        uint256 nomId = nom.mintAndInitialize(user1, tokenIds, quantities, prices);
         address tba = Nom(nom).getTBAForTokenId(nomId);
 
         uint256 traitId3 = 45;
@@ -285,15 +280,12 @@ contract NomTest is Test {
         vm.prank(user1);
         traits.setEquipped(nomId, newTraitsToEquip);
 
-        assertTrue(traits.isTokenIdEquipped(0, traitId1), "Trait 1 should be equipped");
-        assertFalse(traits.isTokenIdEquipped(0, traitId2), "Trait 2 should not be equipped");
-        assertTrue(traits.isTokenIdEquipped(0, traitId3), "Trait 3 should be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId1), "Trait 1 should be equipped");
+        assertFalse(traits.isTokenIdEquipped(nomId, traitId2), "Trait 2 should not be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId3), "Trait 3 should be equipped");
     }
 
     function test_setEquippedWithVarietyOfMintModules() public {
-        uint256 nomId = 0; // Assuming this is the first Nom minted
-        address tba = Nom(nom).getTBAForTokenId(nomId);
-
         // initialize the nom
         uint256 traitId1 = 1;
         uint256 traitId2 = 44;
@@ -303,16 +295,18 @@ contract NomTest is Test {
         uint256[] memory quantities = new uint256[](2);
         quantities[0] = 1;
         quantities[1] = 1;
-        uint256[] memory prices = new uint256[](2);
-        prices[0] = 0 ether;
-        prices[1] = 0 ether;
 
         // address of traits means anyone can mint
         traits.setTraitMintModule(1, address(traits));
         traits.setTraitMintModule(44, address(traits));
 
+        uint256[] memory prices = new uint256[](2);
+        prices[0] = 0 ether;
+        prices[1] = 0 ether;
+
         vm.prank(user1);
-        nom.mintAndInitialize(user1, tokenIds, quantities, prices);
+        uint256 nomId = nom.mintAndInitialize(user1, tokenIds, quantities, prices);
+        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         uint256 traitId3 = 2;
         uint256 price = 0.1 ether;
@@ -328,6 +322,9 @@ contract NomTest is Test {
         uint256[] memory updatedPrices = new uint256[](2);
         updatedPrices[0] = price;
         updatedPrices[1] = 0;
+
+        vm.deal(user1, 1 ether);
+        vm.prank(user1);
         traits.batchMintViaModules{value: price}(tba, newTraitsToEquip, quantities, updatedPrices);
     }
 

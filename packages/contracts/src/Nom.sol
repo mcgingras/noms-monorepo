@@ -32,17 +32,23 @@ contract Nom is ERC721 {
     /// ERC721 functions
     /// ------------------------
 
-    /// @dev No need to protect minting ability
-    /// anyone should be able to mint a nom for free.
-    /// should these be safe mint?
+    /**
+     * @notice Mints a new nom.
+     * @dev Mints a new nom. (should this call safeMint?)
+     * @param to The address to mint the nom to.
+     */
+    function _mint(address to) internal returns (uint256) {
+        uint256 nextTokenId = tokenIdCount + 1;
+        super._mint(to, nextTokenId);
+        return nextTokenId;
+    }
+
     /**
      * @notice Mints a new nom.
      * @dev Mints a new nom.
      */
-    function mint() external payable {
-        // want to return the tokenId
-        uint256 tokenId = tokenIdCount;
-        _mint(msg.sender, tokenId);
+    function mint() public payable returns (uint256) {
+        return _mint(msg.sender);
     }
 
     /**
@@ -50,9 +56,8 @@ contract Nom is ERC721 {
      * @dev Mints a new nom to a specific address.
      * @param to The address to mint the nom to.
      */
-    function mintTo(address to) external payable {
-        uint256 tokenId = tokenIdCount;
-        _mint(to, tokenId);
+    function mintTo(address to) public payable returns (uint256) {
+        return _mint(to);
     }
 
     /// @dev Creates a new nom, initializes the ERC6551Account, mints the traits, and equips the traits.
@@ -71,9 +76,11 @@ contract Nom is ERC721 {
         uint256[] memory traitTokenIds,
         uint256[] memory quantities,
         uint256[] memory prices
-    ) external payable {
-        uint256 tokenId = tokenIdCount;
-        _mint(to, tokenId);
+    ) external payable returns (uint256) {
+        require(traitTokenIds.length == quantities.length && traitTokenIds.length == prices.length, "Nom: Invalid input lengths");
+        require(traitTokenIds.length > 0, "Nom: Cannot initialize a nom with no traits.");
+
+        uint256 tokenId = mintTo(to);
         address tokenboundAccount = IERC6551Registry(erc6551RegistryAddress).createAccount(
             erc6551AccountImplementation, // implementation
             salt, // salt
@@ -84,6 +91,7 @@ contract Nom is ERC721 {
 
         INomTraits(traitContractAddress).batchMintViaModules(tokenboundAccount, traitTokenIds, quantities, prices);
         INomTraits(traitContractAddress).setEquipped(tokenId, traitTokenIds);
+        return tokenId;
     }
 
     /**
