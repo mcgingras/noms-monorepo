@@ -326,9 +326,28 @@ contract NomTest is Test {
         vm.deal(user1, 1 ether);
         vm.prank(user1);
         traits.batchMintViaModules{value: price}(tba, newTraitsToEquip, quantities, updatedPrices);
+        vm.prank(user1);
+        traits.setEquipped(nomId, newTraitsToEquip);
+
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId3), "Trait 3 should be equipped");
+        assertTrue(traits.isTokenIdEquipped(nomId, traitId4), "Trait 4 should be equipped");
+        assertFalse(traits.isTokenIdEquipped(nomId, traitId1), "Trait 1 should not be equipped");
+        assertFalse(traits.isTokenIdEquipped(nomId, traitId2), "Trait 2 should not be equipped");
     }
 
-    // function test_mintTraitThatDoesNotExist() public {
+
+    // trait throws because there is no module to call it from
+    function test_mintTraitThatIsUnRegistered() public {
+        uint256 traitId = 1000000000000;
+        vm.expectRevert("Trait does not exist");
+        traits.setTraitMintModule(traitId, address(traits));
+
+    }
+
+    // function test_mintTraitFromWrongModule() public {
+    //     uint256 traitId = 1;
+    //     vm.prank(user1);
+    //     traits.mintTo(user1, traitId, 1);
     // }
 
     // function test_OnlyOwnerSetsTraitMintModule() public {
