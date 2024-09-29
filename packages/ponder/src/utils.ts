@@ -1,5 +1,16 @@
-import { type Context, ponder } from "@/generated";
-import { concat, encodeAbiParameters, getContractAddress, pad } from "viem";
+import { type Context } from "@/generated";
+import {
+  concat,
+  encodeAbiParameters,
+  getContractAddress,
+  pad,
+  getAddress,
+} from "viem";
+import { easelAbi } from "../foundry/abis";
+import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json";
+
+const txs = NomDeploy.transactions;
+const easelAddress = getAddress(txs[1]!.contractAddress);
 
 export function computeAccount(
   tokenContract: string,
@@ -76,7 +87,6 @@ function getCreationCode(
 
 export async function createFullSVG(tokenIDs: bigint[], context: Context) {
   const { client } = context;
-  const { Easel } = context.contracts;
   const { Trait } = context.db;
 
   let allParts: `0x${string}`[] = [];
@@ -88,8 +98,8 @@ export async function createFullSVG(tokenIDs: bigint[], context: Context) {
   }
 
   const fullSvg = await client.readContract({
-    abi: Easel.abi,
-    address: Easel.address,
+    abi: easelAbi,
+    address: easelAddress,
     functionName: "generateSVGForParts",
     args: [allParts],
   });

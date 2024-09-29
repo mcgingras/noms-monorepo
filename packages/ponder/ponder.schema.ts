@@ -10,7 +10,7 @@ export default createSchema((p) => ({
     tokenId: p.bigint(),
     // timestamp
     created: p.bigint(),
-    owner: p.bytes(),
+    owner: p.hex(),
     deployed: p.boolean(),
     fullSVG: p.string(),
     // relations
@@ -22,7 +22,7 @@ export default createSchema((p) => ({
   Trait: p.createTable({
     // tokenId
     id: p.bigint(),
-    rleBytes: p.bytes(),
+    rleBytes: p.hex(),
     name: p.string(),
     // "body" | "glasses" | "accessory" | "head" | "bg"
     type: p.string(),
@@ -35,6 +35,8 @@ export default createSchema((p) => ({
   // OwnedTrait -- Joined table for Noms and Traits
   // --------------------------------------------------
   NomTrait: p.createTable({
+    // what should this id be?
+    // nomTBA-traitTokenId
     id: p.string(),
     quantity: p.int(),
     equipped: p.boolean(),

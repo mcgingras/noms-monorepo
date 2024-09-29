@@ -1,0 +1,4 @@
+erc6551/=lib/erc6551/src/
+solady/=lib/solady/src/
+erc721a/=lib/ERC721A/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/

@@ -1,7 +1,12 @@
 import { Context, ponder } from "@/generated";
-import { configAddresses } from "../ponder.config";
-import { Address, isAddressEqual } from "viem";
+import { Address, isAddressEqual, getAddress } from "viem";
 import { createFullSVG } from "./utils";
+import { easelAbi } from "../foundry/abis";
+import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json";
+
+const txs = NomDeploy.transactions;
+const accountImplAddress = getAddress(txs[0]!.contractAddress);
+const easelAddress = getAddress(txs[1]!.contractAddress);
 
 // Can check that the transfer is coming from the 0x0 address to know that it's a mint
 // Otherwise it's an address to address transfer, in which we update the owner.
@@ -11,14 +16,16 @@ ponder.on("NFTContract:Transfer", async ({ event, context }) => {
   const { client } = context;
   const { ERC6551Registry, NFTContract } = context.contracts;
 
+  // TODO: this might be incorrect -- can we get a function on NFT that gets us the TBA?
+  // It would be nice if the salt and other things are baked into the contract for easy access
   const TBAAddress = await client.readContract({
     abi: ERC6551Registry.abi,
     address: ERC6551Registry.address,
     functionName: "account",
     args: [
-      configAddresses.AccountImpl, // implementation
+      accountImplAddress, // implementation
       "0x0000000000000000000000000000000000000000000000000000000000000000", // salt
-      11155111n, // chain id
+      31337n, // chain id
       NFTContract.address, // token contract
       event.args.tokenId,
     ],
@@ -38,7 +45,7 @@ ponder.on("NFTContract:Transfer", async ({ event, context }) => {
         fullSVG: fullSVG,
       },
     });
-    console.log(`Added token #${token.tokenId} @ ${token.id}`);
+    console.log(`Added token #${token.id}`);
   } else {
     const existingNom = await Nom.findUnique({
       id: TBAAddress,
@@ -88,12 +95,11 @@ ponder.on(
 /* TRAIT 1155 */
 ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
   const { client } = context;
-  const { Easel } = context.contracts;
   const { Trait } = context.db;
 
   const svg = await client.readContract({
-    abi: Easel.abi,
-    address: Easel.address,
+    abi: easelAbi,
+    address: easelAddress,
     functionName: "generateSVGForParts",
     args: [[event.args.rleBytes]],
   });
@@ -170,16 +176,15 @@ async function increaseTraitQuantity(
   context: Context
 ) {
   const { NomTrait } = context.db;
-  // id scheme -- tbaAddress-traitTokenId
-  const concatID = to.concat("-").concat(id.toString());
+  const nomTraitId = `${to}-${id}`;
   const existingNomTrait = await NomTrait.findUnique({
-    id: concatID,
+    id: nomTraitId,
   });
 
   if (existingNomTrait == null) {
     // NPC owns 0 of this trait so far, so need to add an OT object
     await NomTrait.create({
-      id: concatID,
+      id: nomTraitId,
       data: {
         quantity: Number(value),
         equipped: false,
@@ -189,7 +194,7 @@ async function increaseTraitQuantity(
     });
   } else {
     await NomTrait.update({
-      id: concatID,
+      id: nomTraitId,
       data: {
         quantity: (existingNomTrait.quantity += Number(value)),
       },
@@ -233,10 +238,9 @@ async function reduceTraitQuantity(
 
 ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
   const { Nom, NomTrait } = await context.db;
-
-  const nomTraitId = event.args.owner
-    .concat("-")
-    .concat(event.args.tokenId.toString());
+  const tbaAddress = event.args.owner;
+  const traitTokenId = event.args.traitTokenId;
+  const nomTraitId = `${tbaAddress}-${traitTokenId}`;
 
   const nomTrait = await NomTrait.findUnique({
     id: nomTraitId,
@@ -245,12 +249,12 @@ ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
   if (nomTrait) {
     const existingEquippedNomTraits = await NomTrait.findMany({
       where: {
-        nomId: event.args.owner,
+        nomId: tbaAddress,
         equipped: true,
       },
     });
 
-    const existingEquippedTraitIds = existingEquippedNomTraits.map(
+    const existingEquippedTraitIds = existingEquippedNomTraits.items.map(
       (trait) => trait.traitId
     );
 
@@ -273,9 +277,9 @@ ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
 
 ponder.on("ERC1155Contract:TokenUnequipped", async ({ event, context }) => {
   const { Nom, NomTrait } = await context.db;
-  const nomTraitId = event.args.owner
-    .concat("-")
-    .concat(event.args.tokenId.toString());
+  const tbaAddress = event.args.owner;
+  const traitTokenId = event.args.traitTokenId;
+  const nomTraitId = `${tbaAddress}-${traitTokenId}`;
 
   const nomTrait = await NomTrait.findUnique({
     id: nomTraitId,
@@ -289,9 +293,9 @@ ponder.on("ERC1155Contract:TokenUnequipped", async ({ event, context }) => {
       },
     });
 
-    const equippedTraitIds = existingEquippedNomTraits
+    const equippedTraitIds = existingEquippedNomTraits.items
       .map((trait) => trait.traitId)
-      .filter((traitId) => traitId !== event.args.tokenId);
+      .filter((traitId) => traitId !== event.args.traitTokenId);
 
     const fullSVG = await createFullSVG(equippedTraitIds, context);
     NomTrait.update({

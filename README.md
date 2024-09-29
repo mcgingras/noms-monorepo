@@ -31,7 +31,7 @@ echo "NEXT_PUBLIC_ALCHEMY_API_KEY=m2OWVY-4guxSOIeP174kQUwKZKBddt16" >> ./package
 
 **Run packages**
 
-The monorepo includes two packages. The first is the UI, and the second is an indexing server written with [Ponder](https://ponder.sh/). You can launch both packages in dev mode.
+The monorepo includes three packages. The first is the UI, the second is an indexing server written with [Ponder](https://ponder.sh/), and the third is for contracts. You can launch both service based packages in dev mode.
 
 ```bash
 npm run dev
@@ -41,3 +41,20 @@ npm run dev
 
 You can now view the app at [localhost:3000](http://localhost:3000/)
 In dev mode, you can view a GraphQL client at [localhost:42069](http://localhost:42069/)
+
+
+### extras
+https://github.com/ponder-sh/ponder/tree/main/examples/with-foundry
+
+```
+npx wagmi generate
+npx ponder dev
+```
+
+
+### For minting and creating 6551 account in one function block
+https://github.com/0xStation/0xrails-periphery/blob/b3dd5a939a29ca4995d2c6aebde8a4c159e685dc/src/accountGroup/module/MintCreateInitializeController.sol#L66
+
+
+###
+eoa => owns nom NFT => has TBA => owns traits
