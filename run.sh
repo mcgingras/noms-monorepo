@@ -40,10 +40,13 @@ ANVIL_PID=$!
 echo "Waiting for Anvil to start up before running scripts..."
 sleep 5 # Wait for 5 seconds
 
+# Change to the contracts directory before running Forge scripts
+cd packages/contracts
+
 # Array of scripts to run
 scripts=(
-    "./packages/contracts/script/Nom.s.sol:Deploy"
-    "./packages/contracts/script/TraitDeployerManual.s.sol:Deploy"
+    "script/Nom.s.sol:Deploy"
+    "script/TraitDeployerManual.s.sol:Deploy"
 )
 
 # Loop through the scripts and run them
@@ -64,6 +67,9 @@ done
 
 echo "All foundry deploy scripts have been executed."
 
+# Return to the root directory
+cd ../..
+
 # Generate ABIs with wagmi
 echo "Generating ABIs with wagmi..."
 npx wagmi generate
@@ -77,10 +83,36 @@ else
     exit 1
 fi
 
-# Run Ponder indexing service
-echo "Starting Ponder indexing service..."
-npx ponder dev
 
-# Keep the script running and Anvil process alive
-echo "Keeping Anvil running. Press Ctrl+C to stop."
-wait $ANVIL_PID
+# Run Ponder indexing service in the background
+echo "Starting Ponder indexing service..."
+cd packages/ponder && npx ponder dev &
+PONDER_PID=$!
+
+# Return to the root directory
+cd ../..
+
+# Start Next.js app
+echo "Starting Next.js app..."
+cd packages/app && npm run dev &
+NEXTJS_PID=$!
+
+# Return to the root directory
+cd ../..
+
+# Function to handle script termination
+cleanup() {
+    echo "Terminating Anvil, Ponder, and Next.js app..."
+    kill $ANVIL_PID
+    kill $PONDER_PID
+    kill $NEXTJS_PID
+    exit 0
+}
+
+# Set up trap to call cleanup function on script termination
+trap cleanup SIGINT SIGTERM
+
+echo "Anvil, Ponder, and Next.js app are running. Press Ctrl+C to stop all processes."
+
+# Wait for all processes
+wait $ANVIL_PID $PONDER_PID $NEXTJS_PID
