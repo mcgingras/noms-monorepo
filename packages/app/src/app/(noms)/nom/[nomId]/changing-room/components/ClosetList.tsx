@@ -6,7 +6,7 @@ const ClosetItem = ({ trait }: { trait: any }) => {
 
   return (
     <div
-      className="min-w-[77px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer"
+      className="min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer"
       onClick={() => {
         addSearchParam("trait", trait.id);
       }}

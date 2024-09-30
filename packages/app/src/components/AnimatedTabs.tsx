@@ -6,8 +6,8 @@ import { useState } from "react";
 
 let tabs = [
   { id: "Closet", label: "Closet" },
-  { id: "Mall", label: "Mall" },
-  { id: "Limited edition", label: "Limited edition" },
+  { id: "Traits", label: "Shopping center" },
+  //   { id: "Limited edition", label: "Limited edition" },
 ];
 
 function AnimatedTabs() {

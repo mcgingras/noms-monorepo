@@ -15,6 +15,7 @@ const getNomById = async (tokenId: number) => {
                     name
                     svg
                     type
+                    rleBytes
                 }
             }
           }
@@ -36,8 +37,8 @@ const getNomById = async (tokenId: number) => {
     body: JSON.stringify(graphqlRequest),
   });
 
-    const data = await response.json();
-    return data.data.noms.items[0];
+  const data = await response.json();
+  return data.data.noms.items[0];
 };
 
 export default getNomById;
