@@ -1,4 +1,5 @@
-import NomCard from "./components/NomCard";
+import NomList from "./components/NomList";
+import { Suspense } from "react";
 
 const NomViewLayout = ({
   children,
@@ -21,7 +22,10 @@ const NomViewLayout = ({
           </div>
 
           <div className="mt-4 flex flex-row gap-2 flex-wrap">
-            <NomCard />
+            {/* <NomCard /> */}
+            <Suspense fallback={<div>Loading...</div>}>
+              <NomList />
+            </Suspense>
           </div>
         </div>
         {children}

@@ -34,7 +34,8 @@ else
     echo "Port 8545 is free."
 fi
 
-anvil --fork-url "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" --chain-id 1337 &
+# Start Anvil with saved state
+anvil --fork-url "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" --chain-id 1337 --load-state anvil_state.json > anvil.log 2>&1 &
 ANVIL_PID=$!
 
 echo "Waiting for Anvil to start up before running scripts..."
@@ -103,6 +104,9 @@ cd ../..
 # Function to handle script termination
 cleanup() {
     echo "Terminating Anvil, Ponder, and Next.js app..."
+    # After your writes are complete
+    echo "Saving Anvil state..."
+    curl -X POST -H "Content-Type: application/json" --data '{"id":1, "jsonrpc":"2.0", "method": "anvil_dumpState", "params": ["anvil_state.json"]}' http://localhost:8545
     kill $ANVIL_PID
     kill $PONDER_PID
     kill $NEXTJS_PID

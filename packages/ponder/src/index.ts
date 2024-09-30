@@ -1,7 +1,7 @@
 import { Context, ponder } from "@/generated";
 import { Address, isAddressEqual, getAddress } from "viem";
 import { createFullSVG } from "./utils";
-import { easelAbi } from "../foundry/abis";
+import { easelAbi, nomAbi } from "../foundry/abis";
 import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json";
 
 const txs = NomDeploy.transactions;
@@ -14,21 +14,13 @@ const easelAddress = getAddress(txs[1]!.contractAddress);
 ponder.on("NFTContract:Transfer", async ({ event, context }) => {
   const { Nom } = context.db;
   const { client } = context;
-  const { ERC6551Registry, NFTContract } = context.contracts;
+  const { NFTContract } = context.contracts;
 
-  // TODO: this might be incorrect -- can we get a function on NFT that gets us the TBA?
-  // It would be nice if the salt and other things are baked into the contract for easy access
-  const TBAAddress = await client.readContract({
-    abi: ERC6551Registry.abi,
-    address: ERC6551Registry.address,
-    functionName: "account",
-    args: [
-      accountImplAddress, // implementation
-      "0x0000000000000000000000000000000000000000000000000000000000000000", // salt
-      31337n, // chain id
-      NFTContract.address, // token contract
-      event.args.tokenId,
-    ],
+  const tbaAddress = await client.readContract({
+    abi: nomAbi,
+    address: NFTContract.address,
+    functionName: "getTBAForTokenId",
+    args: [event.args.tokenId],
   });
 
   // is this transaction coming from the 0x0 address?
@@ -36,7 +28,7 @@ ponder.on("NFTContract:Transfer", async ({ event, context }) => {
   if (isMint) {
     const fullSVG = await createFullSVG([], context);
     const token = await Nom.create({
-      id: TBAAddress,
+      id: tbaAddress,
       data: {
         tokenId: event.args.tokenId,
         created: event.block.timestamp,
@@ -48,11 +40,11 @@ ponder.on("NFTContract:Transfer", async ({ event, context }) => {
     console.log(`Added token #${token.id}`);
   } else {
     const existingNom = await Nom.findUnique({
-      id: TBAAddress,
+      id: tbaAddress,
     });
     if (existingNom) {
       const nom = await Nom.update({
-        id: TBAAddress,
+        id: tbaAddress,
         data: {
           owner: event.args.to,
         },
