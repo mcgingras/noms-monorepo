@@ -53,9 +53,11 @@ const Navigation = () => {
           </ActiveNavItem>
         </div>
       )}
-      <div className="flex flex-row items-center">
+      <div className="flex flex-row items-center space-x-2">
         <Link href="/traits/new">
-          <button>New trait</button>
+          <button className="bg-[#2B83F6] text-white px-2 py-1.5 rounded-lg pangram-sans-compact font-bold text-sm">
+            New trait
+          </button>
         </Link>
         <div className="">
           <CustomConnectKit />

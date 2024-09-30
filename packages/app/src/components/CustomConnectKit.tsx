@@ -1,6 +1,6 @@
 "use client";
 
-import { ConnectKitButton } from "connectkit";
+import { ConnectKitButton, Avatar } from "connectkit";
 import { useDisconnect } from "wagmi";
 // import { truncateEthAddress } from "@/lib/utils";
 
@@ -9,20 +9,21 @@ const CustomConnectKit = () => {
 
   return (
     <ConnectKitButton.Custom>
-      {({ isConnected, show, truncatedAddress, ensName }) => {
+      {({ isConnected, show, truncatedAddress, ensName, address }) => {
         return (
           <div className="relative">
             <button
               onClick={isConnected ? () => disconnect() : show}
               className={`${
-                !isConnected
-                  ? "bg-[#2B83F6] text-white hover:shadow-[0_0_0_2px_rgba(43,131,246,1)]"
-                  : "text-white"
-              } rounded-md px-2 py-1 transition-all`}
+                !isConnected ? "bg-[#2B83F6]" : ""
+              } text-white rounded-lg transition-all text-sm font-bold pangram-sans-compact px-2 py-1.5`}
             >
               {isConnected ? (
-                <span className="flex flex-row items-center space-x-1">
-                  <span className="pangram-sans-compact font-medium">
+                <span className="flex flex-row items-center space-x-1.5">
+                  <div className="bg-[#4b4b4b] rounded-full p-0.5">
+                    <Avatar address={address} size={16} />
+                  </div>
+                  <span className="pangram-sans-compact font-bold text-sm text-gray-200">
                     {ensName ?? truncatedAddress}
                   </span>
                 </span>
