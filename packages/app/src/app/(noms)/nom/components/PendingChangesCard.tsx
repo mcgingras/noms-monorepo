@@ -65,7 +65,7 @@ const ChangeRow = ({ layer }: { layer: Layer }) => {
       <span className="flex flex-row items-center space-x-2">
         <span className="h-2 w-2 rounded-full block bg-green-500"></span>
         <span className="pangram-sans font-bold text-sm text-gray-300">
-          EQUIP {layer.trait.name}
+          Equip {layer.trait.name}
         </span>
       </span>
     );
@@ -76,7 +76,7 @@ const ChangeRow = ({ layer }: { layer: Layer }) => {
       <span className="flex flex-row items-center space-x-2">
         <span className="h-2 w-2 rounded-full block bg-red-500"></span>
         <span className="pangram-sans font-bold text-sm text-gray-300">
-          REMOVE {layer.trait.name}
+          Remove {layer.trait.name}
         </span>
       </span>
     );

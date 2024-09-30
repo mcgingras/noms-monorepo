@@ -3,8 +3,20 @@
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Layer } from "@/types/layer";
 import PendingChangesCard from "./PendingChangesCard";
+import ShirtIcon from "@/components/icons/Shirt";
+import { LayerChangeType } from "@/types/layer";
 
-const LayerItem = ({ layer, index }: { layer: any; index: number }) => {
+const LayerItem = ({
+  layer,
+  index,
+  removeLayer,
+  hideLayer,
+}: {
+  layer: Layer;
+  index: number;
+  removeLayer: (layer: Layer) => void;
+  hideLayer: (layer: Layer) => void;
+}) => {
   return (
     <Draggable draggableId={layer.trait.id.toString()} index={index}>
       {(provided) => (
@@ -13,7 +25,13 @@ const LayerItem = ({ layer, index }: { layer: any; index: number }) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          <div className="flex flex-row items-center bg-gray-1000 hover:bg-gray-900 transition-all p-2 rounded-lg gap-x-3">
+          <div
+            className={`flex flex-row items-center hover:bg-gray-900 transition-all p-2 rounded-lg gap-x-3 group ${
+              layer.type === LayerChangeType.UNEQUIP
+                ? "border border-gray-900 opacity-50"
+                : "border border-transparent bg-gray-1000"
+            }`}
+          >
             <span className="bg-gray-800 border border-gray-800 h-5 w-5 self-start mt-[2px]">
               <img
                 src={`data:image/svg+xml;base64,${layer.trait.svg}`}
@@ -24,6 +42,12 @@ const LayerItem = ({ layer, index }: { layer: any; index: number }) => {
             <h4 className="pangram-sans font-bold flex-1">
               {layer.trait.name}
             </h4>
+            <span
+              className="group-hover:block hidden cursor-pointer"
+              onClick={() => removeLayer(layer)}
+            >
+              <ShirtIcon className="h-5 w-5" />
+            </span>
             {/* {price && (
               <span className="pangram-sans-compact font-semibold text-sm">
                 {price} ETH
@@ -54,6 +78,38 @@ const LayerStack = ({
     setLayers(newParts);
   };
 
+  const removeLayer = (layer: Layer) => {
+    if (layer.type === LayerChangeType.FIXED) {
+      // update layer to unequip
+      setLayers(
+        layers.map((l) =>
+          l.trait.id === layer.trait.id
+            ? { ...l, equipped: false, type: LayerChangeType.UNEQUIP }
+            : l
+        )
+      );
+    } else if (layer.type === LayerChangeType.UNEQUIP) {
+      // update layer to equip
+      setLayers(
+        layers.map((l) =>
+          l.trait.id === layer.trait.id
+            ? { ...l, equipped: true, type: LayerChangeType.FIXED }
+            : l
+        )
+      );
+    } else {
+      setLayers(layers.filter((l) => l.trait.id !== layer.trait.id));
+    }
+  };
+
+  const hideLayer = (layer: Layer) => {
+    setLayers(
+      layers.map((l) =>
+        l.trait.id === layer.trait.id ? { ...l, hidden: true } : l
+      )
+    );
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <section className="h-full flex flex-col">
@@ -74,7 +130,13 @@ const LayerStack = ({
               >
                 <div className="space-y-1">
                   {layers.map((layer, idx) => (
-                    <LayerItem key={layer.trait.id} index={idx} layer={layer} />
+                    <LayerItem
+                      key={layer.trait.id}
+                      index={idx}
+                      layer={layer}
+                      removeLayer={removeLayer}
+                      hideLayer={hideLayer}
+                    />
                   ))}
                   {provided.placeholder}
                 </div>
