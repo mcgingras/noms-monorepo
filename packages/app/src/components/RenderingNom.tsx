@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useReadContract } from "wagmi";
 import { easelAbi } from "../../../ponder/foundry/abis";
 import { CHAIN_ID, EASEL_ADDRESS } from "@/lib/constants";
+import { Layer } from "@/types/layer";
 
-const RenderingNom = ({ layers }: { layers: any[] }) => {
+const RenderingNom = ({ layers }: { layers: Layer[] }) => {
   const [nomSVG, setNomSVG] = useState<string | null>(null);
   // The Nouns rendering engine draws first layer, the second etc
   // So we need to reverse the layers to make it feel more like expected
@@ -14,7 +15,7 @@ const RenderingNom = ({ layers }: { layers: any[] }) => {
     abi: easelAbi,
     address: EASEL_ADDRESS,
     functionName: "generateSVGForParts",
-    args: [orderedLayers.map((trait) => trait.rleBytes) as any],
+    args: [orderedLayers.map((layer) => layer.trait.rleBytes) as any],
     query: {
       enabled: !!orderedLayers && orderedLayers.length > 0,
     },

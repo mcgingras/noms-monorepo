@@ -7,8 +7,6 @@ const TraitViewer = ({ traitId }: { traitId: string }) => {
     queryFn: () => getTraitById(Number(traitId)),
   });
 
-  console.log("tv", trait);
-
   return (
     <div className="p-2 bg-[#333] rounded-xl w-full">
       <h5 className="pangram-sans font-bold">{trait?.name}</h5>

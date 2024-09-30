@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Fragment, useState, useEffect } from "react";
 import AnimatedTabs from "@/components/AnimatedTabs";
 import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
@@ -14,6 +15,8 @@ import TraitViewer from "@/components/TraitViewer";
 import MallTab from "./components/MallTab";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import RenderingNom from "@/components/RenderingNom";
+import { Layer, LayerChangeType } from "@/types/layer";
+import { Trait, NomTrait } from "@/types/trait";
 
 const Cart = ({
   pendingParts,
@@ -45,28 +48,44 @@ const ChangingRoom = ({
   const addSearchParam = useAddSearchParam();
   const [page, setPage] = useState<"builder" | "cart">("builder");
   const nomId = params.nomId;
-  const { data } = useQuery({
+  const { data: nomSnapshot } = useQuery({
     queryKey: ["nom", nomId],
     queryFn: () => getNomById(Number(nomId)),
   });
 
-  const [parts, setParts] = useState<any[]>([]);
-  const [pendingParts, setPendingParts] = useState<any[]>([]);
-  const [layers, setLayers] = useState<any[]>([]);
-  const traits = data?.traits.items.map((trait: any) => trait.trait) || [];
+  const [pendingTraits, setPendingTraits] = useState<Trait[]>([]);
+  const [layers, setLayers] = useState<Layer[]>([]);
+  const existingNomTraits = nomSnapshot?.traits.items || [];
   const selectedTraitId = searchParams.trait;
 
   useEffect(() => {
-    if (data) {
-      setLayers([...traits, ...parts]);
+    if (nomSnapshot) {
+      const layers = existingNomTraits.map((nomTrait: NomTrait) => ({
+        owned: true,
+        trait: nomTrait.trait,
+        equipped: nomTrait.equipped,
+        type: LayerChangeType.FIXED,
+      })) as Layer[];
+
+      setLayers([...layers]);
     }
-  }, [data]);
+  }, [nomSnapshot]);
+
+  const addTraitToLayersFromShop = (trait: Trait) => {
+    const newLayer = {
+      trait,
+      owned: false,
+      equipped: true,
+      type: LayerChangeType.BUY_AND_EQUIP,
+    };
+    setLayers([...layers, newLayer]);
+  };
 
   return (
     <main className="h-[calc(100vh-66px)] w-full">
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
         <div className="w-[288px]">
-          <LayerStack parts={layers} setParts={setLayers} />
+          <LayerStack layers={layers} setLayers={setLayers} />
         </div>
         <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row">
           <div className="p-1 h-full flex-1">
@@ -95,7 +114,7 @@ const ChangingRoom = ({
               <div className="flex flex-row justify-between w-full">
                 <AnimatedTabs />
                 <Cart
-                  pendingParts={pendingParts}
+                  pendingParts={pendingTraits}
                   onClick={() => {
                     setPage("cart");
                   }}
@@ -118,17 +137,24 @@ const ChangingRoom = ({
                           type="text"
                           className="bg-gray-900 w-[200px] h-6 block rounded"
                         />
-                        {pendingParts.length > 0 && (
+                        {pendingTraits.length > 0 && (
                           <div className="w-full bg-gray-900 p-2 rounded-lg mt-2">
                             <h3 className="pangram-sans-compact font-bold">
                               Changing room
                             </h3>
                             <div className="mt-2 flex flex-row flex-wrap gap-2">
-                              {pendingParts.map((part) => (
+                              {pendingTraits.map((part) => (
                                 <div
                                   key={part.id}
-                                  className="min-w-20 w-1/8 aspect-square rounded-lg bg-gray-800"
-                                ></div>
+                                  className="min-w-[85px] aspect-square rounded-lg bg-gray-800 relative"
+                                >
+                                  <Image
+                                    src={`data:image/svg+xml;base64,${part.svg}`}
+                                    alt="Trait"
+                                    fill
+                                    className="absolute"
+                                  />
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -138,7 +164,7 @@ const ChangingRoom = ({
                           <h3 className="pangram-sans-compact font-bold">
                             Closet
                           </h3>
-                          <ClosetList traits={traits} />
+                          <ClosetList traits={existingNomTraits} />
                         </div>
                         {selectedTraitId && (
                           <TraitViewer traitId={selectedTraitId} />
@@ -156,10 +182,10 @@ const ChangingRoom = ({
                       className="mt-4 h-full flex flex-row space-x-2 w-full"
                     >
                       <MallTab
-                        onPartClick={(part) => {
-                          setPendingParts([part, ...pendingParts]);
-                          setLayers([part, ...layers]);
-                          addSearchParam("trait", part.id);
+                        onPartClick={(part: Trait) => {
+                          setPendingTraits([part, ...pendingTraits]);
+                          addTraitToLayersFromShop(part);
+                          addSearchParam("trait", part.id.toString());
                         }}
                       />
                     </motion.div>

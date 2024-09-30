@@ -1,18 +1,12 @@
 "use client";
 
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Layer } from "@/types/layer";
+import PendingChangesCard from "./PendingChangesCard";
 
-const LayerItem = ({
-  part,
-  price,
-  index,
-}: {
-  part: any;
-  price?: number;
-  index: number;
-}) => {
+const LayerItem = ({ layer, index }: { layer: any; index: number }) => {
   return (
-    <Draggable draggableId={part.id.toString()} index={index}>
+    <Draggable draggableId={layer.trait.id.toString()} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
@@ -22,17 +16,19 @@ const LayerItem = ({
           <div className="flex flex-row items-center bg-gray-1000 hover:bg-gray-900 transition-all p-2 rounded-lg gap-x-3">
             <span className="bg-gray-800 border border-gray-800 h-5 w-5 self-start mt-[2px]">
               <img
-                src={`data:image/svg+xml;base64,${part.svg}`}
-                alt={part.name}
+                src={`data:image/svg+xml;base64,${layer.trait.svg}`}
+                alt={layer.trait.name}
                 className="w-full h-full"
               />
             </span>
-            <h4 className="pangram-sans font-bold flex-1">{part.name}</h4>
-            {price && (
+            <h4 className="pangram-sans font-bold flex-1">
+              {layer.trait.name}
+            </h4>
+            {/* {price && (
               <span className="pangram-sans-compact font-semibold text-sm">
                 {price} ETH
               </span>
-            )}
+            )} */}
           </div>
         </div>
       )}
@@ -41,21 +37,21 @@ const LayerItem = ({
 };
 
 const LayerStack = ({
-  parts,
-  setParts,
+  layers,
+  setLayers,
 }: {
-  parts: any[];
-  setParts: (parts: any) => void;
+  layers: Layer[];
+  setLayers: (layers: Layer[]) => void;
 }) => {
   const onDragEnd = (result: any) => {
     if (!result.destination) {
       return;
     }
 
-    const newParts = Array.from(parts);
+    const newParts = Array.from(layers);
     const [reorderedItem] = newParts.splice(result.source.index, 1);
     newParts.splice(result.destination.index, 0, reorderedItem);
-    setParts(newParts);
+    setLayers(newParts);
   };
 
   return (
@@ -64,7 +60,7 @@ const LayerStack = ({
         <div className="flex flex-row items-center space-x-2 mb-2">
           <h2 className="oziksoft text-xl">All layers</h2>
           <span className="oziksoft bg-blue-500 rounded-full text-xl h-5 w-5 flex items-center justify-center">
-            {parts.length}
+            {layers.length}
           </span>
         </div>
 
@@ -77,8 +73,8 @@ const LayerStack = ({
                 className="h-full overflow-y-auto"
               >
                 <div className="space-y-1">
-                  {parts.map((part, idx) => (
-                    <LayerItem key={part.id} index={idx} part={part} />
+                  {layers.map((layer, idx) => (
+                    <LayerItem key={layer.trait.id} index={idx} layer={layer} />
                   ))}
                   {provided.placeholder}
                 </div>
@@ -89,23 +85,7 @@ const LayerStack = ({
           </Droppable>
           <div className="absolute h-[60px] w-full bg-gradient-to-t from-black to-transparent bottom-0 left-0"></div>
         </div>
-
-        <div className="bg-gray-900 p-1 rounded-lg flex flex-col space-y-2">
-          <div className="flex flex-row items-center space-x-1">
-            <h3 className="pangram-sans px-1 py-1 text-gray-300">
-              Pending changes
-            </h3>
-            <span className="h-5 w-5 text-sm flex items-center justify-center bg-gray-400 rounded-full">
-              {parts.length}
-            </span>
-          </div>
-          <button className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2">
-            <span className="pangram-sans font-bold">Save changes</span>
-            <span className="pangram-sans-compact font-bold text-sm bg-black/30 px-2 py-1 rounded">
-              0 ETH
-            </span>
-          </button>
-        </div>
+        <PendingChangesCard layers={layers} />
       </section>
     </DragDropContext>
   );
