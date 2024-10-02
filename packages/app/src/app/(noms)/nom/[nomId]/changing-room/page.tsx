@@ -11,9 +11,11 @@ import getNomById from "@/actions/getNomById";
 import MallTab from "./components/MallTab";
 import ClosetTab from "./components/ClosetTab";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
-import RenderingNom from "@/components/RenderingNom";
 import { Layer, LayerChangeType } from "@/types/layer";
 import { Trait, NomTrait } from "@/types/trait";
+import NomViewer from "@/app/(noms)/nom/components/NomViewer";
+import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
+import SearchInput from "@/components/SearchInput";
 
 const Cart = ({
   pendingParts,
@@ -82,44 +84,29 @@ const ChangingRoom = ({
   return (
     <main className="h-[calc(100vh-66px)] w-full">
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
-        <div className="w-[288px]">
+        <div className="w-[288px] h-full">
           <LayerStack
             layers={layers}
             initialLayers={existingNomTraits}
             setLayers={setLayers}
           />
         </div>
-        <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row relative">
-          <div className="p-1 h-full flex-1">
-            <div
-              className="h-full w-full rounded-[20px] p-4 flex flex-col"
-              style={{
-                backgroundColor: "#222222",
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='4' cy='4' r='2' fill='%23ffffff' fill-opacity='0.08' /%3E%3Ccircle cx='16' cy='16' r='2' fill='%23ffffff' fill-opacity='0.08' /%3E%3C/svg%3E")`,
-                backgroundSize: "20px 20px",
-              }}
-            >
-              <h3 className="oziksoft text-xl">Nom 1</h3>
-              <span className="text-sm text-[#818080] pangram-sans font-semibold">
-                Not yet finalized
-              </span>
-              <div className="relative p-4 flex-1 flex items-center justify-center overflow-hidden">
-                <div className="relative w-2/3 aspect-square bg-gray-1000">
-                  <RenderingNom layers={layers} />
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row relative h-full">
+          <NomViewer layers={layers} />
           <WavyTab
             size={size}
             onClick={() => {
               setSize(size === "small" ? "large" : "small");
             }}
           />
-          <div
-            className={`relative p-4 h-full overflow-hidden ${
-              size === "small" ? "w-0" : "w-[840px]"
-            }`}
+          <motion.div
+            className="relative p-4 h-full overflow-hidden"
+            initial={{ width: "840px" }}
+            animate={{ width: size === "small" ? 0 : "840px" }}
+            transition={{
+              duration: 0.5,
+              ease: [0.16, 1, 0.3, 1], // Custom bezier curve
+            }}
           >
             <TabGroup className="flex flex-col h-full">
               <div className="flex flex-row justify-between w-full">
@@ -131,46 +118,36 @@ const ChangingRoom = ({
                   }}
                 />
               </div>
-              <AnimatePresence mode="wait">
-                <TabPanels as={Fragment}>
-                  <TabPanel as={Fragment} unmount={true}>
-                    <motion.div
-                      key={"tab-1"}
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -10, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-4 h-full flex flex-row space-x-2 w-full"
-                    >
-                      <ClosetTab
-                        pendingTraits={pendingTraits}
-                        existingNomTraits={existingNomTraits}
-                        selectedTraitId={selectedTraitId}
-                      />
-                    </motion.div>
-                  </TabPanel>
-                  <TabPanel as={Fragment} unmount={true}>
-                    <motion.div
-                      key={"tab-2"}
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -10, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="mt-4 h-full flex flex-row space-x-2 w-full"
-                    >
-                      <MallTab
-                        onPartClick={(part: Trait) => {
-                          setPendingTraits([part, ...pendingTraits]);
-                          addTraitToLayersFromShop(part);
-                          addSearchParam("trait", part.id.toString());
-                        }}
-                      />
-                    </motion.div>
-                  </TabPanel>
-                </TabPanels>
-              </AnimatePresence>
+              <div className="mt-4 flex-1 flex flex-row space-x-2 w-full overflow-hidden">
+                <AnimatedTabsVertical />
+                <div className="flex-1 flex flex-col h-full">
+                  <SearchInput />
+                  <AnimatePresence mode="wait">
+                    <TabPanels as={Fragment}>
+                      <TabPanel as={Fragment} unmount={true}>
+                        <ClosetTab
+                          key={"tab-1"}
+                          pendingTraits={pendingTraits}
+                          existingNomTraits={existingNomTraits}
+                          selectedTraitId={selectedTraitId}
+                        />
+                      </TabPanel>
+                      <TabPanel as={Fragment} unmount={true}>
+                        <MallTab
+                          key={"tab-2"}
+                          onPartClick={(part: Trait) => {
+                            setPendingTraits([part, ...pendingTraits]);
+                            addTraitToLayersFromShop(part);
+                            addSearchParam("trait", part.id.toString());
+                          }}
+                        />
+                      </TabPanel>
+                    </TabPanels>
+                  </AnimatePresence>
+                </div>
+              </div>
             </TabGroup>
-          </div>
+          </motion.div>
         </div>
       </section>
     </main>
