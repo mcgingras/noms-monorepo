@@ -5,7 +5,6 @@ import { easelAbi, nomAbi } from "../foundry/abis";
 import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json";
 
 const txs = NomDeploy.transactions;
-const accountImplAddress = getAddress(txs[0]!.contractAddress);
 const easelAddress = getAddress(txs[1]!.contractAddress);
 
 // Can check that the transfer is coming from the 0x0 address to know that it's a mint
@@ -169,6 +168,7 @@ async function increaseTraitQuantity(
 ) {
   const { NomTrait } = context.db;
   const nomTraitId = `${to}-${id}`;
+
   const existingNomTrait = await NomTrait.findUnique({
     id: nomTraitId,
   });
@@ -211,15 +211,15 @@ async function reduceTraitQuantity(
 ) {
   const { NomTrait } = context.db;
   // id scheme -- tbaAddress-traitTokenId
-  const concatID = from.concat("-").concat(id.toString());
+  const nomTraitId = `${from}-${id}`;
   const existingNomTrait = await NomTrait.findUnique({
-    id: concatID,
+    id: nomTraitId,
   });
 
   if (existingNomTrait) {
-    // if null, don't track since it didn't't belong to an NPC before
+    // if null, don't track since it didn't belong to an NPC before
     await NomTrait.update({
-      id: concatID,
+      id: nomTraitId,
       data: {
         quantity: (existingNomTrait.quantity -= Number(value)),
       },
@@ -228,80 +228,49 @@ async function reduceTraitQuantity(
   return;
 }
 
-ponder.on("ERC1155Contract:TokenEquipped", async ({ event, context }) => {
+ponder.on("ERC1155Contract:TraitsEquipped", async ({ event, context }) => {
   const { Nom, NomTrait } = await context.db;
+  const { NFTContract } = context.contracts;
   const tbaAddress = event.args.owner;
-  const traitTokenId = event.args.traitTokenId;
-  const nomTraitId = `${tbaAddress}-${traitTokenId}`;
+  const traitTokenIds = event.args.traitIds;
 
-  const nomTrait = await NomTrait.findUnique({
-    id: nomTraitId,
+  const updatePromises = traitTokenIds.map(async (traitTokenId, index) => {
+    const nomTraitId = `${tbaAddress}-${traitTokenId}`;
+    const nomTrait = await NomTrait.findUnique({
+      id: nomTraitId,
+    });
+
+    if (nomTrait) {
+      return NomTrait.update({
+        id: nomTraitId,
+        data: {
+          equipped: true,
+          orderIndex: index,
+        },
+      });
+    }
   });
 
-  if (nomTrait) {
-    const existingEquippedNomTraits = await NomTrait.findMany({
-      where: {
-        nomId: tbaAddress,
-        equipped: true,
-      },
-    });
+  await Promise.all(updatePromises);
 
-    const existingEquippedTraitIds = existingEquippedNomTraits.items.map(
-      (trait) => trait.traitId
-    );
-
-    const fullSVG = await createFullSVG(existingEquippedTraitIds, context);
-    NomTrait.update({
-      id: nomTraitId,
-      data: {
-        equipped: true,
-      },
-    });
-
-    Nom.update({
-      id: event.args.owner,
-      data: {
-        fullSVG: fullSVG,
-      },
-    });
-  }
-});
-
-ponder.on("ERC1155Contract:TokenUnequipped", async ({ event, context }) => {
-  const { Nom, NomTrait } = await context.db;
-  const tbaAddress = event.args.owner;
-  const traitTokenId = event.args.traitTokenId;
-  const nomTraitId = `${tbaAddress}-${traitTokenId}`;
-
-  const nomTrait = await NomTrait.findUnique({
-    id: nomTraitId,
+  // call tokenURI on the nom contract to refresh the fullSVG
+  const tokenURI = await context.client.readContract({
+    abi: nomAbi,
+    address: NFTContract.address,
+    functionName: "tokenURI",
+    args: [event.args.nomTokenId],
   });
 
-  if (nomTrait) {
-    const existingEquippedNomTraits = await NomTrait.findMany({
-      where: {
-        nomId: event.args.owner,
-        equipped: true,
-      },
-    });
+  // base64 decode the tokenURI and get the image property;
+  const detailsB64 = tokenURI.split(",")[1] as string;
+  const details = JSON.parse(atob(detailsB64));
+  const image = details.image;
+  const svgB64 = image.split(",")[1] as string;
 
-    const equippedTraitIds = existingEquippedNomTraits.items
-      .map((trait) => trait.traitId)
-      .filter((traitId) => traitId !== event.args.traitTokenId);
-
-    const fullSVG = await createFullSVG(equippedTraitIds, context);
-    NomTrait.update({
-      id: nomTraitId,
-      data: {
-        equipped: false,
-      },
-    });
-
-    Nom.update({
-      id: event.args.owner,
-      data: {
-        fullSVG: fullSVG,
-      },
-    });
-  }
+  Nom.update({
+    id: event.args.owner,
+    data: {
+      fullSVG: svgB64,
+    },
+  });
 });

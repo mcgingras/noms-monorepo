@@ -3,6 +3,10 @@ import getNomById from "@/actions/getNomById";
 import Image from "next/image";
 import TraitCard from "./components/TraitCard";
 import TraitViewer from "./components/TraitViewer";
+
+// reset nextjs cache
+export const revalidate = 0;
+
 const NomIdPage = async ({
   params: { nomId },
   searchParams,
@@ -13,7 +17,7 @@ const NomIdPage = async ({
   const nom = await getNomById(Number(nomId));
   const traitId = searchParams.trait;
 
-  const trait = nom.traits.items.find(
+  const trait = nom?.traits.find(
     (traitJoin: any) => traitJoin.trait.id === traitId
   );
 
@@ -37,9 +41,12 @@ const NomIdPage = async ({
         <h3 className="oziksoft text-4xl">Nom {nom.tokenId}</h3>
         <div className="bg-[#151515] w-full rounded-lg p-2 flex-1 relative">
           <h4 className="pangram-sans font-bold">Current fit</h4>
-          <div className="flex flex-row space-x-2 mt-2">
-            {nom.traits.items.map((traitJoin: any) => (
-              <TraitCard trait={traitJoin.trait} />
+          <div className="flex flex-row space-x-4 mt-2">
+            {nom.traits.map((traitJoin: any) => (
+              <TraitCard
+                trait={traitJoin.trait}
+                equipped={traitJoin.equipped}
+              />
             ))}
           </div>
           {trait && <TraitViewer trait={trait.trait} />}

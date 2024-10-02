@@ -3,16 +3,30 @@
 import Image from "next/image";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import { useSearchParams } from "next/navigation";
-
-const TraitCard = ({ trait }: { trait: any }) => {
+import { Trait } from "@/types/trait";
+import { cn } from "@/lib/utils";
+const TraitCard = ({
+  trait,
+  equipped,
+}: {
+  trait: Trait;
+  equipped: boolean;
+}) => {
   const addSearchParam = useAddSearchParam();
-  const isActive = useSearchParams().get("trait") === trait.id;
+  const isActive = useSearchParams().get("trait") === trait.id.toString();
 
   return (
     <div
-      className={`bg-[#333] w-[100px] h-[100px] rounded-lg relative cursor-pointer ${isActive ? "ring-2 ring-[#FDCB3F] ring-offset-[#151515] ring-offset-2" : ""}`}
+      className={cn(
+        "bg-[#333] w-[100px] h-[100px] rounded-lg relative cursor-pointer",
+        equipped && "ring-4 ring-[#FDCB3F]",
+        isActive && "ring-4 ring-blue-500",
+        equipped &&
+          isActive &&
+          "ring-[3px] ring-blue-500 ring-offset-4 ring-offset-[#FDCB3F]"
+      )}
       onClick={() => {
-        addSearchParam("trait", trait.id);
+        addSearchParam("trait", trait.id.toString());
       }}
     >
       <Image

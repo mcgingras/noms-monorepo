@@ -1,18 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import { Fragment, useState, useEffect } from "react";
 import AnimatedTabs from "@/components/AnimatedTabs";
-import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
 import LayerStack from "../../components/LayerStack";
 import WavyTab from "../../components/WavyTab";
 import { TabGroup, TabPanel, TabPanels } from "@headlessui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import getNomById from "@/actions/getNomById";
-import ClosetList from "./components/ClosetList";
-import TraitViewer from "@/components/TraitViewer";
 import MallTab from "./components/MallTab";
+import ClosetTab from "./components/ClosetTab";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import RenderingNom from "@/components/RenderingNom";
 import { Layer, LayerChangeType } from "@/types/layer";
@@ -46,6 +43,7 @@ const ChangingRoom = ({
   searchParams: { trait: string };
 }) => {
   const addSearchParam = useAddSearchParam();
+  const [size, setSize] = useState<"small" | "large">("large");
   const [page, setPage] = useState<"builder" | "cart">("builder");
   const nomId = params.nomId;
   const { data: nomSnapshot } = useQuery({
@@ -55,7 +53,7 @@ const ChangingRoom = ({
 
   const [pendingTraits, setPendingTraits] = useState<Trait[]>([]);
   const [layers, setLayers] = useState<Layer[]>([]);
-  const existingNomTraits = nomSnapshot?.traits.items || [];
+  const existingNomTraits = nomSnapshot?.traits || [];
   const selectedTraitId = searchParams.trait;
 
   useEffect(() => {
@@ -85,9 +83,13 @@ const ChangingRoom = ({
     <main className="h-[calc(100vh-66px)] w-full">
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
         <div className="w-[288px]">
-          <LayerStack layers={layers} setLayers={setLayers} />
+          <LayerStack
+            layers={layers}
+            initialLayers={existingNomTraits}
+            setLayers={setLayers}
+          />
         </div>
-        <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row">
+        <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row relative">
           <div className="p-1 h-full flex-1">
             <div
               className="h-full w-full rounded-[20px] p-4 flex flex-col"
@@ -108,8 +110,17 @@ const ChangingRoom = ({
               </div>
             </div>
           </div>
-          <div className="relative p-4 w-[840px] h-full overflow-hidden">
-            <WavyTab />
+          <WavyTab
+            size={size}
+            onClick={() => {
+              setSize(size === "small" ? "large" : "small");
+            }}
+          />
+          <div
+            className={`relative p-4 h-full overflow-hidden ${
+              size === "small" ? "w-0" : "w-[840px]"
+            }`}
+          >
             <TabGroup className="flex flex-col h-full">
               <div className="flex flex-row justify-between w-full">
                 <AnimatedTabs />
@@ -131,45 +142,11 @@ const ChangingRoom = ({
                       transition={{ duration: 0.2 }}
                       className="mt-4 h-full flex flex-row space-x-2 w-full"
                     >
-                      <AnimatedTabsVertical />
-                      <div className="flex-1 flex flex-col">
-                        <input
-                          type="text"
-                          className="bg-gray-900 w-[200px] h-6 block rounded"
-                        />
-                        {pendingTraits.length > 0 && (
-                          <div className="w-full bg-gray-900 p-2 rounded-lg mt-2">
-                            <h3 className="pangram-sans-compact font-bold">
-                              Changing room
-                            </h3>
-                            <div className="mt-2 flex flex-row flex-wrap gap-2">
-                              {pendingTraits.map((part) => (
-                                <div
-                                  key={part.id}
-                                  className="min-w-[85px] aspect-square rounded-lg bg-gray-800 relative"
-                                >
-                                  <Image
-                                    src={`data:image/svg+xml;base64,${part.svg}`}
-                                    alt="Trait"
-                                    fill
-                                    className="absolute"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <hr className="mt-2 border-gray-900" />
-                        <div className="pt-2 flex-1">
-                          <h3 className="pangram-sans-compact font-bold">
-                            Closet
-                          </h3>
-                          <ClosetList traits={existingNomTraits} />
-                        </div>
-                        {selectedTraitId && (
-                          <TraitViewer traitId={selectedTraitId} />
-                        )}
-                      </div>
+                      <ClosetTab
+                        pendingTraits={pendingTraits}
+                        existingNomTraits={existingNomTraits}
+                        selectedTraitId={selectedTraitId}
+                      />
                     </motion.div>
                   </TabPanel>
                   <TabPanel as={Fragment} unmount={true}>

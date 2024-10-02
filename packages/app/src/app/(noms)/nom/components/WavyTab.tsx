@@ -1,6 +1,17 @@
-const WavyTab = () => {
+const WavyTab = ({
+  size,
+  onClick,
+}: {
+  size: "small" | "large";
+  onClick: () => void;
+}) => {
   return (
-    <div className="absolute left-[-68px] top-1/2 flex flex-row -rotate-90">
+    <div
+      className={`absolute top-1/2 flex flex-row -rotate-90 z-50 transform -translate-y-1/2 cursor-pointer ${
+        size === "small" ? "right-[-12px]" : "right-[800px]"
+      }`}
+      onClick={onClick}
+    >
       <svg
         width="41"
         height="22"
@@ -13,8 +24,8 @@ const WavyTab = () => {
           fill="#151515"
         />
       </svg>
-      <span className="bg-[#151515] h-[22px] px-1 flex items-center justify-center text-xs uppercase oziksoft">
-        Hide
+      <span className="bg-[#151515] h-[22px] px-1 flex items-center justify-center text-xs uppercase oziksoft text-white">
+        {size === "small" ? "Show" : "Hide"}
       </span>
       <svg
         width="41"

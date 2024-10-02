@@ -1,6 +1,9 @@
 import NomList from "./components/NomList";
 import { Suspense } from "react";
 
+// revalidate
+export const revalidate = 0;
+
 const NomViewLayout = ({
   children,
 }: Readonly<{

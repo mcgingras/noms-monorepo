@@ -14,6 +14,9 @@ import CaratDownIcon from "@/components/icons/CaratDownIcon";
 import CaratUpIcon from "@/components/icons/CaratUpIcon";
 import { useAccount } from "wagmi";
 import { initNom } from "@/lib/viem/createNom";
+import { Layer, LayerChangeType } from "@/types/layer";
+import { Trait } from "@/types/trait";
+import RenderingNom from "@/components/RenderingNom";
 
 const Nav = ({ children }: { children: React.ReactNode }) => {
   return <nav className="flex flex-row justify-between w-full">{children}</nav>;
@@ -82,10 +85,16 @@ const ItemAccordion = ({
 
 const NewNomPage = () => {
   const { address } = useAccount();
-  const [pendingParts, setPendingParts] = useState<any[]>([]);
+  const [pendingLayers, setPendingLayers] = useState<Layer[]>([]);
   const [page, setPage] = useState<"builder" | "cart">("builder");
-  const addPart = (part: any) => {
-    setPendingParts([...pendingParts, part]);
+  const addTraitToLayer = (trait: Trait) => {
+    const layer: Layer = {
+      trait,
+      equipped: false,
+      owned: false,
+      type: LayerChangeType.BUY_AND_EQUIP,
+    };
+    setPendingLayers([...pendingLayers, layer]);
   };
 
   return (
@@ -103,21 +112,21 @@ const NewNomPage = () => {
                 <ArrowLeftIcon className="h-5 w-5" />
                 <span className="oziksoft text-2xl">Back to editing</span>
               </div>
-              <Cart pendingParts={pendingParts} />
+              <Cart pendingParts={pendingLayers} />
             </nav>
             <div className="flex flex-row gap-4 h-full">
               <div className="flex-1 flex flex-col gap-y-2">
-                <ItemAccordion title="Purchasing" number={pendingParts.length}>
+                <ItemAccordion title="Purchasing" number={pendingLayers.length}>
                   <div className="flex flex-row gap-x-4 mt-4">
-                    {pendingParts.map((part) => (
+                    {pendingLayers.map((layer) => (
                       <div
-                        key={part.id}
+                        key={layer.trait.id}
                         className="flex flex-row items-center gap-x-2"
                       >
                         <span className="h-20 w-20 self-start mt-[2px]">
                           <img
-                            src={`data:image/svg+xml;base64,${part.svg}`}
-                            alt={part.name}
+                            src={`data:image/svg+xml;base64,${layer.trait.svg}`}
+                            alt={layer.trait.name}
                             className="w-full h-full rounded"
                           />
                         </span>
@@ -127,7 +136,7 @@ const NewNomPage = () => {
                 </ItemAccordion>
                 <ItemAccordion
                   title="Changing"
-                  number={pendingParts.length}
+                  number={pendingLayers.length}
                   description="Any un-equipped items go into a nom's closet."
                 >
                   <p></p>
@@ -137,7 +146,7 @@ const NewNomPage = () => {
                 <div className="flex flex-col space-y-2 flex-1">
                   <div className="flex flex-row items-center gap-x-2">
                     <span className="pangram-sans font-bold">
-                      Purchasing {pendingParts.length} items
+                      Purchasing {pendingLayers.length} items
                     </span>
                     <hr className="flex-1 border-b border-dotted border-[#595959]" />
                     <span className="pangram-sans font-bold">0.0 ETH</span>
@@ -174,9 +183,11 @@ const NewNomPage = () => {
                     if (isFirstNom) {
                       const tx = await initNom({
                         to: address,
-                        traitTokenIds: pendingParts.map((part) => part.id),
-                        quantities: pendingParts.map(() => BigInt(1)),
-                        prices: pendingParts.map(() => BigInt(0)),
+                        traitTokenIds: pendingLayers.map((layer) =>
+                          BigInt(layer.trait.id)
+                        ),
+                        quantities: pendingLayers.map(() => BigInt(1)),
+                        prices: pendingLayers.map(() => BigInt(0)),
                       });
                     }
                   }}
@@ -194,17 +205,21 @@ const NewNomPage = () => {
         ) : (
           <>
             <div className="w-[288px]">
-              <LayerStack parts={pendingParts} setParts={setPendingParts} />
+              <LayerStack
+                layers={pendingLayers}
+                initialLayers={[]}
+                setLayers={setPendingLayers}
+              />
             </div>
             <div className="flex-1 bg-[#151515] rounded-[24px] flex flex-row">
-              <NomViewer pendingParts={pendingParts} />
+              <NomViewer layers={pendingLayers} />
               <div className="relative p-4 w-[700px] h-full overflow-hidden">
                 <WavyTab />
                 <TabGroup className="flex flex-col h-full">
                   <Nav>
                     <AnimatedTabs />
                     <Cart
-                      pendingParts={pendingParts}
+                      pendingParts={pendingLayers}
                       onClick={() => {
                         setPage("cart");
                       }}
@@ -213,12 +228,12 @@ const NewNomPage = () => {
                   <TabPanels as={Fragment}>
                     <TabPanel as={Fragment} unmount={true}>
                       <AnimatePresence mode="wait">
-                        <ClosetTab pendingParts={pendingParts} />
+                        <ClosetTab pendingLayers={pendingLayers} />
                       </AnimatePresence>
                     </TabPanel>
                     <TabPanel as={Fragment} unmount={true}>
                       <AnimatePresence mode="wait">
-                        <MallTab onPartClick={addPart} />
+                        <MallTab onPartClick={addTraitToLayer} />
                       </AnimatePresence>
                     </TabPanel>
                   </TabPanels>

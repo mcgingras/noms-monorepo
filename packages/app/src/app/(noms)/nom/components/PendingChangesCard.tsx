@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import CaratDownIcon from "@/components/icons/CaratDownIcon";
 import CaratUpIcon from "@/components/icons/CaratUpIcon";
 import { Layer, LayerChangeType } from "@/types/layer";
+import { saveNom } from "@/lib/viem/saveNom";
+import { useParams } from "next/navigation";
 
 const SmoothAnimatePresence = ({
   children,
@@ -85,18 +87,32 @@ const ChangeRow = ({ layer }: { layer: Layer }) => {
   return null;
 };
 
-const PendingChangesCard = ({ layers }: { layers: Layer[] }) => {
+const PendingChangesCard = ({
+  initialLayers,
+  layers,
+}: {
+  initialLayers: Layer[];
+  layers: Layer[];
+}) => {
+  const nomId = useParams().nomId as string;
   const [changesOpen, setChangesOpen] = useState(false);
 
-  const totalChanges = layers.reduce((acc, layer) => {
-    if (layer.type === LayerChangeType.BUY_AND_EQUIP) {
-      return acc + 2;
-    }
-    if (layer.type === LayerChangeType.FIXED) {
-      return acc;
-    }
-    return acc + 1;
-  }, 0);
+  const hasLayerOrderChanged =
+    layers.length === initialLayers.length &&
+    layers.some((layer, index) => {
+      return layer.trait.id !== initialLayers[index].trait.id;
+    });
+
+  const totalChanges =
+    layers.reduce((acc, layer) => {
+      if (layer.type === LayerChangeType.BUY_AND_EQUIP) {
+        return acc + 2;
+      }
+      if (layer.type === LayerChangeType.FIXED) {
+        return acc;
+      }
+      return acc + 1;
+    }, 0) + (hasLayerOrderChanged ? 1 : 0);
 
   if (totalChanges === 0) {
     return null;
@@ -143,10 +159,23 @@ const PendingChangesCard = ({ layers }: { layers: Layer[] }) => {
             {layers.map((layer) => (
               <ChangeRow key={layer.trait.id} layer={layer} />
             ))}
+            {hasLayerOrderChanged && (
+              <span className="flex flex-row items-center space-x-2">
+                <span className="h-2 w-2 rounded-full block bg-gray-500"></span>
+                <span className="pangram-sans font-bold text-sm text-gray-300">
+                  Reorder layers
+                </span>
+              </span>
+            )}
           </div>
         </motion.div>
       </SmoothAnimatePresence>
-      <button className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2">
+      <button
+        className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2"
+        onClick={async () => {
+          await saveNom(nomId, layers);
+        }}
+      >
         <span className="pangram-sans font-bold">Save changes</span>
         <span className="pangram-sans-compact font-bold text-sm bg-black/30 px-2 py-1 rounded">
           0 ETH

@@ -34,8 +34,8 @@ else
     echo "Port 8545 is free."
 fi
 
-# Start Anvil with saved state
-anvil --fork-url "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" --chain-id 1337 --load-state anvil_state.json > anvil.log 2>&1 &
+# Start Anvil
+anvil --fork-url "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" --chain-id 1337 > anvil.log 2>&1 &
 ANVIL_PID=$!
 
 echo "Waiting for Anvil to start up before running scripts..."
@@ -93,30 +93,18 @@ PONDER_PID=$!
 # Return to the root directory
 cd ../..
 
-# Start Next.js app
-echo "Starting Next.js app..."
-cd packages/app && npm run dev &
-NEXTJS_PID=$!
-
-# Return to the root directory
-cd ../..
-
 # Function to handle script termination
 cleanup() {
-    echo "Terminating Anvil, Ponder, and Next.js app..."
-    # After your writes are complete
-    echo "Saving Anvil state..."
-    curl -X POST -H "Content-Type: application/json" --data '{"id":1, "jsonrpc":"2.0", "method": "anvil_dumpState", "params": ["anvil_state.json"]}' http://localhost:8545
+    echo "Terminating Anvil and Ponder..."
     kill $ANVIL_PID
     kill $PONDER_PID
-    kill $NEXTJS_PID
     exit 0
 }
 
 # Set up trap to call cleanup function on script termination
 trap cleanup SIGINT SIGTERM
 
-echo "Anvil, Ponder, and Next.js app are running. Press Ctrl+C to stop all processes."
+echo "Anvil and Ponder app are running. Press Ctrl+C to stop all processes."
 
 # Wait for all processes
-wait $ANVIL_PID $PONDER_PID $NEXTJS_PID
+wait $ANVIL_PID $PONDER_PID

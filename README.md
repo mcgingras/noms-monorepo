@@ -46,15 +46,6 @@ In dev mode, you can view a GraphQL client at [localhost:42069](http://localhost
 ### extras
 https://github.com/ponder-sh/ponder/tree/main/examples/with-foundry
 
-```
-npx wagmi generate
-npx ponder dev
-```
-
-
-### For minting and creating 6551 account in one function block
-https://github.com/0xStation/0xrails-periphery/blob/b3dd5a939a29ca4995d2c6aebde8a4c159e685dc/src/accountGroup/module/MintCreateInitializeController.sol#L66
-
 
 ###
-eoa => owns nom NFT => has TBA => owns traits
+nc localhost 3000

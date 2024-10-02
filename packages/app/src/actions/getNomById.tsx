@@ -10,6 +10,8 @@ const getNomById = async (tokenId: number) => {
           tokenId
           traits {
             items {
+                equipped
+                orderIndex
                 trait {
                     id
                     name
@@ -38,7 +40,15 @@ const getNomById = async (tokenId: number) => {
   });
 
   const data = await response.json();
-  return data.data.noms.items[0];
+  const nom = data.data.noms.items[0];
+  const sortedTraits = nom.traits.items.sort(
+    (a: any, b: any) => b.orderIndex - a.orderIndex
+  );
+
+  return {
+    ...nom,
+    traits: sortedTraits,
+  };
 };
 
 export default getNomById;

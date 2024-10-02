@@ -6,9 +6,12 @@ import { motion } from "framer-motion";
 import ChangingRoomRow from "../components/ChangingRoomRow";
 import HangerIcon from "@/components/icons/Hanger";
 import SearchInput from "./SearchInput";
+import { Layer } from "@/types/layer";
 
-const ClosetTab = ({ pendingParts }: { pendingParts: any[] }) => {
-  const [selectedPart, setSelectedPart] = useState<any | null>(pendingParts[0]);
+const ClosetTab = ({ pendingLayers }: { pendingLayers: Layer[] }) => {
+  const [selectedPart, setSelectedPart] = useState<any | null>(
+    pendingLayers[0]
+  );
   const ownedParts = [];
 
   return (
@@ -23,21 +26,21 @@ const ClosetTab = ({ pendingParts }: { pendingParts: any[] }) => {
       <AnimatedTabsVertical />
       <div className="flex-1 flex flex-col">
         <SearchInput />
-        {pendingParts.length > 0 && (
+        {pendingLayers.length > 0 && (
           <div className="w-full bg-gray-900 p-2 rounded-lg mt-2">
             <h3 className="pangram-sans-compact font-bold">Pending changes</h3>
             <div className="mt-2 flex flex-row flex-wrap gap-2">
-              {pendingParts.map((part) => (
+              {pendingLayers.map((layer) => (
                 <div
-                  key={part.id}
+                  key={layer.trait.id}
                   className="w-[15%] aspect-square rounded-lg bg-gray-800 cursor-pointer"
-                  onClick={() => setSelectedPart(part)}
+                  onClick={() => setSelectedPart(layer)}
                 >
                   <img
-                    src={`data:image/svg+xml;base64,${part.svg}`}
-                    alt={part.name}
+                    src={`data:image/svg+xml;base64,${layer.trait.svg}`}
+                    alt={layer.trait.name}
                     className={`rounded-lg border-blue-500 border-4 ${
-                      selectedPart === part
+                      selectedPart === layer
                         ? "ring ring-offset-0 ring-yellow-500"
                         : ""
                     }`}

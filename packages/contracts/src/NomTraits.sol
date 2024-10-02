@@ -18,15 +18,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract NomTraits is ERC1155, INomTraits, Ownable {
     using Strings for uint256;
 
-    uint256 traitIdCount;
+
     address public easel;
     address public nomContractAddress;
-    mapping (uint256 => Trait) traits;
+    uint256 _traitIdCount;
+    mapping (uint256 => Trait) _traits;
 
     // for equipping
-    mapping(address => mapping(uint256 => uint256)) equippedByOwner; // nom (tbaAddress) => (tokenId => tokenId) [linked list]
-    mapping(address => uint256) counts; // nom (tbaAddres) => count
-    uint256 constant SENTINEL_TOKEN_ID = 0;
+    mapping(address => mapping(uint256 => uint256)) _equippedByOwner; // nom (tbaAddress) => (tokenId => tokenId) [linked list]
+    mapping(address => uint256) _counts; // nom (tbaAddres) => count
+    uint256 constant _SENTINEL_TOKEN_ID = 0;
 
     // Minting module system
     address public defaultMintModule;
@@ -90,19 +91,19 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param name The name of the trait.
      */
     function registerTrait(bytes memory rleBytes, string memory name) public {
-      traitIdCount = traitIdCount + 1;
-      traits[traitIdCount] = Trait({
+      _traitIdCount = _traitIdCount + 1;
+      _traits[_traitIdCount] = Trait({
           name: name,
           rleBytes: rleBytes,
           creator: msg.sender
       });
-      emit TraitRegistered(traitIdCount, rleBytes, name, msg.sender);
+      emit TraitRegistered(_traitIdCount, rleBytes, name, msg.sender);
     }
 
 
-    function registerBatchTraits(Trait[] memory _traits) public {
-      for (uint256 i = 0; i < _traits.length; i++) {
-        registerTrait(_traits[i].rleBytes, _traits[i].name);
+    function registerBatchTraits(Trait[] memory _traitsToRegister) public {
+      for (uint256 i = 0; i < _traitsToRegister.length; i++) {
+        registerTrait(_traitsToRegister[i].rleBytes, _traitsToRegister[i].name);
       }
     }
 
@@ -113,7 +114,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @return Trait memory The trait data.
      */
     function getTraitData(uint256 traitId) public view returns (Trait memory) {
-      return traits[traitId];
+      return _traits[traitId];
     }
 
     /**
@@ -123,7 +124,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @return bytes memory The image data for the trait.
      */
     function getImageDataForTrait(uint256 traitId) public view returns (bytes memory) {
-      Trait memory trait = traits[traitId];
+      Trait memory trait = _traits[traitId];
       return trait.rleBytes;
     }
 
@@ -134,7 +135,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @return string memory The name of the trait.
      */
     function getNameForTrait(uint256 traitId) public view returns (string memory) {
-      Trait memory trait = traits[traitId];
+      Trait memory trait = _traits[traitId];
       return trait.name;
     }
 
@@ -184,8 +185,8 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         uint256 traitId,
         address module
     ) external {
-        require(traits[traitId].rleBytes.length > 0, "Trait does not exist");
-        require(msg.sender == owner() || msg.sender == traits[traitId].creator, "Not authorized to set mint module");
+        require(_traits[traitId].rleBytes.length > 0, "Trait does not exist");
+        require(msg.sender == owner() || msg.sender == _traits[traitId].creator, "Not authorized to set mint module");
         traitMintModules[traitId] = module;
         emit MintModuleSet(traitId, module);
     }
@@ -276,11 +277,11 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         require(newTokenIds.length > 0, "Must equip at least one token.");
         address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
 
-        uint256[] memory prevTokenIds = getEquippedTokenIds(nomTokenId);
         _validateTokens(nomTBA, newTokenIds);
-        _updateEquippedTokens(nomTBA, newTokenIds, prevTokenIds, nomTokenId);
         _updateLinkedList(nomTBA, newTokenIds);
-        counts[nomTBA] = newTokenIds.length;
+        _counts[nomTBA] = newTokenIds.length;
+
+        emit TraitsEquipped(nomTBA, nomTokenId, newTokenIds);
     }
 
     /**
@@ -295,36 +296,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     ) internal view {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             require(IERC1155(address(this)).balanceOf(nomTBA, tokenIds[i]) > 0, "Address must own token.");
-            require(tokenIds[i] != SENTINEL_TOKEN_ID, "Invalid token.");
-        }
-    }
-
-    /**
-     * @notice Updates the equipped tokens for a nom.
-     * @dev Checks for removed tokens and emits events accordingly.
-     * @param nomTBA The address of the nom.
-     * @param newTokenIds The new IDs of the tokens to equip.
-     * @param prevTokenIds The previous IDs of the tokens to equip.
-     * @param nomTokenId The ID of the nom.
-     */
-    function _updateEquippedTokens(
-        address nomTBA,
-        uint256[] memory newTokenIds,
-        uint256[] memory prevTokenIds,
-        uint256 nomTokenId
-    ) internal {
-        // Check for removed tokens
-        for (uint256 i = 0; i < prevTokenIds.length; i++) {
-            if (!_contains(newTokenIds, prevTokenIds[i])) {
-                emit TokenUnequipped(nomTBA, prevTokenIds[i], nomTokenId);
-            }
-        }
-
-        // Check for added tokens
-        for (uint256 i = 0; i < newTokenIds.length; i++) {
-            if (!_contains(prevTokenIds, newTokenIds[i])) {
-                emit TokenEquipped(nomTBA, newTokenIds[i], nomTokenId);
-            }
+            require(tokenIds[i] != _SENTINEL_TOKEN_ID, "Invalid token.");
         }
     }
 
@@ -338,12 +310,12 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         address nomTBA,
         uint256[] memory tokenIds
     ) internal {
-        uint256 currentTokenId = SENTINEL_TOKEN_ID;
+        uint256 currentTokenId = _SENTINEL_TOKEN_ID;
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            equippedByOwner[nomTBA][currentTokenId] = tokenIds[i];
+            _equippedByOwner[nomTBA][currentTokenId] = tokenIds[i];
             currentTokenId = tokenIds[i];
         }
-        equippedByOwner[nomTBA][currentTokenId] = SENTINEL_TOKEN_ID;
+        _equippedByOwner[nomTBA][currentTokenId] = _SENTINEL_TOKEN_ID;
     }
 
     /**
@@ -377,12 +349,12 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         uint256 tokenId
     ) public view returns (bool) {
       address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
-      uint256 currentTokenId = equippedByOwner[nomTBA][SENTINEL_TOKEN_ID];
-      while (currentTokenId != SENTINEL_TOKEN_ID) {
+      uint256 currentTokenId = _equippedByOwner[nomTBA][_SENTINEL_TOKEN_ID];
+      while (currentTokenId != _SENTINEL_TOKEN_ID) {
           if (currentTokenId == tokenId) {
               return true;
           }
-          currentTokenId = equippedByOwner[nomTBA][currentTokenId];
+          currentTokenId = _equippedByOwner[nomTBA][currentTokenId];
       }
         return false;
     }
@@ -397,13 +369,13 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         uint256 nomTokenId
     ) public view returns (uint256[] memory) {
       address nomTBA = INom(nomContractAddress).getTBAForTokenId(nomTokenId);
-      uint256[] memory array = new uint256[](counts[nomTBA]);
+      uint256[] memory array = new uint256[](_counts[nomTBA]);
 
       uint256 index = 0;
-      uint256 currentTokenId = equippedByOwner[nomTBA][SENTINEL_TOKEN_ID];
-      while (currentTokenId != SENTINEL_TOKEN_ID) {
+      uint256 currentTokenId = _equippedByOwner[nomTBA][_SENTINEL_TOKEN_ID];
+      while (currentTokenId != _SENTINEL_TOKEN_ID) {
           array[index] = currentTokenId;
-          currentTokenId = equippedByOwner[nomTBA][currentTokenId];
+          currentTokenId = _equippedByOwner[nomTBA][currentTokenId];
           index++;
       }
 

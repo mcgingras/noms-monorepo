@@ -43,7 +43,7 @@ const LayerItem = ({
               {layer.trait.name}
             </h4>
             <span
-              className="group-hover:block hidden cursor-pointer"
+              className="group-hover:visible invisible cursor-pointer"
               onClick={() => removeLayer(layer)}
             >
               <ShirtIcon className="h-5 w-5" />
@@ -63,9 +63,11 @@ const LayerItem = ({
 const LayerStack = ({
   layers,
   setLayers,
+  initialLayers,
 }: {
   layers: Layer[];
   setLayers: (layers: Layer[]) => void;
+  initialLayers: Layer[];
 }) => {
   const onDragEnd = (result: any) => {
     if (!result.destination) {
@@ -147,7 +149,7 @@ const LayerStack = ({
           </Droppable>
           <div className="absolute h-[60px] w-full bg-gradient-to-t from-black to-transparent bottom-0 left-0"></div>
         </div>
-        <PendingChangesCard layers={layers} />
+        <PendingChangesCard layers={layers} initialLayers={initialLayers} />
       </section>
     </DragDropContext>
   );

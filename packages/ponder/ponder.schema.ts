@@ -40,6 +40,7 @@ export default createSchema((p) => ({
     id: p.string(),
     quantity: p.int(),
     equipped: p.boolean(),
+    orderIndex: p.int().optional(),
     nomId: p.string().references("Nom.id"),
     traitId: p.bigint().references("Trait.id"),
     nom: p.one("nomId"),

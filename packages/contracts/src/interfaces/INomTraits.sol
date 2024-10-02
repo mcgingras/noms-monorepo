@@ -9,8 +9,7 @@ interface INomTraits {
     }
 
     event TraitRegistered(uint256 traitId, bytes rleBytes, string name, address creator);
-    event TokenEquipped(address indexed owner, uint256 indexed traitTokenId, uint256 indexed nomTokenId);
-    event TokenUnequipped(address indexed owner, uint256 indexed traitTokenId, uint256 indexed nomTokenId);
+    event TraitsEquipped(address indexed owner, uint256 indexed nomTokenId, uint256[] traitIds);
 
     function registerTrait(bytes memory rleBytes, string memory name) external;
     function registerBatchTraits(Trait[] memory _traits) external;
