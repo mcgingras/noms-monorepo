@@ -1,14 +1,14 @@
 import Image from "next/image";
-import ClosetList from "./ClosetList";
+import ClosetList from "@/components/ClosetList";
 import TraitViewer from "@/components/TraitViewer";
 
-const ClosetTab = ({
+const NomBuilderClosetTabContent = ({
   pendingTraits,
-  existingNomTraits,
+  ownedTraits,
   selectedTraitId,
 }: {
   pendingTraits: any[];
-  existingNomTraits: any[];
+  ownedTraits: any[];
   selectedTraitId: string;
 }) => {
   return (
@@ -36,11 +36,11 @@ const ClosetTab = ({
       <hr className="mt-2 border-gray-900" />
       <div className="pt-2 flex-1">
         <h3 className="pangram-sans-compact font-bold">Closet</h3>
-        <ClosetList traits={existingNomTraits} />
+        <ClosetList traits={ownedTraits} />
       </div>
       {selectedTraitId && <TraitViewer traitId={selectedTraitId} />}
     </>
   );
 };
 
-export default ClosetTab;
+export default NomBuilderClosetTabContent;

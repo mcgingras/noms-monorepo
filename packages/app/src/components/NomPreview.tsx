@@ -1,7 +1,7 @@
 import RenderingNom from "@/components/RenderingNom";
 import { Layer } from "@/types/layer";
 
-const NomViewer = ({ layers }: { layers: Layer[] }) => {
+const NomPreview = ({ layers }: { layers: Layer[] }) => {
   return (
     <div className="p-1 h-full flex-1">
       <div
@@ -26,4 +26,4 @@ const NomViewer = ({ layers }: { layers: Layer[] }) => {
   );
 };
 
-export default NomViewer;
+export default NomPreview;

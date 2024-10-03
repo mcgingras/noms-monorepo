@@ -114,7 +114,7 @@ const LayerStack = ({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <section className="h-full flex flex-col">
+      <section className="h-full flex flex-col w-[288px]">
         <div className="flex flex-row items-center space-x-2 mb-2">
           <h2 className="oziksoft text-xl">All layers</h2>
           <span className="oziksoft bg-blue-500 rounded-full text-xl h-5 w-5 flex items-center justify-center">
