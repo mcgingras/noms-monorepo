@@ -2,23 +2,23 @@ import Image from "next/image";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import { NomTrait } from "@/types/trait";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
+import { cn } from "@/lib/utils";
 
 const ClosetItem = ({ nomTrait }: { nomTrait: NomTrait }) => {
   const addSearchParam = useAddSearchParam();
 
-  //   <div
-  //       className={`group bg-[#2d2d2d] w-[100px] h-[100px] rounded-lg relative cursor-pointer ring-offset-gray-900 ring-[3px] ring-offset-4 hover:ring-[#FDCB3F] ${
-  //         isActive ? "ring-[#FDCB3F]" : "ring-transparent"
-  //       }`}
   return (
     <div
-      className="min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer ring-offset-gray-900 ring-[3px] ring-offset-4 hover:ring-[#FDCB3F]"
+      className={cn(
+        "min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer ring-0 hover:ring-[3px] ring-transparent ring-offset-4 hover:ring-[#FDCB3F] transition-all",
+        nomTrait.equipped ? "ring-offset-blue-500" : "ring-offset-gray-900"
+      )}
       onClick={() => {
         addSearchParam("trait", nomTrait.trait.id.toString());
       }}
     >
-      <div className="absolute top-[-4px] left-[45%] flex flex-col">
-        <div className="h-6 w-2 rounded bg-[#3E3D3D] z-20"></div>
+      <div className="absolute top-[-16px] left-[45%] flex flex-col">
+        <div className="h-8 w-2 rounded bg-[#3E3D3D] z-20"></div>
         <span className="h-4 w-4 rounded-full bg-black mt-[-10px] ml-[-4px] z-10"></span>
       </div>
       <Image
@@ -33,11 +33,11 @@ const ClosetItem = ({ nomTrait }: { nomTrait: NomTrait }) => {
 
 const ClosetRow = ({ nomTraits }: { nomTraits: NomTrait[] }) => {
   return (
-    <div className="mt-4 flex flex-row flex-wrap gap-4 relative px-2">
+    <div className="mt-6 flex flex-row flex-wrap gap-4 relative px-2">
       {nomTraits.map((nomTrait) => (
         <ClosetItem key={nomTrait.id} nomTrait={nomTrait} />
       ))}
-      <div className="h-8 w-full bg-gray-900 rounded absolute left-0 top-[-8px]"></div>
+      <div className="h-12 w-full bg-gray-900 rounded absolute left-0 top-[-20px]"></div>
     </div>
   );
 };
