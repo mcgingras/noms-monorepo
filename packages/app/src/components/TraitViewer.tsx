@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import getTraitById from "../actions/getTraitById";
 
-const TraitViewer = ({ traitId }: { traitId: string }) => {
-  const { data: trait } = useQuery({
+const TraitViewer = ({ traitId }: { traitId: number }) => {
+  const { data: trait, isLoading } = useQuery({
     queryKey: ["trait", traitId],
-    queryFn: () => getTraitById(Number(traitId)),
+    queryFn: () => getTraitById(traitId),
   });
 
   return (
@@ -30,7 +30,7 @@ const TraitViewer = ({ traitId }: { traitId: string }) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-row space-x-2 mt-4 justify-between h-[100px]">
+      <div className="flex flex-row space-x-2 mt-4 justify-between">
         <p className="pangram-sans w-3/4">
           Here is where the trait description would go. Here is where the trait
           description would go. Here is where the trait description would go.

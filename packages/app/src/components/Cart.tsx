@@ -1,10 +1,7 @@
-const Cart = ({
-  pendingParts,
-  onClick,
-}: {
-  pendingParts: any[];
-  onClick?: () => void;
-}) => {
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
+
+const Cart = ({ onClick }: { onClick?: () => void }) => {
+  const pendingTraits = useNomBuilderContext((state) => state.pendingTraits);
   return (
     <span
       className="oziksoft text-2xl cursor-pointer gap-x-2 flex flex-row items-center justify-center"
@@ -12,7 +9,7 @@ const Cart = ({
     >
       <span>Cart</span>
       <span className="bg-blue-500 h-6 w-6 flex items-center justify-center rounded-full">
-        {pendingParts.length}
+        {pendingTraits.length}
       </span>
     </span>
   );

@@ -1,16 +1,15 @@
+"use client";
 import NomBuilder from "@/components/NomBuilder";
+import { NomBuilderProvider } from "@/stores/nomBuilder/context";
 
-const ChangingRoom = ({
-  params,
-  searchParams,
-}: {
-  params: { nomId: string };
-  searchParams: { trait: string };
-}) => {
+const ChangingRoom = ({ params }: { params: { nomId: string } }) => {
   const nomId = params.nomId;
-  const selectedTraitId = searchParams.trait;
 
-  return <NomBuilder nomId={nomId} selectedTraitId={selectedTraitId} />;
+  return (
+    <NomBuilderProvider nomId={nomId}>
+      <NomBuilder />
+    </NomBuilderProvider>
+  );
 };
 
 export default ChangingRoom;

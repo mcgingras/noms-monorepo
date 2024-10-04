@@ -1,7 +1,8 @@
 import RenderingNom from "@/components/RenderingNom";
-import { Layer } from "@/types/layer";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
-const NomPreview = ({ layers }: { layers: Layer[] }) => {
+const NomPreview = () => {
+  const layers = useNomBuilderContext((state) => state.layers);
   return (
     <div className="p-1 h-full flex-1">
       <div

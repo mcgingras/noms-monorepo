@@ -5,6 +5,7 @@ import { Layer } from "@/types/layer";
 import PendingChangesCard from "./PendingChangesCard";
 import ShirtIcon from "@/components/icons/Shirt";
 import { LayerChangeType } from "@/types/layer";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 const LayerItem = ({
   layer,
@@ -39,7 +40,7 @@ const LayerItem = ({
                 className="w-full h-full"
               />
             </span>
-            <h4 className="pangram-sans font-bold flex-1">
+            <h4 className="pangram-sans font-bold flex-1 truncate overflow-hidden text-ellipsis">
               {layer.trait.name}
             </h4>
             <span
@@ -60,15 +61,9 @@ const LayerItem = ({
   );
 };
 
-const LayerStack = ({
-  layers,
-  setLayers,
-  initialLayers,
-}: {
-  layers: Layer[];
-  setLayers: (layers: Layer[]) => void;
-  initialLayers: Layer[];
-}) => {
+const LayerStack = ({ initialLayers }: { initialLayers: Layer[] }) => {
+  const layers = useNomBuilderContext((state) => state.layers);
+  const setLayers = useNomBuilderContext((state) => state.setLayers);
   const onDragEnd = (result: any) => {
     if (!result.destination) {
       return;

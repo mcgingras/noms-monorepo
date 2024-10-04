@@ -18,7 +18,7 @@ const TraitCard = ({
   return (
     <div
       className={cn(
-        "bg-[#333] w-[100px] h-[100px] rounded-lg relative cursor-pointer",
+        "bg-[#2d2d2d] w-[100px] h-[100px] rounded-lg relative cursor-pointer",
         equipped && "ring-4 ring-[#FDCB3F]",
         isActive && "ring-4 ring-blue-500",
         equipped &&

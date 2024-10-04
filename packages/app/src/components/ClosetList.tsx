@@ -1,13 +1,18 @@
 import Image from "next/image";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import { NomTrait } from "@/types/trait";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 const ClosetItem = ({ nomTrait }: { nomTrait: NomTrait }) => {
   const addSearchParam = useAddSearchParam();
 
+  //   <div
+  //       className={`group bg-[#2d2d2d] w-[100px] h-[100px] rounded-lg relative cursor-pointer ring-offset-gray-900 ring-[3px] ring-offset-4 hover:ring-[#FDCB3F] ${
+  //         isActive ? "ring-[#FDCB3F]" : "ring-transparent"
+  //       }`}
   return (
     <div
-      className="min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer"
+      className="min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer ring-offset-gray-900 ring-[3px] ring-offset-4 hover:ring-[#FDCB3F]"
       onClick={() => {
         addSearchParam("trait", nomTrait.trait.id.toString());
       }}
@@ -28,7 +33,7 @@ const ClosetItem = ({ nomTrait }: { nomTrait: NomTrait }) => {
 
 const ClosetRow = ({ nomTraits }: { nomTraits: NomTrait[] }) => {
   return (
-    <div className="mt-4 flex flex-row flex-wrap gap-2 relative px-2">
+    <div className="mt-4 flex flex-row flex-wrap gap-4 relative px-2">
       {nomTraits.map((nomTrait) => (
         <ClosetItem key={nomTrait.id} nomTrait={nomTrait} />
       ))}
@@ -37,9 +42,10 @@ const ClosetRow = ({ nomTraits }: { nomTraits: NomTrait[] }) => {
   );
 };
 
-const ClosetList = ({ traits }: { traits: NomTrait[] }) => {
+const ClosetList = () => {
+  const ownedTraits = useNomBuilderContext((state) => state.ownedTraits);
   // turn traits from array into array of length 6 arrays
-  const rows = traits.reduce((acc, trait, index) => {
+  const rows = ownedTraits.reduce((acc, trait, index) => {
     if (index % 6 === 0) {
       acc.push([trait]);
     } else {
