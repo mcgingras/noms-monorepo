@@ -1,8 +1,9 @@
 import { Nom } from "./nom";
 
 export type Trait = {
-  id: number;
+  id: string;
   name: string;
+  type: string;
   svg: string;
   rleBytes: string;
 };

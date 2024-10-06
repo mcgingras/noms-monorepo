@@ -3,16 +3,20 @@
 import { Tab, TabList } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 let tabs = [
   { id: "Closet", label: "Closet" },
   { id: "Traits", label: "Shopping center" },
-  //   { id: "Limited edition", label: "Limited edition" },
+  //   { id: "New", label: "New traits" },
 ];
 
 function AnimatedTabs() {
   let [transitionComplete, setTransitionComplete] = useState(true);
   let [activeTab, setActiveTab] = useState(tabs[0].id);
+  const setTraitSearchQuery = useNomBuilderContext(
+    (state) => state.setTraitSearchQuery
+  );
 
   return (
     <TabList className="flex space-x-1 bg-gray-900 rounded-full">
@@ -25,6 +29,7 @@ function AnimatedTabs() {
             setTimeout(() => {
               setTransitionComplete(true);
             }, 100);
+            setTraitSearchQuery("");
           }}
           className={`${
             activeTab === tab.id && transitionComplete

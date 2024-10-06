@@ -5,6 +5,7 @@ import CaratUpIcon from "@/components/icons/CaratUpIcon";
 import { Layer, LayerChangeType } from "@/types/layer";
 import { saveNom } from "@/lib/viem/saveNom";
 import { useParams } from "next/navigation";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 const SmoothAnimatePresence = ({
   children,
@@ -87,15 +88,11 @@ const ChangeRow = ({ layer }: { layer: Layer }) => {
   return null;
 };
 
-const PendingChangesCard = ({
-  initialLayers,
-  layers,
-}: {
-  initialLayers: Layer[];
-  layers: Layer[];
-}) => {
+const PendingChangesCard = () => {
   const nomId = useParams().nomId as string;
   const [changesOpen, setChangesOpen] = useState(false);
+  const layers = useNomBuilderContext((state) => state.layers);
+  const initialLayers = [] as any[];
 
   const hasLayerOrderChanged =
     layers.length === initialLayers.length &&

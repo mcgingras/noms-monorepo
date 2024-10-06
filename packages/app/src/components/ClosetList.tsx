@@ -1,20 +1,32 @@
 import Image from "next/image";
-import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import { NomTrait } from "@/types/trait";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 import { cn } from "@/lib/utils";
+import { Trait } from "@/types/trait";
+import { useSearchParams } from "next/navigation";
 
-const ClosetItem = ({ nomTrait }: { nomTrait: NomTrait }) => {
-  const addSearchParam = useAddSearchParam();
+const ClosetItem = ({
+  nomTrait,
+  onClickTrait,
+}: {
+  nomTrait: NomTrait;
+  onClickTrait: (trait: Trait) => void;
+}) => {
+  const selectedTraitId = useNomBuilderContext(
+    (state) => state.selectedTraitId
+  );
 
   return (
     <div
       className={cn(
-        "min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer ring-0 hover:ring-[3px] ring-transparent ring-offset-4 hover:ring-[#FDCB3F] transition-all",
-        nomTrait.equipped ? "ring-offset-blue-500" : "ring-offset-gray-900"
+        "min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer ring-offset-4 hover:ring-[3px] hover:ring-[#FDCB3F] transition-all",
+        nomTrait.equipped ? "ring-offset-blue-500" : "ring-offset-gray-900",
+        nomTrait.trait.id === selectedTraitId
+          ? "ring-[3px] ring-[#FDCB3F]"
+          : "ring-0 ring-transparent"
       )}
       onClick={() => {
-        addSearchParam("trait", nomTrait.trait.id.toString());
+        onClickTrait(nomTrait.trait);
       }}
     >
       <div className="absolute top-[-16px] left-[45%] flex flex-col">
@@ -31,21 +43,44 @@ const ClosetItem = ({ nomTrait }: { nomTrait: NomTrait }) => {
   );
 };
 
-const ClosetRow = ({ nomTraits }: { nomTraits: NomTrait[] }) => {
+const ClosetRow = ({
+  nomTraits,
+  onClickTrait,
+}: {
+  nomTraits: NomTrait[];
+  onClickTrait: (trait: Trait) => void;
+}) => {
   return (
     <div className="mt-6 flex flex-row flex-wrap gap-4 relative px-2">
       {nomTraits.map((nomTrait) => (
-        <ClosetItem key={nomTrait.id} nomTrait={nomTrait} />
+        <ClosetItem
+          key={nomTrait.id}
+          nomTrait={nomTrait}
+          onClickTrait={onClickTrait}
+        />
       ))}
       <div className="h-12 w-full bg-gray-900 rounded absolute left-0 top-[-20px]"></div>
     </div>
   );
 };
 
-const ClosetList = () => {
+const ClosetList = ({
+  onClickTrait,
+}: {
+  onClickTrait: (trait: Trait) => void;
+}) => {
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type") || "all";
+
   const ownedTraits = useNomBuilderContext((state) => state.ownedTraits);
+
+  const filteredTraits = ownedTraits.filter((trait) => {
+    if (type === "all") return true;
+    return trait.trait.type === type;
+  });
+
   // turn traits from array into array of length 6 arrays
-  const rows = ownedTraits.reduce((acc, trait, index) => {
+  const rows = filteredTraits.reduce((acc, trait, index) => {
     if (index % 6 === 0) {
       acc.push([trait]);
     } else {
@@ -57,7 +92,7 @@ const ClosetList = () => {
   return (
     <>
       {rows.map((row: any[], index: number) => (
-        <ClosetRow key={index} nomTraits={row} />
+        <ClosetRow key={index} nomTraits={row} onClickTrait={onClickTrait} />
       ))}
     </>
   );

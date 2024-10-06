@@ -7,6 +7,12 @@ export interface INomBuilderState {
   layers: Layer[];
   ownedTraits: NomTrait[];
   pendingTraits: Trait[];
+  selectedTraitId: string | null;
+  showingSelectedTraitDetails: boolean;
+  traitSearchQuery: string;
+  setTraitSearchQuery: (query: string) => void;
+  setShowingSelectedTraitDetails: (showing: boolean) => void;
+  setSelectedTraitId: (id: string) => void;
   addLayer: (layer: Layer) => void;
   removeLayer: (layer: Layer) => void;
   setLayers: (layers: Layer[]) => void;
@@ -25,19 +31,28 @@ export type NomBuilderStore = ReturnType<typeof createNomBuilderStore>;
 export const createNomBuilderStore = (nom: Nom) => {
   const ownedTraits = nom.traits || [];
   const initialLayers =
-    ownedTraits?.map((nomTrait) => {
-      return {
-        trait: nomTrait.trait,
-        equipped: nomTrait.equipped,
-        owned: true,
-        type: LayerChangeType.FIXED,
-      };
-    }) || [];
+    ownedTraits
+      ?.filter((nomTrait) => nomTrait.equipped)
+      .map((nomTrait) => {
+        return {
+          trait: nomTrait.trait,
+          equipped: nomTrait.equipped,
+          owned: true,
+          type: LayerChangeType.FIXED,
+        };
+      }) || [];
 
   return createStore<INomBuilderState>((set) => ({
     layers: initialLayers,
     ownedTraits,
     pendingTraits: [],
+    selectedTraitId: null,
+    showingSelectedTraitDetails: false,
+    traitSearchQuery: "",
+    setTraitSearchQuery: (query: string) => set({ traitSearchQuery: query }),
+    setShowingSelectedTraitDetails: (showing: boolean) =>
+      set({ showingSelectedTraitDetails: showing }),
+    setSelectedTraitId: (id: string) => set({ selectedTraitId: id }),
     addLayer: (layer: Layer) =>
       set((state: any) => ({ layers: [...state.layers, layer] })),
     removeLayer: (layer: Layer) =>

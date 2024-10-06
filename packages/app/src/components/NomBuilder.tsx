@@ -17,7 +17,7 @@ const NomBuilder = () => {
   return (
     <main className="h-[calc(100vh-66px)] w-full">
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
-        <LayerStack initialLayers={[]} />
+        <LayerStack />
         <NomBuilderCanvas>
           <NomPreview />
           <WavyTab size={size} onClick={toggleSize} />

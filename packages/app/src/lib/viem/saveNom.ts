@@ -1,4 +1,4 @@
-import { Layer } from "@/types/layer";
+import { Layer, LayerChangeType } from "@/types/layer";
 import { walletClient, publicClient } from "./index";
 import { nomTraitsAbi, nomAbi } from "../../../../ponder/foundry/abis";
 import { localhost } from "viem/chains";
@@ -43,12 +43,19 @@ export const saveNom = async (nomId: string, layers: Layer[]) => {
     });
   }
 
+  const equippedTraitLayers = orderedLayers.filter(
+    (layer) => layer.type !== LayerChangeType.UNEQUIP
+  );
+
   const equipTraitTx = await walletClient.writeContract({
     chain: localhost,
     account,
     ...traitContract,
     functionName: "setEquipped",
-    args: [BigInt(nomId), orderedLayers.map((layer) => BigInt(layer.trait.id))],
+    args: [
+      BigInt(nomId),
+      equippedTraitLayers.map((layer) => BigInt(layer.trait.id)),
+    ],
   });
 
   return { mintTraitTx, equipTraitTx };

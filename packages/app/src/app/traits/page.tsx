@@ -14,7 +14,7 @@ const TraitsPage = ({ searchParams }: { searchParams: any }) => {
   const { data } = useSuspenseQuery({
     queryKey: ["traits-query", searchParams.type || "all"],
     queryFn: async () => {
-      const traits = await getTraits(searchParams.type || "all");
+      const traits = await getTraits(searchParams.type || "all", "");
       return { traits };
     },
   });

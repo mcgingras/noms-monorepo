@@ -61,7 +61,7 @@ const LayerItem = ({
   );
 };
 
-const LayerStack = ({ initialLayers }: { initialLayers: Layer[] }) => {
+const LayerStack = () => {
   const layers = useNomBuilderContext((state) => state.layers);
   const setLayers = useNomBuilderContext((state) => state.setLayers);
   const onDragEnd = (result: any) => {
@@ -144,7 +144,7 @@ const LayerStack = ({ initialLayers }: { initialLayers: Layer[] }) => {
           </Droppable>
           <div className="absolute h-[60px] w-full bg-gradient-to-t from-black to-transparent bottom-0 left-0"></div>
         </div>
-        <PendingChangesCard layers={layers} initialLayers={initialLayers} />
+        <PendingChangesCard />
       </section>
     </DragDropContext>
   );

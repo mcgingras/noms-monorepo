@@ -1,7 +1,7 @@
 import { Context, ponder } from "@/generated";
 import { Address, isAddressEqual, getAddress } from "viem";
 import { createFullSVG } from "./utils";
-import { easelAbi, nomAbi } from "../foundry/abis";
+import { easelAbi, nomAbi, nomTraitsAbi } from "../foundry/abis";
 import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json";
 
 const txs = NomDeploy.transactions;
@@ -228,13 +228,25 @@ async function reduceTraitQuantity(
   return;
 }
 
+// TODO: issue here where it does not respect un-equipping
+// need to compare the existing equipped layers with the new equipped layers
+// and set all unequipped layers to not equipped
 ponder.on("ERC1155Contract:TraitsEquipped", async ({ event, context }) => {
   const { Nom, NomTrait } = await context.db;
-  const { NFTContract } = context.contracts;
+  const { NFTContract, ERC1155Contract } = context.contracts;
   const tbaAddress = event.args.owner;
   const traitTokenIds = event.args.traitIds;
 
-  const updatePromises = traitTokenIds.map(async (traitTokenId, index) => {
+  // get snapshot of equipped traits from previous block
+  const previouslyEquippedTraits = await context.client.readContract({
+    abi: nomTraitsAbi,
+    address: ERC1155Contract.address,
+    functionName: "getEquippedTokenIds",
+    args: [event.args.nomTokenId],
+    blockNumber: event.block.number - BigInt(1),
+  });
+
+  const equipPromises = traitTokenIds.map(async (traitTokenId, index) => {
     const nomTraitId = `${tbaAddress}-${traitTokenId}`;
     const nomTrait = await NomTrait.findUnique({
       id: nomTraitId,
@@ -251,7 +263,19 @@ ponder.on("ERC1155Contract:TraitsEquipped", async ({ event, context }) => {
     }
   });
 
-  await Promise.all(updatePromises);
+  const unequipPromises = previouslyEquippedTraits.map(async (traitTokenId) => {
+    if (!traitTokenIds.includes(traitTokenId)) {
+      const nomTraitId = `${tbaAddress}-${traitTokenId}`;
+      return NomTrait.update({
+        id: nomTraitId,
+        data: {
+          equipped: false,
+        },
+      });
+    }
+  });
+
+  await Promise.all([...equipPromises, ...unequipPromises]);
 
   // call tokenURI on the nom contract to refresh the fullSVG
   const tokenURI = await context.client.readContract({

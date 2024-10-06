@@ -1,8 +1,8 @@
 import { NomTrait } from "./trait";
 
 export type Nom = {
-  id: number;
+  id: string;
   fullSVG: string;
-  tokenId: number;
+  tokenId: string;
   traits?: NomTrait[];
 };

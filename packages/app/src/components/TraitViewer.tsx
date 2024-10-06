@@ -1,11 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import getTraitById from "../actions/getTraitById";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
-const TraitViewer = ({ traitId }: { traitId: number }) => {
+const TraitViewer = ({ traitId }: { traitId: string }) => {
   const { data: trait, isLoading } = useQuery({
     queryKey: ["trait", traitId],
-    queryFn: () => getTraitById(traitId),
+    queryFn: () => getTraitById(parseInt(traitId)),
   });
+
+  const setShowingSelectedTraitDetails = useNomBuilderContext(
+    (state) => state.setShowingSelectedTraitDetails
+  );
 
   return (
     <div className="p-2.5 bg-[#222] rounded-xl w-full">
@@ -37,7 +42,10 @@ const TraitViewer = ({ traitId }: { traitId: number }) => {
           Here is where the trait description would go. Here is where the trait
           description would go.
         </p>
-        <div className="font-bold pangram-sans-compact text-black text-sm bg-[#E3EDE3] rounded-full px-2 py-1 self-end cursor-pointer">
+        <div
+          className="font-bold pangram-sans-compact text-black text-sm bg-[#E3EDE3] rounded-full px-2 py-1 self-end cursor-pointer"
+          onClick={() => setShowingSelectedTraitDetails(true)}
+        >
           More info
         </div>
       </div>

@@ -1,26 +1,43 @@
 "use client";
 
-import { useState } from "react";
 import ClosetList from "@/components/ClosetList";
 import TraitViewer from "@/components/TraitViewer";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 import TraitCard from "@/components/TraitCard";
+import { Trait } from "@/types/trait";
+import { useSearchParams } from "next/navigation";
 
 const NomBuilderClosetTabContent = () => {
-  const [selectedTraitId, setSelectedTraitId] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type") || "all";
+
+  const setSelectedTraitId = useNomBuilderContext(
+    (state) => state.setSelectedTraitId
+  );
+  const selectedTraitId = useNomBuilderContext(
+    (state) => state.selectedTraitId
+  );
+
   const pendingTraits = useNomBuilderContext((state) => state.pendingTraits);
+  const filteredTraits = pendingTraits.filter((trait) => {
+    if (type === "all") return true;
+    return trait.type === type;
+  });
+
   return (
     <>
-      {pendingTraits.length > 0 && (
+      {filteredTraits.length > 0 && (
         <div className="w-full bg-gray-900 p-2 rounded-lg mt-2">
           <h3 className="pangram-sans-compact font-bold">Changing room</h3>
           <div className="mt-2 flex flex-row flex-wrap gap-4">
-            {pendingTraits.map((trait) => (
+            {filteredTraits.map((trait) => (
               <TraitCard
                 key={trait.id}
                 trait={trait}
                 isActive={false}
-                onClickTrait={() => {}}
+                onClickTrait={() => {
+                  setSelectedTraitId(trait.id.toString());
+                }}
               />
             ))}
           </div>
@@ -29,7 +46,11 @@ const NomBuilderClosetTabContent = () => {
       <hr className="mt-2 border-gray-900" />
       <div className="pt-2 flex-1">
         <h3 className="pangram-sans-compact font-bold">Closet</h3>
-        <ClosetList />
+        <ClosetList
+          onClickTrait={(trait: Trait) => {
+            setSelectedTraitId(trait.id.toString());
+          }}
+        />
       </div>
       {selectedTraitId && <TraitViewer traitId={selectedTraitId} />}
     </>
