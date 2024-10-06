@@ -9,7 +9,6 @@ import NomBuilderClosetTabContent from "./NomBuilderClosetTabContent";
 import Cart from "./Cart";
 import TraitDetailsSlider from "./TraitDetailsSlider";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
-import { cn } from "@/lib/utils";
 
 const NomBuilderTraitPalette = ({ size }: { size: "small" | "large" }) => {
   const [page, setPage] = useState<"cart" | "shop">("shop");

@@ -69,15 +69,27 @@ const ClosetList = ({
 }: {
   onClickTrait: (trait: Trait) => void;
 }) => {
-  const searchParams = useSearchParams();
-  const type = searchParams.get("type") || "all";
-
+  const typeQuery = useNomBuilderContext((state) => state.typeQuery);
+  const searchQuery = useNomBuilderContext((state) => state.traitSearchQuery);
   const ownedTraits = useNomBuilderContext((state) => state.ownedTraits);
 
-  const filteredTraits = ownedTraits.filter((trait) => {
-    if (type === "all") return true;
-    return trait.trait.type === type;
-  });
+  if (ownedTraits.length === 0) {
+    return (
+      <ClosetRow key={"empty-closet"} nomTraits={[]} onClickTrait={() => {}} />
+    );
+  }
+
+  const filteredTraits = ownedTraits
+    .filter((trait) => {
+      if (typeQuery === "all") return true;
+      return trait.trait.type === typeQuery;
+    })
+    .filter((trait) => {
+      if (searchQuery === "") return true;
+      return trait.trait.name
+        .toLowerCase()
+        .includes(searchQuery.trim().toLowerCase());
+    });
 
   // turn traits from array into array of length 6 arrays
   const rows = filteredTraits.reduce((acc, trait, index) => {

@@ -1,5 +1,5 @@
 import { Layer, LayerChangeType } from "@/types/layer";
-import { walletClient, publicClient } from "./index";
+import { getWalletClient, publicClient } from "./index";
 import { nomTraitsAbi, nomAbi } from "../../../../ponder/foundry/abis";
 import { localhost } from "viem/chains";
 import { TRAIT_ADDRESS, NOM_ADDRESS } from "@/lib/constants";
@@ -18,6 +18,11 @@ const nomContract = {
 // and if so, use the smart wallet to save the nom
 export const saveNom = async (nomId: string, layers: Layer[]) => {
   const orderedLayers = [...layers].reverse();
+  const walletClient = getWalletClient();
+  if (!walletClient) {
+    throw new Error("No wallet client found");
+  }
+
   const [account] = await walletClient.getAddresses();
   const tba = await publicClient.readContract({
     ...nomContract,

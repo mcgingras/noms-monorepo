@@ -10,6 +10,8 @@ export interface INomBuilderState {
   selectedTraitId: string | null;
   showingSelectedTraitDetails: boolean;
   traitSearchQuery: string;
+  typeQuery: string;
+  setTypeQuery: (query: string) => void;
   setTraitSearchQuery: (query: string) => void;
   setShowingSelectedTraitDetails: (showing: boolean) => void;
   setSelectedTraitId: (id: string) => void;
@@ -28,8 +30,8 @@ export type NomBuilderStore = ReturnType<typeof createNomBuilderStore>;
 // Idea of keeping track of all changes in a separate array so we can track
 // the history of changes. It would also allow us to easily track the order
 // changes, and can parse the total transaction diff by looking at all changes
-export const createNomBuilderStore = (nom: Nom) => {
-  const ownedTraits = nom.traits || [];
+export const createNomBuilderStore = (nom: Nom | null) => {
+  const ownedTraits = nom?.traits || [];
   const initialLayers =
     ownedTraits
       ?.filter((nomTrait) => nomTrait.equipped)
@@ -49,7 +51,9 @@ export const createNomBuilderStore = (nom: Nom) => {
     selectedTraitId: null,
     showingSelectedTraitDetails: false,
     traitSearchQuery: "",
+    typeQuery: "",
     setTraitSearchQuery: (query: string) => set({ traitSearchQuery: query }),
+    setTypeQuery: (query: string) => set({ typeQuery: query }),
     setShowingSelectedTraitDetails: (showing: boolean) =>
       set({ showingSelectedTraitDetails: showing }),
     setSelectedTraitId: (id: string) => set({ selectedTraitId: id }),

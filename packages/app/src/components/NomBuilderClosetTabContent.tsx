@@ -5,11 +5,10 @@ import TraitViewer from "@/components/TraitViewer";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 import TraitCard from "@/components/TraitCard";
 import { Trait } from "@/types/trait";
-import { useSearchParams } from "next/navigation";
 
 const NomBuilderClosetTabContent = () => {
-  const searchParams = useSearchParams();
-  const type = searchParams.get("type") || "all";
+  const typeQuery = useNomBuilderContext((state) => state.typeQuery);
+  const searchQuery = useNomBuilderContext((state) => state.traitSearchQuery);
 
   const setSelectedTraitId = useNomBuilderContext(
     (state) => state.setSelectedTraitId
@@ -19,10 +18,17 @@ const NomBuilderClosetTabContent = () => {
   );
 
   const pendingTraits = useNomBuilderContext((state) => state.pendingTraits);
-  const filteredTraits = pendingTraits.filter((trait) => {
-    if (type === "all") return true;
-    return trait.type === type;
-  });
+  const filteredTraits = pendingTraits
+    .filter((trait) => {
+      if (typeQuery === "all") return true;
+      return trait.type === typeQuery;
+    })
+    .filter((trait) => {
+      if (searchQuery === "") return true;
+      return trait.name
+        .toLowerCase()
+        .includes(searchQuery.trim().toLowerCase());
+    });
 
   return (
     <>

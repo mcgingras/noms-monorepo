@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import CaratDownIcon from "@/components/icons/CaratDownIcon";
 import CaratUpIcon from "@/components/icons/CaratUpIcon";
 import { Layer, LayerChangeType } from "@/types/layer";
-import { saveNom } from "@/lib/viem/saveNom";
 import { useParams } from "next/navigation";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
+import { usePathname } from "next/navigation";
+import { useAccount } from "wagmi";
+import SaveNomButton from "./SaveNomButton";
 
 const SmoothAnimatePresence = ({
   children,
@@ -89,7 +91,11 @@ const ChangeRow = ({ layer }: { layer: Layer }) => {
 };
 
 const PendingChangesCard = () => {
-  const nomId = useParams().nomId as string;
+  const { address } = useAccount();
+  // get route to check if "new" is present in the route
+  //   const pathname = usePathname();
+  //   const isNew = pathname.includes("new");
+
   const [changesOpen, setChangesOpen] = useState(false);
   const layers = useNomBuilderContext((state) => state.layers);
   const initialLayers = [] as any[];
@@ -167,17 +173,7 @@ const PendingChangesCard = () => {
           </div>
         </motion.div>
       </SmoothAnimatePresence>
-      <button
-        className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2"
-        onClick={async () => {
-          await saveNom(nomId, layers);
-        }}
-      >
-        <span className="pangram-sans font-bold">Save changes</span>
-        <span className="pangram-sans-compact font-bold text-sm bg-black/30 px-2 py-1 rounded">
-          0 ETH
-        </span>
-      </button>
+      <SaveNomButton />
     </div>
   );
 };

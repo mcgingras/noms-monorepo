@@ -3,7 +3,7 @@ export const getTraits = async (type: string = "all", searchQuery?: string) => {
 
   const query = `
             query GetTraits($type: String!, $searchQuery: String!) {
-                traits(where: { type_contains: $type, name_contains: $searchQuery }) {
+                traits(where: { type_contains: $type, name_contains: $searchQuery }, limit: 60) {
                     items {
                     id
                     name

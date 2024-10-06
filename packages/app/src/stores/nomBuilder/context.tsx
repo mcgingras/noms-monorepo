@@ -31,20 +31,31 @@ export const NomBuilderProvider = ({
   nomId,
 }: {
   children: React.ReactNode;
-  nomId: string;
+  nomId: string | null;
 }) => {
   const storeRef = useRef<NomBuilderStore | null>(null);
   const { data } = useQuery({
     queryKey: ["nom", nomId],
     queryFn: () => getNomById(Number(nomId)),
+    enabled: !!nomId,
   });
 
-  if (data && !storeRef.current) {
-    storeRef.current = createNomBuilderStore(data);
+  // If we have no nom, we are creating a new nom, and can initialize an empty store
+  // otherwise, we need to wait for the data to load before initializing the store
+  if (!nomId) {
+    storeRef.current = createNomBuilderStore(null);
+  } else {
+    if (data && !storeRef.current) {
+      storeRef.current = createNomBuilderStore(data);
+    }
   }
 
   if (!storeRef.current) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex items-center justify-center h-[200px] bg-gray-1000 p-2 w-full rounded-xl mt-10 animate-pulse">
+        <p className="pangram-sans">Loading the Nom Builder</p>
+      </div>
+    );
   }
 
   return (

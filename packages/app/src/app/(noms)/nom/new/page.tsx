@@ -1,9 +1,14 @@
+"use client";
+
 import NomBuilder from "@/components/NomBuilder";
+import { NomBuilderProvider } from "@/stores/nomBuilder/context";
 
-const NewNomPage = ({ searchParams }: { searchParams: { trait: string } }) => {
-  const selectedTraitId = searchParams.trait;
-
-  return <NomBuilder nomId={null} selectedTraitId={selectedTraitId} />;
+const NewNomPage = () => {
+  return (
+    <NomBuilderProvider nomId={null}>
+      <NomBuilder />
+    </NomBuilderProvider>
+  );
 };
 
 export default NewNomPage;

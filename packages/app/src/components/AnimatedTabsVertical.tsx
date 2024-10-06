@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 import SoftArrow from "@/components/icons/SoftArrow";
+import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 let tabs = [
   { id: "all", label: "Everything" },
@@ -18,12 +18,13 @@ let tabs = [
 function AnimatedTabs() {
   let [transitionComplete, setTransitionComplete] = useState(true);
   let [activeTab, setActiveTab] = useState(tabs[0].id);
-  const addSearchParam = useAddSearchParam();
+  const setTypeQuery = useNomBuilderContext((state) => state.setTypeQuery);
 
   const goToNextTab = (currentTab: string) => {
     const currentIndex = tabs.findIndex((tab) => tab.id === currentTab);
     const nextIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
     setActiveTab(tabs[nextIndex].id);
+    setTypeQuery(tabs[nextIndex].id);
   };
 
   const goToPreviousTab = (currentTab: string) => {
@@ -31,6 +32,7 @@ function AnimatedTabs() {
     const previousIndex =
       currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
     setActiveTab(tabs[previousIndex].id);
+    setTypeQuery(tabs[previousIndex].id);
   };
 
   return (
@@ -49,7 +51,7 @@ function AnimatedTabs() {
             onClick={() => {
               setTransitionComplete(false);
               setActiveTab(tab.id);
-              addSearchParam("type", tab.id);
+              setTypeQuery(tab.id);
               setTimeout(() => {
                 setTransitionComplete(true);
               }, 100);
