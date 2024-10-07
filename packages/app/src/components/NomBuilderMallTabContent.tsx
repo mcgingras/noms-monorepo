@@ -1,7 +1,5 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { getTraits } from "@/actions/getTraits";
 import TraitCard from "@/components/TraitCard";
 import TraitViewer from "@/components/TraitViewer";
 import ShirtIcon from "@/components/icons/Shirt";
@@ -28,10 +26,19 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
   };
 
   const isInStack = false;
+  const isEquipped = true;
+
+  if (isEquipped) {
+    return (
+      <div className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-2 left-2 flex items-center justify-center p-1">
+        <ShirtIcon className="text-white" filled={true} />
+      </div>
+    );
+  }
 
   return (
     <div
-      className="bg-[#222] rounded-lg absolute bottom-2 left-2 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0"
+      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-2 left-2 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0"
       onClick={(e) => {
         e.stopPropagation();
 
@@ -82,17 +89,14 @@ const NomBuilderMallTabContent = () => {
     }
   }, [inView, hasNextPage, isFetching, fetchNextPage]);
 
-  console.log("data", traits);
-  console.log("error", error);
-  console.log("isLoading", isLoading);
-  console.log("isFetching", isFetching);
-  console.log("hasNextPage", hasNextPage);
-  console.log("fetchNextPage", fetchNextPage);
-  console.log("status", status);
-
   return (
     <>
       <div className="w-full bg-gray-900 p-2 rounded-lg my-2 flex-1 overflow-y-scroll">
+        {traits.length === 0 && (
+          <div className="flex flex-row justify-center items-center h-full">
+            <p className="pangram-sans text-gray-400">No traits found</p>
+          </div>
+        )}
         <div className="flex flex-row flex-wrap gap-4">
           {traits.map((trait: Trait) => (
             <TraitCard

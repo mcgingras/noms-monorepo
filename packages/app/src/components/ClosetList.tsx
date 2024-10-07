@@ -81,7 +81,7 @@ const ClosetList = ({
 
   const filteredTraits = ownedTraits
     .filter((trait) => {
-      if (typeQuery === "all") return true;
+      if (typeQuery === "all" || typeQuery === "") return true;
       return trait.trait.type === typeQuery;
     })
     .filter((trait) => {
@@ -100,6 +100,12 @@ const ClosetList = ({
     }
     return acc;
   }, [] as NomTrait[][]);
+
+  if (rows.length === 0) {
+    return (
+      <ClosetRow key={"empty-closet"} nomTraits={[]} onClickTrait={() => {}} />
+    );
+  }
 
   return (
     <>

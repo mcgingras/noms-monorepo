@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import getTraitById from "../actions/getTraitById";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
+import CloseIcon from "@/components/icons/CloseIcon";
 
 const TraitViewer = ({ traitId }: { traitId: string }) => {
   const { data: trait, isLoading } = useQuery({
@@ -8,13 +9,21 @@ const TraitViewer = ({ traitId }: { traitId: string }) => {
     queryFn: () => getTraitById(parseInt(traitId)),
   });
 
+  const setSelectedTraitId = useNomBuilderContext(
+    (state) => state.setSelectedTraitId
+  );
   const setShowingSelectedTraitDetails = useNomBuilderContext(
     (state) => state.setShowingSelectedTraitDetails
   );
 
   return (
     <div className="p-2.5 bg-[#222] rounded-xl w-full">
-      <h5 className="pangram-sans font-bold text-lg">{trait?.name}</h5>
+      <div className="flex flex-row justify-between">
+        <h5 className="pangram-sans font-bold text-lg">{trait?.name}</h5>
+        <span className="bg-[#222] p-1 rounded-full">
+          <CloseIcon className="w-4 h-4 text-white" />
+        </span>
+      </div>
       <div className="flex flex-row space-x-2 mt-6">
         <div className="w-1/2 flex flex-col">
           <h3 className="pangram-sans-compact font-bold text-sm">Creator</h3>

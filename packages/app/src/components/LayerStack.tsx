@@ -19,7 +19,7 @@ const LayerItem = ({
   hideLayer: (layer: Layer) => void;
 }) => {
   return (
-    <Draggable draggableId={layer.trait.id.toString()} index={index}>
+    <Draggable draggableId={`${layer.trait.id}-${index}`} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
@@ -64,6 +64,10 @@ const LayerItem = ({
 const LayerStack = () => {
   const layers = useNomBuilderContext((state) => state.layers);
   const setLayers = useNomBuilderContext((state) => state.setLayers);
+  const pendingTraits = useNomBuilderContext((state) => state.pendingTraits);
+  const setPendingTraits = useNomBuilderContext(
+    (state) => state.setPendingTraits
+  );
   const onDragEnd = (result: any) => {
     if (!result.destination) {
       return;
@@ -96,6 +100,7 @@ const LayerStack = () => {
       );
     } else {
       setLayers(layers.filter((l) => l.trait.id !== layer.trait.id));
+      setPendingTraits(pendingTraits.filter((t) => t.id !== layer.trait.id));
     }
   };
 
@@ -128,7 +133,7 @@ const LayerStack = () => {
                 <div className="space-y-1">
                   {layers.map((layer, idx) => (
                     <LayerItem
-                      key={layer.trait.id}
+                      key={`${layer.trait.id}-${idx}`}
                       index={idx}
                       layer={layer}
                       removeLayer={removeLayer}

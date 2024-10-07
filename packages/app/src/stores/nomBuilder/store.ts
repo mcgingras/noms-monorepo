@@ -11,10 +11,12 @@ export interface INomBuilderState {
   showingSelectedTraitDetails: boolean;
   traitSearchQuery: string;
   typeQuery: string;
+  nomId: string | null;
   setTypeQuery: (query: string) => void;
   setTraitSearchQuery: (query: string) => void;
   setShowingSelectedTraitDetails: (showing: boolean) => void;
-  setSelectedTraitId: (id: string) => void;
+  setSelectedTraitId: (id: string | null) => void;
+  setNomId: (id: string | null) => void;
   addLayer: (layer: Layer) => void;
   removeLayer: (layer: Layer) => void;
   setLayers: (layers: Layer[]) => void;
@@ -52,11 +54,13 @@ export const createNomBuilderStore = (nom: Nom | null) => {
     showingSelectedTraitDetails: false,
     traitSearchQuery: "",
     typeQuery: "",
+    nomId: nom?.id || null,
+    setNomId: (id: string | null) => set({ nomId: id }),
     setTraitSearchQuery: (query: string) => set({ traitSearchQuery: query }),
     setTypeQuery: (query: string) => set({ typeQuery: query }),
     setShowingSelectedTraitDetails: (showing: boolean) =>
       set({ showingSelectedTraitDetails: showing }),
-    setSelectedTraitId: (id: string) => set({ selectedTraitId: id }),
+    setSelectedTraitId: (id: string | null) => set({ selectedTraitId: id }),
     addLayer: (layer: Layer) =>
       set((state: any) => ({ layers: [...state.layers, layer] })),
     removeLayer: (layer: Layer) =>
