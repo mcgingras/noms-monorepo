@@ -26,11 +26,11 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
   };
 
   const isInStack = false;
-  const isEquipped = true;
+  const isEquipped = false;
 
   if (isEquipped) {
     return (
-      <div className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-2 left-2 flex items-center justify-center p-1">
+      <div className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1">
         <ShirtIcon className="text-white" filled={true} />
       </div>
     );
@@ -38,7 +38,7 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
 
   return (
     <div
-      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-2 left-2 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0"
+      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0"
       onClick={(e) => {
         e.stopPropagation();
 

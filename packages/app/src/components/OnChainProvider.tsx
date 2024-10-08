@@ -1,9 +1,28 @@
 "use client";
 
-import { WagmiProvider, createConfig, http } from "wagmi";
+import {
+  WagmiProvider,
+  createConfig,
+  http,
+  useSwitchChain,
+  useAccount,
+} from "wagmi";
 import { localhost } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
+import { useEffect } from "react";
+
+const ChainSwitcher = ({ children }: { children: React.ReactNode }) => {
+  const { chain } = useAccount();
+  const { switchChain } = useSwitchChain();
+  useEffect(() => {
+    if (chain?.id !== localhost.id) {
+      switchChain({ chainId: localhost.id });
+    }
+  }, [chain, switchChain]);
+
+  return children;
+};
 
 const config = createConfig(
   getDefaultConfig({
@@ -39,7 +58,7 @@ export const OnChainProvider = ({
             "--ck-connectbutton-box-shadow": "0px 0px 0px 1px #E5E7EB",
           }}
         >
-          {children}
+          <ChainSwitcher>{children}</ChainSwitcher>
         </ConnectKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

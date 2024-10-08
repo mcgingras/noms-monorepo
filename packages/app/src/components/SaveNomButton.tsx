@@ -1,10 +1,19 @@
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+"use client";
+
+import { useEffect } from "react";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import { localhost } from "viem/chains";
 import { NOM_ADDRESS, TRAIT_ADDRESS } from "@/lib/constants";
 import { nomAbi, nomTraitsAbi } from "../../../ponder/foundry/abis";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 import { LayerChangeType } from "@/types/layer";
-import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const NOM_CONTRACT = {
   address: NOM_ADDRESS,
@@ -17,6 +26,7 @@ const TRAIT_CONTRACT = {
 } as const;
 
 const SaveNomButton = () => {
+  const router = useRouter();
   const { address } = useAccount();
   const nomId = useNomBuilderContext((state) => state.nomId);
   const layers = useNomBuilderContext((state) => state.layers);
@@ -27,6 +37,25 @@ const SaveNomButton = () => {
     error: createNomError,
     isPending: isCreateNomPending,
   } = useWriteContract();
+
+  if (createNomError) {
+    console.error(createNomError);
+    toast.error("Error creating nom");
+  }
+
+  const { data: createNomReceipt, isLoading: isCreateNomReceiptLoading } =
+    useWaitForTransactionReceipt({
+      hash: createNomData,
+      confirmations: 2,
+    });
+
+  useEffect(() => {
+    if (createNomReceipt) {
+      const nomId = createNomReceipt.logs[0].topics[3] as `0x${string}`;
+      const parsedNomId = parseInt(nomId, 16);
+      router.push(`/nom/${parsedNomId}`);
+    }
+  }, [createNomReceipt]);
 
   const {
     writeContractAsync: saveNomAsync,
@@ -45,7 +74,7 @@ const SaveNomButton = () => {
   const { data: tba } = useReadContract({
     ...NOM_CONTRACT,
     functionName: "getTBAForTokenId",
-    args: [BigInt(nomId as string)],
+    args: [BigInt(nomId || 0)],
     query: { enabled: !!nomId },
   });
 
@@ -58,7 +87,8 @@ const SaveNomButton = () => {
           // toast
           return;
         }
-        if (nomId) {
+
+        if (!!nomId) {
           if (!tba) {
             return;
           }
@@ -106,7 +136,11 @@ const SaveNomButton = () => {
       }}
     >
       <span className="pangram-sans font-bold">
-        {isCreateNomPending || isSaveNomPending ? "Saving..." : "Save changes"}
+        {isCreateNomPending || isSaveNomPending
+          ? "Signing tx..."
+          : isCreateNomReceiptLoading
+            ? "Pending..."
+            : "Save changes"}
       </span>
       <span className="pangram-sans-compact font-bold text-sm bg-black/30 px-2 py-1 rounded">
         0 ETH

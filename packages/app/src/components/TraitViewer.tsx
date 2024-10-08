@@ -20,7 +20,10 @@ const TraitViewer = ({ traitId }: { traitId: string }) => {
     <div className="p-2.5 bg-[#222] rounded-xl w-full">
       <div className="flex flex-row justify-between">
         <h5 className="pangram-sans font-bold text-lg">{trait?.name}</h5>
-        <span className="bg-[#222] p-1 rounded-full">
+        <span
+          className="bg-[#222] p-1 rounded-full cursor-pointer"
+          onClick={() => setSelectedTraitId(null)}
+        >
           <CloseIcon className="w-4 h-4 text-white" />
         </span>
       </div>

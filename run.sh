@@ -35,7 +35,7 @@ else
 fi
 
 # Start Anvil
-anvil --fork-url "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" --chain-id 1337 > anvil.log 2>&1 &
+anvil --fork-url "https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" --chain-id 1337 --block-time 10 &
 ANVIL_PID=$!
 
 echo "Waiting for Anvil to start up before running scripts..."

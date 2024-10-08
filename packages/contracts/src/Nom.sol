@@ -38,7 +38,8 @@ contract Nom is ERC721 {
      * @param to The address to mint the nom to.
      */
     function _mint(address to) internal returns (uint256) {
-        uint256 nextTokenId = tokenIdCount + 1;
+        tokenIdCount++;
+        uint256 nextTokenId = tokenIdCount;
         super._mint(to, nextTokenId);
         return nextTokenId;
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useCallback } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 // r stands for rotate
 const Nom = ({
@@ -19,8 +19,8 @@ const Nom = ({
     c === 0
       ? "bg-blue-600 text-blue-300"
       : c === 1
-      ? "bg-red-600 text-red-300"
-      : "bg-green-600 text-green-300";
+        ? "bg-red-600 text-red-300"
+        : "bg-green-600 text-green-300";
   return (
     <div
       className="absolute"
@@ -56,7 +56,6 @@ const easeInOut = (t: number) => {
 // COMPONENT
 const PageTransitionLoaderTwo = () => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isFadeIn, setIsFadeIn] = useState<boolean>(true);
   const [stop, setStop] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,24 +66,12 @@ const PageTransitionLoaderTwo = () => {
     []
   );
 
-  //   useEffect(() => {
-  //     let timer;
-  //     if (isLoading) {
-  //       setShouldRender(true);
-  //       timer = setTimeout(() => {
-  //         setIsLoading(false);
-  //       }, 1000); // Ensure loader shows for at least 1 second
-  //     } else {
-  //       timer = setTimeout(() => {
-  //         setShouldRender(false);
-  //       }, 500); // Allow time for exit animation
-  //     }
-  //     return () => clearTimeout(timer);
-  //   }, [isLoading]);
-
   useEffect(() => {
-    setIsLoading(true);
-  }, [pathname, searchParams]);
+    // if pathname matches exactly the regex /nom/:id
+    if (pathname.match(/^\/nom\/\d+$/)) {
+      setIsLoading(true);
+    }
+  }, [pathname]);
 
   const updateNoms = useCallback(
     (progress: number) => {
@@ -100,22 +87,15 @@ const PageTransitionLoaderTwo = () => {
     let animationFrameId: number;
 
     const animate = (currentTime: number) => {
-      if (startTime === null) {
-        startTime = currentTime;
-      }
+      if (startTime === null) startTime = currentTime;
 
       const elapsedTime = currentTime - startTime;
       const progress = Math.min(elapsedTime / animationDuration, 1);
 
       updateNoms(progress);
 
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animate);
-      }
-
-      if (progress === 1) {
-        animationFrameId = requestAnimationFrame(animateOut);
-      }
+      if (progress < 1) animationFrameId = requestAnimationFrame(animate);
+      if (progress === 1) animationFrameId = requestAnimationFrame(animateOut);
     };
 
     const animateOut = (currentTime: number) => {
@@ -129,8 +109,6 @@ const PageTransitionLoaderTwo = () => {
         (elapsedTime - animationDuration) / animationDuration,
         1
       );
-
-      console.log(progress);
 
       updateNoms(1 - progress);
 
@@ -159,12 +137,11 @@ const PageTransitionLoaderTwo = () => {
     return () => cancelAnimationFrame(animationFrameId);
   }, [isLoading, updateNoms, animationDuration]);
 
-  console.log("shouldRender", shouldRender);
   if (!shouldRender) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-50 h-full w-full bg-blue-500 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[110] h-full w-full bg-blue-500 transition-opacity duration-300 ${
         isLoading ? "opacity-100" : "opacity-0"
       }`}
     >
