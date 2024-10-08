@@ -1,10 +1,9 @@
 "use client";
 
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Layer } from "@/types/layer";
-import PendingChangesCard from "./PendingChangesCard";
+import PendingChangesCard from "../../../../components/PendingChangesCard";
 import ShirtIcon from "@/components/icons/Shirt";
-import { LayerChangeType } from "@/types/layer";
+import { Layer, LayerChangeType } from "@/types/layer";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 const LayerItem = ({

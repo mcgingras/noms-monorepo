@@ -9,6 +9,17 @@ import { Trait } from "@/types/trait";
 import { useTraits } from "@/actions/useTraits";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
+import { isTraitInStack, hooklessIsTraitInStack } from "@/lib/utils";
+import ClockIcon from "@/components/icons/Clock";
+import RareIcon from "@/components/icons/Rare";
+import OwnedIcon from "@/components/icons/Owned";
+import EthereumIcon from "../../../../components/icons/Ethereum";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../../../components/Tooltip";
 
 const AddToCartAction = ({ trait }: { trait: Trait }) => {
   const addLayer = useNomBuilderContext((state) => state.addLayer);
@@ -38,7 +49,7 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
 
   return (
     <div
-      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0"
+      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0 transition-all"
       onClick={(e) => {
         e.stopPropagation();
 
@@ -53,6 +64,56 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
   );
 };
 
+const MallTabTraitDetails = ({ trait }: { trait: Trait }) => {
+  const nomId = useNomBuilderContext((state) => state.nomId);
+  const isInStack = isTraitInStack(trait);
+
+  return (
+    <div className="group-hover:opacity-100 opacity-0 transition-all absolute top-0 left-0 w-full h-full bg-black bg-opacity-10">
+      {/* mint type icon */}
+      <div className="h-[23px] bg-[#222] rounded-[6px] absolute top-1 left-1 flex items-center justify-center px-2">
+        <span className="flex items-center gap-x-1.5 justify-center">
+          <ClockIcon className="w-3 h-3" />
+          {/* <span className="pangram-sans text-xs leading-[12px] font-bold mt-[1px]">
+        6d
+      </span> */}
+        </span>
+      </div>
+      {/* owned + rare */}
+      <div className="h-[23px] bg-[#222] rounded-[6px] absolute top-1 right-1 flex items-center gap-x-2 justify-center px-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <OwnedIcon className="w-3 h-3" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <span>{`Nom #${nomId} owns this trait.`}</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <RareIcon className="w-3 h-3" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <span>{`This trait is rare.`}</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      {/* price */}
+
+      <div className="h-[23px] bg-[#222] rounded-[6px] absolute bottom-1 right-1 flex items-center gap-x-1.5 justify-center px-2">
+        <EthereumIcon className="w-3 h-3" />
+        <span className="pangram-sans text-xs leading-[12px] font-bold mt-[1px]">
+          0.01
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const NomBuilderMallTabContent = () => {
   const selectedTraitId = useNomBuilderContext(
     (state) => state.selectedTraitId
@@ -60,11 +121,10 @@ const NomBuilderMallTabContent = () => {
   const setSelectedTraitId = useNomBuilderContext(
     (state) => state.setSelectedTraitId
   );
-
   const traitSearchQuery = useNomBuilderContext(
     (state) => state.traitSearchQuery
   );
-
+  const layers = useNomBuilderContext((state) => state.layers);
   const typeQuery = useNomBuilderContext((state) => state.typeQuery);
   const {
     data: traits,
@@ -79,9 +139,7 @@ const NomBuilderMallTabContent = () => {
     searchQuery: traitSearchQuery,
   });
 
-  const { ref, inView } = useInView({
-    threshold: 0,
-  });
+  const { ref, inView } = useInView({ threshold: 0 });
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetching) {
@@ -98,15 +156,20 @@ const NomBuilderMallTabContent = () => {
           </div>
         )}
         <div className="flex flex-row flex-wrap gap-4">
-          {traits.map((trait: Trait) => (
-            <TraitCard
-              key={trait.id}
-              trait={trait}
-              isActive={selectedTraitId === trait.id}
-              onClickTrait={() => setSelectedTraitId(trait.id)}
-              actionComponent={<AddToCartAction trait={trait} />}
-            />
-          ))}
+          {traits.map((trait: Trait) => {
+            const isInStack = hooklessIsTraitInStack(layers, trait);
+            return (
+              <TraitCard
+                key={trait.id}
+                trait={trait}
+                isSelected={selectedTraitId === trait.id}
+                isSecondarySelected={isInStack}
+                onClickTrait={() => setSelectedTraitId(trait.id)}
+                actionComponent={<AddToCartAction trait={trait} />}
+                metadataComponent={<MallTabTraitDetails trait={trait} />}
+              />
+            );
+          })}
         </div>
         {hasNextPage && (
           <div ref={ref} className="w-full py-4 flex justify-center">

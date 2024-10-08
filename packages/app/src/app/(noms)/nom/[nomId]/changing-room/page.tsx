@@ -1,5 +1,6 @@
 "use client";
-import NomBuilder from "@/components/NomBuilder";
+
+import NomBuilder from "../../components/NomBuilder";
 import { NomBuilderProvider } from "@/stores/nomBuilder/context";
 
 const ChangingRoom = ({ params }: { params: { nomId: string } }) => {

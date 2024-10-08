@@ -1,6 +1,6 @@
 "use client";
 
-import ClosetList from "@/components/ClosetList";
+import ClosetList from "../components/ClosetList";
 import TraitViewer from "@/components/TraitViewer";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 import ChangingRoomList from "@/components/ChangingRoomList";

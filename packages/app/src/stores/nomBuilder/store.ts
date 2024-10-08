@@ -54,7 +54,7 @@ export const createNomBuilderStore = (nom: Nom | null) => {
     showingSelectedTraitDetails: false,
     traitSearchQuery: "",
     typeQuery: "",
-    nomId: nom?.id || null,
+    nomId: nom?.tokenId || null,
     setNomId: (id: string | null) => set({ nomId: id }),
     setTraitSearchQuery: (query: string) => set({ traitSearchQuery: query }),
     setTypeQuery: (query: string) => set({ typeQuery: query }),

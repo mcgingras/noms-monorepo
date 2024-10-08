@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
 import { Trait } from "@/types/trait";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
+import { Layer } from "@/types/layer";
 
 export const configAddresses = {
   NFTContract: "0x0AEA8ce800c5609e61E799648195620d1B62B3fd" as Address,
@@ -19,5 +20,9 @@ export const cn = (...inputs: ClassValue[]) => {
 
 export const isTraitInStack = (trait: Trait) => {
   const layers = useNomBuilderContext((state) => state.layers);
+  return layers.some((layer) => layer.trait.id === trait.id);
+};
+
+export const hooklessIsTraitInStack = (layers: Layer[], trait: Trait) => {
   return layers.some((layer) => layer.trait.id === trait.id);
 };

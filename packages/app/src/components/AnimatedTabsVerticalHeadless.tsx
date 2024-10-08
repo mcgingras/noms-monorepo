@@ -3,28 +3,22 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import SoftArrow from "@/components/icons/SoftArrow";
-import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
-let tabs = [
-  { id: "all", label: "Everything" },
-  { id: "glasses", label: "Glasses" },
-  { id: "head", label: "Head" },
-  { id: "body", label: "Body" },
-  { id: "accessory", label: "Accessory" },
-  { id: "background", label: "Background" },
-  { id: "wildcard", label: "Wildcard" },
-];
-
-function AnimatedTabs() {
+function AnimatedTabsVerticalHeadless({
+  tabs,
+  onTabChange,
+}: {
+  tabs: { id: string; label: string }[];
+  onTabChange: (tab: string) => void;
+}) {
   let [transitionComplete, setTransitionComplete] = useState(true);
   let [activeTab, setActiveTab] = useState(tabs[0].id);
-  const setTypeQuery = useNomBuilderContext((state) => state.setTypeQuery);
 
   const goToNextTab = (currentTab: string) => {
     const currentIndex = tabs.findIndex((tab) => tab.id === currentTab);
     const nextIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
     setActiveTab(tabs[nextIndex].id);
-    setTypeQuery(tabs[nextIndex].id);
+    onTabChange(tabs[nextIndex].id);
   };
 
   const goToPreviousTab = (currentTab: string) => {
@@ -32,7 +26,7 @@ function AnimatedTabs() {
     const previousIndex =
       currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
     setActiveTab(tabs[previousIndex].id);
-    setTypeQuery(tabs[previousIndex].id);
+    onTabChange(tabs[previousIndex].id);
   };
 
   return (
@@ -43,7 +37,6 @@ function AnimatedTabs() {
       >
         <SoftArrow direction="up" />
       </span>
-      {/* <div className="flex-grow overflow-y-auto"> */}
       <div className="flex flex-col space-y-1 bg-gray-1000 rounded h-full">
         {tabs.map((tab) => (
           <button
@@ -51,7 +44,7 @@ function AnimatedTabs() {
             onClick={() => {
               setTransitionComplete(false);
               setActiveTab(tab.id);
-              setTypeQuery(tab.id);
+              onTabChange(tab.id);
               setTimeout(() => {
                 setTransitionComplete(true);
               }, 100);
@@ -87,4 +80,4 @@ function AnimatedTabs() {
   );
 }
 
-export default AnimatedTabs;
+export default AnimatedTabsVerticalHeadless;

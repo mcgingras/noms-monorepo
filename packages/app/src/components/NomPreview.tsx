@@ -3,6 +3,8 @@ import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 const NomPreview = () => {
   const layers = useNomBuilderContext((state) => state.layers);
+  const nomId = useNomBuilderContext((state) => state.nomId);
+
   return (
     <div className="p-1 h-full flex-1">
       <div
@@ -13,9 +15,11 @@ const NomPreview = () => {
           backgroundSize: "20px 20px",
         }}
       >
-        <h3 className="oziksoft text-xl">Nom 1</h3>
+        <h3 className="oziksoft text-xl">
+          {nomId ? `Nom ${nomId}` : "New Nom"}
+        </h3>
         <span className="text-sm text-[#818080] pangram-sans font-semibold">
-          Not yet finalized
+          {nomId ? "" : "Not yet finalized"}
         </span>
         <div className="relative p-4 flex-1 flex items-center justify-center overflow-hidden">
           <div className="relative w-2/3 aspect-square bg-gray-1000">

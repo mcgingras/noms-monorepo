@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TraitTab from "./components/TraitTab";
-import SoftArrow from "@/components/icons/SoftArrow";
-import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
+import AnimatedTabsVertical from "./components/AnimatedTabsVertical";
 import Searchbar from "@/components/Searchbar";
 import TraitGridUI from "./components/TraitGridUI";
 import TraitDetails from "./components/TraitDetails";
@@ -42,16 +41,20 @@ const TraitsPage = ({ searchParams }: { searchParams: any }) => {
                 <span className="bg-gray-900 h-6 w-6 rounded-full block"></span>
               </div>
             </div>
-            <div className="flex-grow overflow-y-auto">
-              <TraitGridUI
-                traits={traits}
-                setSelectedTrait={setSelectedTrait}
-                selectedTrait={selectedTrait}
-              />
+            <div className="flex-grow grid grid-cols-[1fr,auto] gap-2 overflow-hidden">
+              <div className="overflow-y-auto">
+                <TraitGridUI
+                  traits={traits}
+                  setSelectedTrait={setSelectedTrait}
+                  selectedTrait={selectedTrait}
+                />
+              </div>
+              <div className="w-[375px] bg-gray-900 rounded-lg overflow-y-auto">
+                {selectedTrait && (
+                  <TraitDetails selectedTrait={selectedTrait} />
+                )}
+              </div>
             </div>
-          </div>
-          <div className="w-[375px] bg-gray-900 rounded-lg">
-            {selectedTrait && <TraitDetails selectedTrait={selectedTrait} />}
           </div>
         </div>
       </section>

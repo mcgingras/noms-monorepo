@@ -2,12 +2,12 @@ import { useState, Fragment } from "react";
 import { TabGroup, TabPanel, TabPanels } from "@headlessui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedTabs from "@/components/AnimatedTabs";
-import AnimatedTabsVertical from "@/components/AnimatedTabsVertical";
+import AnimatedTabsVertical from "./AnimatedTabsVertical";
 import SearchInput from "@/components/SearchInput";
 import NomBuilderMallTabContent from "./NomBuilderMallTabContent";
 import NomBuilderClosetTabContent from "./NomBuilderClosetTabContent";
-import Cart from "./Cart";
-import TraitDetailsSlider from "./TraitDetailsSlider";
+import Cart from "../../../../components/Cart";
+import TraitDetailsSlider from "../../../../components/TraitDetailsSlider";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
 const NomBuilderTraitPalette = ({ size }: { size: "small" | "large" }) => {

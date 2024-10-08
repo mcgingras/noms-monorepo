@@ -3,7 +3,7 @@
 import { useState } from "react";
 import LayerStack from "./LayerStack";
 import NomBuilderCanvas from "./NomBuilderCanvas";
-import NomPreview from "./NomPreview";
+import NomPreview from "../../../../components/NomPreview";
 import WavyTab from "./WavyTab";
 import NomBuilderTraitPalette from "./NomBuilderTraitPalette";
 

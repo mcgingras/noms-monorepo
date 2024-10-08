@@ -3,7 +3,6 @@ import { NomTrait } from "@/types/trait";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 import { cn } from "@/lib/utils";
 import { Trait } from "@/types/trait";
-import { useSearchParams } from "next/navigation";
 
 const ClosetItem = ({
   nomTrait,

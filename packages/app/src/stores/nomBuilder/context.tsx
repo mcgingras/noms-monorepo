@@ -42,7 +42,7 @@ export const NomBuilderProvider = ({
 
   // If we have no nom, we are creating a new nom, and can initialize an empty store
   // otherwise, we need to wait for the data to load before initializing the store
-  if (!nomId) {
+  if (!nomId && !storeRef.current) {
     storeRef.current = createNomBuilderStore(null);
   } else {
     if (data && !storeRef.current) {

@@ -18,11 +18,11 @@ const TraitGridUI = ({
   setSelectedTrait: (trait: Trait) => void;
 }) => {
   return (
-    <div className="flex flex-row flex-wrap gap-2">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 content-start">
       {traits.map((trait) => (
         <div
           key={trait.id}
-          className={`w-[100px] h-[100px] rounded-lg p-1 bg-gray-900 cursor-pointer border-2  ${
+          className={`aspect-square flex-shrink-0 rounded-lg p-1 bg-gray-900 cursor-pointer border-2 ${
             selectedTrait.id.toString() === trait.id.toString()
               ? "border-[#FDCB3F] "
               : "border-transparent"
@@ -34,7 +34,7 @@ const TraitGridUI = ({
           <img
             src={`data:image/svg+xml;base64,${trait.svg}`}
             alt={trait.name}
-            className="w-full h-full rounded-[2px]"
+            className="w-full h-full rounded-[2px] object-cover"
           />
         </div>
       ))}
