@@ -14,12 +14,20 @@ let tabs = [
 ];
 
 function AnimatedTabsVertical() {
+  const typeQuery = useNomBuilderContext((state) => state.typeQuery);
   const setTypeQuery = useNomBuilderContext((state) => state.setTypeQuery);
   const onTabChange = (tab: string) => {
     setTypeQuery(tab);
   };
 
-  return <AnimatedTabsVerticalHeadless tabs={tabs} onTabChange={onTabChange} />;
+  return (
+    <AnimatedTabsVerticalHeadless
+      tabs={tabs}
+      onTabChange={onTabChange}
+      activeTab={typeQuery || "all"}
+      setActiveTab={setTypeQuery}
+    />
+  );
 }
 
 export default AnimatedTabsVertical;

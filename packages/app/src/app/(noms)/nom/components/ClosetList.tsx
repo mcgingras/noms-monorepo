@@ -1,8 +1,79 @@
 import Image from "next/image";
 import { NomTrait } from "@/types/trait";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
-import { cn } from "@/lib/utils";
+import {
+  cn,
+  hooklessIsTraitEquipped,
+  hooklessIsTraitStaged,
+} from "@/lib/utils";
 import { Trait } from "@/types/trait";
+import ShirtIcon from "@/components/icons/Shirt";
+
+const UnEquipTraitAction = ({ trait }: { trait: Trait }) => {
+  const setEquippedTraitAsUnequipped = useNomBuilderContext(
+    (state) => state.setEquippedTraitAsUnequipped
+  );
+  const unequipTrait = (trait: Trait) => {
+    setEquippedTraitAsUnequipped(trait);
+  };
+
+  return (
+    <div
+      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0 transition-all"
+      onClick={(e) => {
+        e.stopPropagation();
+        unequipTrait(trait);
+      }}
+    >
+      <ShirtIcon className="text-white" filled={false} />
+    </div>
+  );
+};
+
+const EquipTraitAction = ({ trait }: { trait: Trait }) => {
+  const setUnequippedTraitAsEquipped = useNomBuilderContext(
+    (state) => state.setUnequippedTraitAsEquipped
+  );
+
+  const equipTrait = (trait: Trait) => {
+    setUnequippedTraitAsEquipped(trait);
+  };
+
+  return (
+    <div
+      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0 transition-all"
+      onClick={(e) => {
+        e.stopPropagation();
+        equipTrait(trait);
+      }}
+    >
+      <ShirtIcon className="text-white" filled={true} />
+    </div>
+  );
+};
+
+// TODO: WRONG -- SHOULD NOT BE A PENDING TRAIT BECAUSE WE ALREADY OWN IT
+const AddTraitAction = ({ trait }: { trait: Trait }) => {
+  const addPendingTrait = useNomBuilderContext(
+    (state) => state.addPendingTrait
+  );
+
+  const addTrait = (trait: Trait) => {
+    addPendingTrait(trait);
+  };
+
+  return (
+    <div
+      className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0 transition-all"
+      onClick={(e) => {
+        e.stopPropagation();
+        addTrait(trait);
+      }}
+    >
+      <ShirtIcon className="text-white" filled={true} />
+    </div>
+  );
+};
 
 const ClosetItem = ({
   nomTrait,
@@ -14,15 +85,21 @@ const ClosetItem = ({
   const selectedTraitId = useNomBuilderContext(
     (state) => state.selectedTraitId
   );
+  const layers = useNomBuilderContext((state) => state.layers);
+  const isActive = nomTrait.trait.id === selectedTraitId;
+  const isStaged = hooklessIsTraitStaged(layers, nomTrait.trait);
+  const isEquipped = hooklessIsTraitEquipped(layers, nomTrait.trait);
 
   return (
     <div
       className={cn(
-        "min-w-[100px] aspect-square rounded-lg bg-gray-800 relative z-10 cursor-pointer ring-offset-4 hover:ring-[3px] hover:ring-[#FDCB3F] transition-all",
-        nomTrait.equipped ? "ring-offset-blue-500" : "ring-offset-gray-900",
-        nomTrait.trait.id === selectedTraitId
-          ? "ring-[3px] ring-[#FDCB3F]"
-          : "ring-0 ring-transparent"
+        "min-w-[100px] aspect-square rounded-lg bg-[#2d2d2d] relative z-10 cursor-pointer ring-offset-4 ring-0 hover:ring-[3px] ring-transparent hover:ring-[#FDCB3F] transition-all group",
+        isActive ? "ring-[3px] ring-[#FDCB3F]" : "ring-transparent",
+        isStaged
+          ? "ring-offset-[#2B83F6]"
+          : isEquipped
+            ? "ring-offset-[#5648ED]"
+            : "ring-offset-gray-900"
       )}
       onClick={() => {
         onClickTrait(nomTrait.trait);
@@ -38,6 +115,13 @@ const ClosetItem = ({
         className="bottom-0 absolute"
         fill
       />
+      {isStaged ? (
+        <EquipTraitAction trait={nomTrait.trait} />
+      ) : isEquipped ? (
+        <UnEquipTraitAction trait={nomTrait.trait} />
+      ) : (
+        <AddTraitAction trait={nomTrait.trait} />
+      )}
     </div>
   );
 };

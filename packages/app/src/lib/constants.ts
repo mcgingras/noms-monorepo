@@ -13,3 +13,7 @@ export const ERC6551_REGISTRY_ADDRESS = getAddress(
   Extrastxs[1]!.contractAddress
 );
 export const CHAIN_ID = 1337; // for some reason this is 1337 in wagmi? 31337 elsewhere
+
+// purple - #5648ED
+// yellow - #FDCB3F
+// blue - #257CED

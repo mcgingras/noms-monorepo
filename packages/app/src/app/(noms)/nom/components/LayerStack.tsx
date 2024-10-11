@@ -84,7 +84,7 @@ const LayerStack = () => {
       setLayers(
         layers.map((l) =>
           l.trait.id === layer.trait.id
-            ? { ...l, equipped: false, type: LayerChangeType.UNEQUIP }
+            ? { ...l, equipped: true, type: LayerChangeType.UNEQUIP }
             : l
         )
       );

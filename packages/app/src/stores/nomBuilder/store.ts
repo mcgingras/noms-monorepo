@@ -3,8 +3,17 @@ import { Layer, LayerChangeType } from "../../types/layer";
 import { Trait, NomTrait } from "../../types/trait";
 import { Nom } from "../../types/nom";
 
+// TODO:
+// add "actions" that map to layer types
+// - buy + equip trait
+// - equip trait
+// - unequip trait
+// - "unbuy + unequip" trait
+// or, for each trait layer type, have an "undo" action
+
 export interface INomBuilderState {
   layers: Layer[];
+  initialLayers: Layer[];
   ownedTraits: NomTrait[];
   pendingTraits: Trait[];
   selectedTraitId: string | null;
@@ -19,11 +28,15 @@ export interface INomBuilderState {
   setNomId: (id: string | null) => void;
   addLayer: (layer: Layer) => void;
   removeLayer: (layer: Layer) => void;
+  setEquippedTraitAsUnequipped: (trait: Trait) => void;
+  setUnequippedTraitAsEquipped: (trait: Trait) => void;
   setLayers: (layers: Layer[]) => void;
   setOwnedTraits: (traits: NomTrait[]) => void;
   setPendingTraits: (traits: Trait[]) => void;
   addPendingTrait: (trait: Trait) => void;
   removePendingTrait: (trait: Trait) => void;
+  addUnOwnedTrait: (trait: Trait) => void;
+  removeUnOwnedTrait: (trait: Trait) => void;
 }
 
 export type NomBuilderStore = ReturnType<typeof createNomBuilderStore>;
@@ -48,6 +61,7 @@ export const createNomBuilderStore = (nom: Nom | null) => {
 
   return createStore<INomBuilderState>((set) => ({
     layers: initialLayers,
+    initialLayers,
     ownedTraits,
     pendingTraits: [],
     selectedTraitId: null,
@@ -67,6 +81,39 @@ export const createNomBuilderStore = (nom: Nom | null) => {
       set((state: any) => ({
         layers: state.layers.filter((l: Layer) => l !== layer),
       })),
+    // used for closet
+    setEquippedTraitAsUnequipped: (trait: Trait) =>
+      set((state: any) => ({
+        layers: state.layers.map((l: Layer) =>
+          l.trait.id === trait.id ? { ...l, type: LayerChangeType.UNEQUIP } : l
+        ),
+      })),
+    // used for closet
+    setUnequippedTraitAsEquipped: (trait: Trait) =>
+      set((state: any) => ({
+        layers: state.layers.map((l: Layer) =>
+          l.trait.id === trait.id ? { ...l, type: LayerChangeType.FIXED } : l
+        ),
+      })),
+    // adds new trait to the layer stack and adds new "pending trait"
+    addUnOwnedTrait: (trait: Trait) => {
+      const newLayer = {
+        trait,
+        owned: false,
+        equipped: true,
+        type: LayerChangeType.BUY_AND_EQUIP,
+      };
+      set((state: any) => ({
+        layers: [...state.layers, newLayer],
+        pendingTraits: [...state.pendingTraits, trait],
+      }));
+    },
+    removeUnOwnedTrait: (trait: Trait) => {
+      set((state: any) => ({
+        layers: state.layers.filter((l: Layer) => l.trait.id !== trait.id),
+        pendingTraits: state.pendingTraits.filter((t: Trait) => t !== trait),
+      }));
+    },
     setLayers: (layers: Layer[]) => set({ layers }),
     setOwnedTraits: (traits: NomTrait[]) => set({ ownedTraits: traits }),
     setPendingTraits: (traits: Trait[]) => set({ pendingTraits: traits }),

@@ -1,12 +1,9 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import CaratDownIcon from "@/components/icons/CaratDownIcon";
 import CaratUpIcon from "@/components/icons/CaratUpIcon";
-import { Layer, LayerChangeType } from "@/types/layer";
-import { useParams } from "next/navigation";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
-import { usePathname } from "next/navigation";
-import { useAccount } from "wagmi";
+import { Layer, LayerChangeType } from "@/types/layer";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRef, useState } from "react";
 import SaveNomButton from "./SaveNomButton";
 
 const SmoothAnimatePresence = ({
@@ -91,14 +88,9 @@ const ChangeRow = ({ layer }: { layer: Layer }) => {
 };
 
 const PendingChangesCard = () => {
-  const { address } = useAccount();
-  // get route to check if "new" is present in the route
-  //   const pathname = usePathname();
-  //   const isNew = pathname.includes("new");
-
   const [changesOpen, setChangesOpen] = useState(false);
   const layers = useNomBuilderContext((state) => state.layers);
-  const initialLayers = [] as any[];
+  const initialLayers = useNomBuilderContext((state) => state.initialLayers);
 
   const hasLayerOrderChanged =
     layers.length === initialLayers.length &&

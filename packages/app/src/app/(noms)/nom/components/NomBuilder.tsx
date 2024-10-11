@@ -19,7 +19,7 @@ const NomBuilder = () => {
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
         <LayerStack />
         <NomBuilderCanvas>
-          <NomPreview />
+          <NomPreview size={size} />
           <WavyTab size={size} onClick={toggleSize} />
           <NomBuilderTraitPalette size={size} />
         </NomBuilderCanvas>

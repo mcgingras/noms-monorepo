@@ -9,7 +9,12 @@ import { Trait } from "@/types/trait";
 import { useTraits } from "@/actions/useTraits";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
-import { isTraitInStack, hooklessIsTraitInStack } from "@/lib/utils";
+import {
+  isTraitInStack,
+  hooklessIsTraitInStack,
+  hooklessIsTraitStaged,
+  hooklessIsTraitEquipped,
+} from "@/lib/utils";
 import ClockIcon from "@/components/icons/Clock";
 import RareIcon from "@/components/icons/Rare";
 import OwnedIcon from "@/components/icons/Owned";
@@ -22,19 +27,9 @@ import {
 } from "../../../../components/Tooltip";
 
 const AddToCartAction = ({ trait }: { trait: Trait }) => {
-  const addLayer = useNomBuilderContext((state) => state.addLayer);
-  const addPendingTrait = useNomBuilderContext(
-    (state) => state.addPendingTrait
+  const addUnOwnedTrait = useNomBuilderContext(
+    (state) => state.addUnOwnedTrait
   );
-  const addTraitToLayersFromShop = (trait: Trait) => {
-    const newLayer = {
-      trait,
-      owned: false,
-      equipped: true,
-      type: LayerChangeType.BUY_AND_EQUIP,
-    };
-    addLayer(newLayer);
-  };
 
   const isInStack = false;
   const isEquipped = false;
@@ -42,7 +37,7 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
   if (isEquipped) {
     return (
       <div className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1">
-        <ShirtIcon className="text-white" filled={true} />
+        <ShirtIcon className="text-white" filled={false} />
       </div>
     );
   }
@@ -54,12 +49,11 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
         e.stopPropagation();
 
         if (!isInStack) {
-          addTraitToLayersFromShop(trait);
-          addPendingTrait(trait);
+          addUnOwnedTrait(trait);
         }
       }}
     >
-      <ShirtIcon className="" />
+      <ShirtIcon className="text-white" filled={true} />
     </div>
   );
 };
@@ -157,13 +151,15 @@ const NomBuilderMallTabContent = () => {
         )}
         <div className="flex flex-row flex-wrap gap-4">
           {traits.map((trait: Trait) => {
-            const isInStack = hooklessIsTraitInStack(layers, trait);
+            const isStaged = hooklessIsTraitStaged(layers, trait);
+            const isEquipped = hooklessIsTraitEquipped(layers, trait);
             return (
               <TraitCard
                 key={trait.id}
                 trait={trait}
-                isSelected={selectedTraitId === trait.id}
-                isSecondarySelected={isInStack}
+                isActive={selectedTraitId === trait.id}
+                isStaged={isStaged}
+                isEquipped={isEquipped}
                 onClickTrait={() => setSelectedTraitId(trait.id)}
                 actionComponent={<AddToCartAction trait={trait} />}
                 metadataComponent={<MallTabTraitDetails trait={trait} />}

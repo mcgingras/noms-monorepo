@@ -17,6 +17,7 @@ function AnimatedTabs() {
   const setTraitSearchQuery = useNomBuilderContext(
     (state) => state.setTraitSearchQuery
   );
+  const setTypeQuery = useNomBuilderContext((state) => state.setTypeQuery);
 
   return (
     <TabList className="flex space-x-1 bg-gray-900 rounded-full">
@@ -30,6 +31,7 @@ function AnimatedTabs() {
               setTransitionComplete(true);
             }, 100);
             setTraitSearchQuery("");
+            setTypeQuery("all");
           }}
           className={`${
             activeTab === tab.id && transitionComplete

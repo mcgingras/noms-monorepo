@@ -1,7 +1,9 @@
+import React from "react";
+import { motion } from "framer-motion";
 import RenderingNom from "@/components/RenderingNom";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
 
-const NomPreview = () => {
+const NomPreview = ({ size }: { size: "small" | "large" }) => {
   const layers = useNomBuilderContext((state) => state.layers);
   const nomId = useNomBuilderContext((state) => state.nomId);
 
@@ -22,9 +24,18 @@ const NomPreview = () => {
           {nomId ? "" : "Not yet finalized"}
         </span>
         <div className="relative p-4 flex-1 flex items-center justify-center overflow-hidden">
-          <div className="relative w-2/3 aspect-square bg-gray-1000">
+          <motion.div
+            className="relative aspect-square bg-gray-1000 w-auto"
+            initial={{ height: size === "small" ? "100%" : "50%" }}
+            animate={{ height: size === "small" ? "100%" : "50%" }}
+            transition={{
+              duration: 0.5,
+              ease: [0.16, 1, 0.3, 1], // Custom bezier curve
+              delay: size === "small" ? 0.5 : 0,
+            }}
+          >
             <RenderingNom layers={layers} />
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

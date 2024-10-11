@@ -7,12 +7,15 @@ import SoftArrow from "@/components/icons/SoftArrow";
 function AnimatedTabsVerticalHeadless({
   tabs,
   onTabChange,
+  activeTab,
+  setActiveTab,
 }: {
   tabs: { id: string; label: string }[];
   onTabChange: (tab: string) => void;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }) {
   let [transitionComplete, setTransitionComplete] = useState(true);
-  let [activeTab, setActiveTab] = useState(tabs[0].id);
 
   const goToNextTab = (currentTab: string) => {
     const currentIndex = tabs.findIndex((tab) => tab.id === currentTab);
