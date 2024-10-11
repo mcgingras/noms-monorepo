@@ -30,6 +30,7 @@ export interface INomBuilderState {
   removeLayer: (layer: Layer) => void;
   setEquippedTraitAsUnequipped: (trait: Trait) => void;
   setUnequippedTraitAsEquipped: (trait: Trait) => void;
+  setOwnedTraitAsEquipped: (trait: Trait) => void;
   setLayers: (layers: Layer[]) => void;
   setOwnedTraits: (traits: NomTrait[]) => void;
   setPendingTraits: (traits: Trait[]) => void;
@@ -37,6 +38,7 @@ export interface INomBuilderState {
   removePendingTrait: (trait: Trait) => void;
   addUnOwnedTrait: (trait: Trait) => void;
   removeUnOwnedTrait: (trait: Trait) => void;
+  saveAndResetState: () => void;
 }
 
 export type NomBuilderStore = ReturnType<typeof createNomBuilderStore>;
@@ -53,7 +55,7 @@ export const createNomBuilderStore = (nom: Nom | null) => {
       .map((nomTrait) => {
         return {
           trait: nomTrait.trait,
-          equipped: nomTrait.equipped,
+          equipped: true,
           owned: true,
           type: LayerChangeType.FIXED,
         };
@@ -95,6 +97,18 @@ export const createNomBuilderStore = (nom: Nom | null) => {
           l.trait.id === trait.id ? { ...l, type: LayerChangeType.FIXED } : l
         ),
       })),
+    setOwnedTraitAsEquipped: (trait: Trait) =>
+      set((state: any) => ({
+        layers: [
+          ...state.layers,
+          {
+            trait,
+            owned: true,
+            equipped: false,
+            type: LayerChangeType.EQUIP,
+          },
+        ],
+      })),
     // adds new trait to the layer stack and adds new "pending trait"
     addUnOwnedTrait: (trait: Trait) => {
       const newLayer = {
@@ -114,6 +128,9 @@ export const createNomBuilderStore = (nom: Nom | null) => {
         pendingTraits: state.pendingTraits.filter((t: Trait) => t !== trait),
       }));
     },
+    addOwnedTrait: (trait: NomTrait) => {
+      set((state: any) => ({ ownedTraits: [...state.ownedTraits, trait] }));
+    },
     setLayers: (layers: Layer[]) => set({ layers }),
     setOwnedTraits: (traits: NomTrait[]) => set({ ownedTraits: traits }),
     setPendingTraits: (traits: Trait[]) => set({ pendingTraits: traits }),
@@ -123,5 +140,50 @@ export const createNomBuilderStore = (nom: Nom | null) => {
       set((state: any) => ({
         pendingTraits: state.pendingTraits.filter((t: Trait) => t !== trait),
       })),
+    saveAndResetState: () => {
+      // save nom
+      // mint traits
+      // take layers, process each layer into appropriate initial state
+      // ---------------------------------------------------------------
+      // need to update:
+      // ownedTraits
+      // initialLayers => owned traits that are equipped
+      // layers => initialLayers
+      // pendingTraits => []
+      set((state: INomBuilderState) => {
+        const existingLayers = state.layers;
+        const newlyOwnedTraitsAsNomTraits: NomTrait[] = existingLayers
+          .filter((l: Layer) => l.type === LayerChangeType.BUY_AND_EQUIP)
+          .map((l: Layer) => ({
+            id: l.trait.id,
+            trait: l.trait,
+            equipped: true,
+            owned: true,
+            quantity: 1,
+            nom: nom!,
+          }));
+
+        const updatedOwnedTraits: NomTrait[] = [
+          ...state.ownedTraits,
+          ...newlyOwnedTraitsAsNomTraits,
+        ];
+
+        const updatedInitialLayers = updatedOwnedTraits
+          .filter((t: NomTrait) => t.equipped)
+          .map((t: NomTrait) => ({
+            trait: t.trait,
+            equipped: true,
+            owned: true,
+            type: LayerChangeType.FIXED,
+          }));
+
+        return {
+          ownedTraits: updatedOwnedTraits,
+          initialLayers: updatedInitialLayers,
+          layers: updatedInitialLayers,
+          pendingTraits: [],
+        };
+      });
+    },
   }));
 };

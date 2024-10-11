@@ -54,12 +54,12 @@ const EquipTraitAction = ({ trait }: { trait: Trait }) => {
 
 // TODO: WRONG -- SHOULD NOT BE A PENDING TRAIT BECAUSE WE ALREADY OWN IT
 const AddTraitAction = ({ trait }: { trait: Trait }) => {
-  const addPendingTrait = useNomBuilderContext(
-    (state) => state.addPendingTrait
+  const setOwnedTraitAsEquipped = useNomBuilderContext(
+    (state) => state.setOwnedTraitAsEquipped
   );
 
-  const addTrait = (trait: Trait) => {
-    addPendingTrait(trait);
+  const equipOwnedTrait = (trait: Trait) => {
+    setOwnedTraitAsEquipped(trait);
   };
 
   return (
@@ -67,7 +67,7 @@ const AddTraitAction = ({ trait }: { trait: Trait }) => {
       className="h-[23px] w-[23px] bg-[#222] rounded-[6px] absolute bottom-1 left-1 flex items-center justify-center p-1 group-hover:opacity-100 opacity-0 transition-all"
       onClick={(e) => {
         e.stopPropagation();
-        addTrait(trait);
+        equipOwnedTrait(trait);
       }}
     >
       <ShirtIcon className="text-white" filled={true} />

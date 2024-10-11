@@ -30,6 +30,9 @@ const SaveNomButton = () => {
   const { address } = useAccount();
   const nomId = useNomBuilderContext((state) => state.nomId);
   const layers = useNomBuilderContext((state) => state.layers);
+  const saveAndResetState = useNomBuilderContext(
+    (state) => state.saveAndResetState
+  );
 
   const {
     writeContract: createNom,
@@ -71,7 +74,20 @@ const SaveNomButton = () => {
     isPending: isMintTraitsPending,
   } = useWriteContract();
 
-  const { data: tba } = useReadContract({
+  const { data: saveNomReceipt, isLoading: isSaveNomReceiptLoading } =
+    useWaitForTransactionReceipt({
+      hash: saveNomData,
+      confirmations: 2,
+    });
+
+  useEffect(() => {
+    if (saveNomReceipt) {
+      saveAndResetState();
+    }
+  }, [saveNomReceipt]);
+
+  // classic error here is being on the wrong chain :p
+  const { data: tba, error: readNomTBAError } = useReadContract({
     ...NOM_CONTRACT,
     functionName: "getTBAForTokenId",
     args: [BigInt(nomId || 0)],
@@ -84,28 +100,32 @@ const SaveNomButton = () => {
       onClick={async () => {
         const orderedLayers = [...layers].reverse();
         if (!address) {
-          // toast
+          toast.error("Please connect your wallet");
           return;
         }
 
         if (!!nomId) {
           if (!tba) {
+            toast.error("Nom TBA not found");
             return;
           }
           const unownedTraitLayers = orderedLayers.filter(
             (layer) => !layer.owned
           );
-          await mintTraitsAsync({
-            chain: localhost,
-            ...TRAIT_CONTRACT,
-            functionName: "batchMintViaModules",
-            args: [
-              tba,
-              unownedTraitLayers.map((layer) => BigInt(layer.trait.id)),
-              unownedTraitLayers.map((_layer) => BigInt(1)),
-              unownedTraitLayers.map((_layer) => BigInt(0)),
-            ],
-          });
+
+          if (unownedTraitLayers.length > 0) {
+            await mintTraitsAsync({
+              chain: localhost,
+              ...TRAIT_CONTRACT,
+              functionName: "batchMintViaModules",
+              args: [
+                tba,
+                unownedTraitLayers.map((layer) => BigInt(layer.trait.id)),
+                unownedTraitLayers.map((_layer) => BigInt(1)),
+                unownedTraitLayers.map((_layer) => BigInt(0)),
+              ],
+            });
+          }
 
           const equippedTraitLayers = orderedLayers.filter(
             (layer) => layer.type !== LayerChangeType.UNEQUIP
@@ -136,9 +156,9 @@ const SaveNomButton = () => {
       }}
     >
       <span className="pangram-sans font-bold">
-        {isCreateNomPending || isSaveNomPending
+        {isCreateNomPending || isSaveNomPending || isMintTraitsPending
           ? "Signing tx..."
-          : isCreateNomReceiptLoading
+          : isCreateNomReceiptLoading || isSaveNomReceiptLoading
             ? "Pending..."
             : "Save changes"}
       </span>
