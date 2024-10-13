@@ -27,7 +27,7 @@ export type Action =
 const createEmptyGrid = (width: number, height: number): PixelGrid =>
   Array(height)
     .fill(null)
-    .map(() => Array(width).fill("#FFF"));
+    .map(() => Array(width).fill("TRANSPARENT"));
 
 const gridReducer = (state: PixelGridState, action: Action): PixelGridState => {
   switch (action.type) {
@@ -151,7 +151,7 @@ export const usePixelGrid = (initialWidth: number, initialHeight: number) => {
     currentGrid: createEmptyGrid(initialWidth, initialHeight),
     history: [],
     future: [],
-    currentColor: "#000",
+    currentColor: "#000000",
     brushSize: 1,
     drawMode: "brush" as DrawMode,
   });

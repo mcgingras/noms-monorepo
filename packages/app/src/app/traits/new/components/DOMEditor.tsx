@@ -38,6 +38,7 @@ const DOMEditor = ({
   brushSize: number;
   drawMode: DrawMode;
 }) => {
+  console.log(grid);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hoveredPixel, setHoveredPixel] = useState<{
     x: number;
@@ -112,7 +113,7 @@ const DOMEditor = ({
                 className={`w-[3.125%] aspect-square relative transition-colors duration-150`}
                 style={{
                   backgroundColor:
-                    pixelColor !== "#FFF" ? pixelColor : "transparent",
+                    pixelColor !== "#ffffff" ? pixelColor : "transparent",
                 }}
                 onMouseDown={() => handleMouseDown(x, y)}
                 onMouseMove={() => handleMouseMove(x, y)}

@@ -1,6 +1,7 @@
-const UndoIcon = () => {
+const UndoIcon = ({ className }: { className?: string }) => {
   return (
     <svg
+      className={className}
       width="27"
       height="14"
       viewBox="0 0 27 14"
