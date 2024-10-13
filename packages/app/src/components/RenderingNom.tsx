@@ -30,8 +30,6 @@ const RenderingNom = ({ layers }: { layers: Layer[] }) => {
     }
   }, [data]);
 
-  console.log(error);
-
   return (
     <div className="w-full h-full relative">
       <div

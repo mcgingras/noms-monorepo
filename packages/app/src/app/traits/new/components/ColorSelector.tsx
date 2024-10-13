@@ -1,14 +1,4 @@
-const colors = [
-  "#1929f4",
-  "#ab36be",
-  "#f4c724",
-  "#f4a724",
-  "#f42424",
-  "#24f424",
-  "#24f4f4",
-  "#2424f4",
-  "#f424f4",
-];
+const colors = ["#c5b9a1", "#cfc2ab", "#63a0f9"];
 
 const ColorSelector = ({
   setColor,

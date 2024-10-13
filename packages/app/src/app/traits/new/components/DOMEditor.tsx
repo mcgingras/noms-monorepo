@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { DrawMode } from "../hooks/usePixelGrid";
+import useDebouncedQuery from "@/hooks/useDebouncedQuery";
+import { useTraitEditorContext } from "@/stores/traitEditor/context";
 
 // Create the checkerboard pattern SVG
 const checkerboardPattern = encodeURIComponent(`
@@ -38,7 +40,9 @@ const DOMEditor = ({
   brushSize: number;
   drawMode: DrawMode;
 }) => {
-  console.log(grid);
+  const updateCustomLayerWithGridDetails = useTraitEditorContext(
+    (state) => state.updateCustomLayerWithGridDetails
+  );
   const [isDrawing, setIsDrawing] = useState(false);
   const [hoveredPixel, setHoveredPixel] = useState<{
     x: number;
@@ -76,25 +80,13 @@ const DOMEditor = ({
     handleMouseUp();
   }, [handleMouseUp]);
 
+  const debouncedGrid = useDebouncedQuery(grid, 500);
+  useEffect(() => {
+    updateCustomLayerWithGridDetails(debouncedGrid);
+  }, [debouncedGrid]);
+
   return (
     <div className="p-4 w-full h-full flex flex-col items-center justify-center">
-      {/* <div className="mb-4 space-x-2">
-        <select
-          value={drawMode}
-          onChange={(e) => setDrawMode(e.target.value as DrawMode)}
-        >
-          <option value="brush">Brush</option>
-          <option value="fill">Fill</option>
-          <option value="circle">Circle</option>
-        </select>
-        <input
-          type="number"
-          min="1"
-          max="5"
-          value={brushSize}
-          onChange={(e) => setBrushSize(Number(e.target.value))}
-        />
-      </div> */}
       <div
         className="min-w-[400px] w-1/2 aspect-square block relative"
         style={{

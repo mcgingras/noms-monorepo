@@ -2,13 +2,13 @@ import { createStore } from "zustand";
 import { Layer, LayerChangeType } from "../../types/layer";
 import { NomTrait } from "../../types/trait";
 import { Nom } from "../../types/nom";
+import { getRLE } from "@/lib/rle";
 
 export interface ITraitEditorState {
   layers: Layer[];
-  customLayer: Layer | null;
   ownedTraits: NomTrait[];
   nomId: string | null;
-  setCustomLayer: (layer: Layer | null) => void;
+  updateCustomLayerWithGridDetails: (grid: string[][]) => void;
   setNomId: (id: string | null) => void;
   addLayer: (layer: Layer) => void;
   removeLayer: (layer: Layer) => void;
@@ -34,7 +34,7 @@ export const createTraitEditorStore = (nom: Nom | null) => {
   const customLayer = {
     trait: {
       id: "custom",
-      name: "Custom Layer",
+      name: "New trait",
       type: "custom",
       svg: "",
       rleBytes:
@@ -46,12 +46,32 @@ export const createTraitEditorStore = (nom: Nom | null) => {
   };
 
   return createStore<ITraitEditorState>((set) => ({
-    layers: [...initialLayers, customLayer],
-    customLayer: null,
+    layers: [customLayer, ...initialLayers],
     ownedTraits,
     nomId: nom?.tokenId || null,
     setNomId: (id: string | null) => set({ nomId: id }),
-    setCustomLayer: (layer: Layer | null) => set({ customLayer: layer }),
+    updateCustomLayerWithGridDetails: (grid: string[][]) =>
+      set((state: any) => {
+        const rle = getRLE(grid);
+        const updatedCustomTrait = {
+          id: "custom",
+          name: "New trait",
+          type: "custom",
+          svg: "",
+          rleBytes: rle,
+        };
+        return {
+          layers: state.layers.map((layer: Layer) => {
+            if (layer.trait.id === "custom") {
+              return {
+                ...layer,
+                trait: updatedCustomTrait,
+              };
+            }
+            return layer;
+          }),
+        };
+      }),
     addLayer: (layer: Layer) =>
       set((state: any) => ({ layers: [...state.layers, layer] })),
     removeLayer: (layer: Layer) =>

@@ -92,6 +92,10 @@ export class Image {
    * @param data The numeric array to run-length encode
    */
   private encode(data: number[], width: number): string {
+    if (data.length === 0) {
+      return "";
+    }
+
     if (data.length % width !== 0) {
       throw new Error("Data length must be a multiple of width");
     }
