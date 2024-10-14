@@ -8,9 +8,17 @@ import {INomTraits} from "../src/interfaces/INomTraits.sol";
 contract TraitDeployer is Script {
     IEasel public easel;
     INomTraits public traitsContract;
-    string public constant FILE_NAME = "traits.json";
+    string public constant FILE_NAME = "traits_oct_14_2024.json";
     uint8 public constant PALETTE_INDEX = 0;
     uint256 public constant BATCH_SIZE = 20;
+
+    struct JSONTrait {
+        address creator;
+        bytes data;
+        string description;
+        string filename;
+        string traitType;
+    }
 
     struct Trait {
         bytes data;
@@ -58,9 +66,15 @@ contract TraitDeployer is Script {
         string memory filePath = string.concat(vm.projectRoot(), "/script/data/", FILE_NAME);
         string memory jsonContent = vm.readFile(filePath);
 
+
+        console2.log("here 1 ");
         string memory path = string(abi.encodePacked(".images.", category));
+        console2.log("here 2 ");
         bytes memory parsedData = vm.parseJson(jsonContent, path);
-        Trait[] memory traits = abi.decode(parsedData, (Trait[]));
+        console2.log("here 3 ");
+        console2.logBytes(parsedData);
+        JSONTrait[] memory traits = abi.decode(parsedData, (JSONTrait[]));
+        console2.log("here 4 ");
 
         uint256 traitCount = traits.length;
         console2.log("Total traits for category", category, ":", traitCount);
@@ -68,7 +82,13 @@ contract TraitDeployer is Script {
         for (uint256 i = 0; i < traitCount; i += BATCH_SIZE) {
             uint256 end = i + BATCH_SIZE > traitCount ? traitCount : i + BATCH_SIZE;
             for (uint256 j = i; j < end; j++) {
-                traitsContract.registerTrait(traits[j].data, traits[j].filename);
+                traitsContract.registerTrait(
+                    traits[j].data,
+                    traits[j].filename,
+                    traits[j].traitType,
+                    traits[j].description,
+                    traits[j].creator
+                );
             }
         }
     }

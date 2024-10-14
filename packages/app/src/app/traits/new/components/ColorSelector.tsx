@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { colors } from "@/lib/constants";
+import CaratDownIcon from "@/components/icons/CaratDownIcon";
+import CaratUpIcon from "@/components/icons/CaratUpIcon";
 
 const ColorSelector = ({
   setColor,
@@ -75,8 +77,8 @@ const ColorSelector = ({
           ))}
         </motion.div>
       </AnimatePresence>
-      <div className="flex flex-row space-x-4 p-2 bg-gray-800">
-        {colors.slice(1, 10).map((color) => (
+      <div className="flex flex-row space-x-4 p-2 bg-gray-800 items-center">
+        {colors.slice(1, 20).map((color) => (
           <div
             onClick={() => {
               setColor(color);
@@ -91,10 +93,14 @@ const ColorSelector = ({
           ></div>
         ))}
         <span
-          className="text-sm pangram-sans px-2 py-1 rounded cursor-pointer"
+          className="cursor-pointer flex-1 flex justify-end"
           onClick={() => setShowMore(!showMore)}
         >
-          {showMore ? "Less" : "More"}
+          {showMore ? (
+            <CaratDownIcon className="w-4 h-4" />
+          ) : (
+            <CaratUpIcon className="w-4 h-4" />
+          )}
         </span>
       </div>
     </div>

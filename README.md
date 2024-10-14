@@ -49,3 +49,4 @@ https://github.com/ponder-sh/ponder/tree/main/examples/with-foundry
 
 ###
 nc localhost 3000
+npx wagmi generate

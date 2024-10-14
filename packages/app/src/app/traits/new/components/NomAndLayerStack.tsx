@@ -31,9 +31,7 @@ const NomAndLayerStack = ({ noms }: { noms: Nom[] }) => {
             <SelectValue placeholder="Select a Nom" />
           </SelectTrigger>
           <SelectContent>
-            {noms?.length === 0 && (
-              <div className="text-sm p-2">No noms found</div>
-            )}
+            {noms?.length === 0 && <div className="p-2">No noms found</div>}
             {noms?.map((nom: Nom) => (
               <SelectItem key={nom.tokenId} value={nom.tokenId}>
                 Nom #{nom.tokenId}

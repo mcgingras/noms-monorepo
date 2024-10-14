@@ -8,13 +8,17 @@ import {INomTraits} from "../src/interfaces/INomTraits.sol";
 contract Deploy is Script {
     IEasel public easel;
     INomTraits public traitsContract;
-    string public constant FILE_NAME = "traits.json";
+    string public constant FILE_NAME = "traits_oct_14_2024.json";
     uint8 public constant PALETTE_INDEX = 0;
     uint256 public constant BATCH_SIZE = 20;
 
-    struct Trait {
+    // needs to be alphabetical
+   struct JSONTrait {
+        address creator;
         bytes data;
+        string description;
         string filename;
+        string traitType;
     }
 
     function setUp() public {
@@ -89,24 +93,29 @@ contract Deploy is Script {
 
         string memory path = string(abi.encodePacked(".images.", category));
         bytes memory parsedData = vm.parseJson(jsonContent, path);
-        Trait[] memory traits = abi.decode(parsedData, (Trait[]));
+        JSONTrait[] memory traits = abi.decode(parsedData, (JSONTrait[]));
 
         uint256 traitCount = traits.length;
         console2.log("Total traits for category", category, ":", traitCount);
 
         for (uint256 i = 0; i < traitCount; i += BATCH_SIZE) {
             uint256 batchEnd = (i + BATCH_SIZE < traitCount) ? i + BATCH_SIZE : traitCount;
-            INomTraits.Trait[] memory batch = new INomTraits.Trait[](batchEnd - i);
+
+            bytes[] memory data = new bytes[](batchEnd - i);
+            string[] memory names = new string[](batchEnd - i);
+            string[] memory traitTypes = new string[](batchEnd - i);
+            string[] memory descriptions = new string[](batchEnd - i);
+            address[] memory creators = new address[](batchEnd - i);
 
             for (uint256 j = i; j < batchEnd; j++) {
-                batch[j - i] = INomTraits.Trait({
-                    rleBytes: traits[j].data,
-                    name: traits[j].filename,
-                    creator: address(0)
-                });
+                data[j - i] = traits[j].data;
+                names[j - i] = traits[j].filename;
+                traitTypes[j - i] = traits[j].traitType;
+                descriptions[j - i] = traits[j].description;
+                creators[j - i] = traits[j].creator;
             }
 
-            traitsContract.registerBatchTraits(batch);
+            traitsContract.registerBatchTraits(data, names, traitTypes, descriptions, creators);
         }
     }
 

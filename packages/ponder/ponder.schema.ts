@@ -26,6 +26,8 @@ export default createSchema((p) => ({
     name: p.string(),
     // "body" | "glasses" | "accessory" | "head" | "bg"
     type: p.string(),
+    creator: p.string(),
+    description: p.string(),
     // svg (as base64 string)
     svg: p.string(),
     // relations

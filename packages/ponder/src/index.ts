@@ -104,6 +104,8 @@ ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
       rleBytes: event.args.rleBytes,
       svg: b64,
       type: event.args.name.substring(0, event.args.name.indexOf("-")),
+      creator: event.args.creator,
+      description: event.args.description,
     },
   });
 

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-
-import { Test, console } from "forge-std/Test.sol";
 import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -14,10 +12,8 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 contract NomTraits is ERC1155, INomTraits, Ownable {
     using Strings for uint256;
-
 
     address public easel;
     address public nomContractAddress;
@@ -89,22 +85,45 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @dev Registers a trait.
      * @param rleBytes The RLE bytes for the trait.
      * @param name The name of the trait.
+     * @param traitType The type of the trait.
+     * @param description The description of the trait.
+     * @param creator The creator of the trait.
      */
-    function registerTrait(bytes memory rleBytes, string memory name) public {
+    function registerTrait(bytes memory rleBytes, string memory name, string memory traitType, string memory description, address creator) public {
       _traitIdCount = _traitIdCount + 1;
       _traits[_traitIdCount] = Trait({
           name: name,
           rleBytes: rleBytes,
-          creator: msg.sender
+          creator: creator
       });
-      emit TraitRegistered(_traitIdCount, rleBytes, name, msg.sender);
+      emit TraitRegistered(_traitIdCount, rleBytes, name, traitType, description, creator);
     }
 
 
-    function registerBatchTraits(Trait[] memory _traitsToRegister) public {
-      for (uint256 i = 0; i < _traitsToRegister.length; i++) {
-        registerTrait(_traitsToRegister[i].rleBytes, _traitsToRegister[i].name);
-      }
+    function registerBatchTraits(
+        bytes[] memory rleBytes,
+        string[] memory names,
+        string[] memory traitTypes,
+        string[] memory descriptions,
+        address[] memory creators
+    ) public {
+        require(
+            rleBytes.length == names.length &&
+            rleBytes.length == traitTypes.length &&
+            rleBytes.length == descriptions.length &&
+            rleBytes.length == creators.length,
+            "All input arrays must have the same length"
+        );
+
+        for (uint256 i = 0; i < rleBytes.length; i++) {
+            registerTrait(
+                rleBytes[i],
+                names[i],
+                traitTypes[i],
+                descriptions[i],
+                creators[i]
+            );
+        }
     }
 
     /**

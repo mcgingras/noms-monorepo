@@ -544,16 +544,11 @@ export const nomTraitsAbi = [
   {
     type: 'function',
     inputs: [
-      {
-        name: '_traitsToRegister',
-        internalType: 'struct INomTraits.Trait[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'name', internalType: 'string', type: 'string' },
-          { name: 'rleBytes', internalType: 'bytes', type: 'bytes' },
-          { name: 'creator', internalType: 'address', type: 'address' },
-        ],
-      },
+      { name: 'rleBytes', internalType: 'bytes[]', type: 'bytes[]' },
+      { name: 'names', internalType: 'string[]', type: 'string[]' },
+      { name: 'traitTypes', internalType: 'string[]', type: 'string[]' },
+      { name: 'descriptions', internalType: 'string[]', type: 'string[]' },
+      { name: 'creators', internalType: 'address[]', type: 'address[]' },
     ],
     name: 'registerBatchTraits',
     outputs: [],
@@ -564,6 +559,9 @@ export const nomTraitsAbi = [
     inputs: [
       { name: 'rleBytes', internalType: 'bytes', type: 'bytes' },
       { name: 'name', internalType: 'string', type: 'string' },
+      { name: 'traitType', internalType: 'string', type: 'string' },
+      { name: 'description', internalType: 'string', type: 'string' },
+      { name: 'creator', internalType: 'address', type: 'address' },
     ],
     name: 'registerTrait',
     outputs: [],
@@ -791,6 +789,18 @@ export const nomTraitsAbi = [
         indexed: false,
       },
       { name: 'name', internalType: 'string', type: 'string', indexed: false },
+      {
+        name: 'traitType',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'description',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
       {
         name: 'creator',
         internalType: 'address',

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import { Test, console } from "forge-std/Test.sol";
 import { IEasel } from "./interfaces/IEasel.sol";
 import { INomTraits } from "./interfaces/INomTraits.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
