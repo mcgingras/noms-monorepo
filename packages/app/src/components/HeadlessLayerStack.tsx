@@ -118,12 +118,6 @@ const HeadlessLayerStack = ({
           </Droppable>
           <div className="absolute h-[60px] w-full bg-gradient-to-t from-black to-transparent bottom-0 left-0"></div>
         </div>
-        <button
-          onClick={() => {}}
-          className="w-full bg-blue-500 text-center rounded-lg font-bold pangram-sans flex items-center justify-center gap-2 py-1.5 mb-1"
-        >
-          Create trait
-        </button>
       </section>
     </DragDropContext>
   );

@@ -10,7 +10,6 @@ import EraserIcon from "@/components/icons/Eraser";
 import { DrawMode } from "../hooks/usePixelGrid";
 import { useTraitEditorContext } from "@/stores/traitEditor/context";
 import RenderingNom from "@/components/RenderingNom";
-import { getRLE } from "@/lib/rle";
 
 const Toolbox = ({
   grid,
@@ -72,7 +71,7 @@ const Toolbox = ({
             <PaintbrushIcon className="h-9 w-9" />
           </div>
         </div>
-        <div className="grid grid-cols-2 px-12 rounded-lg mt-2 gap-2">
+        <div className="grid grid-cols-2 px-8 rounded-lg mt-2 gap-2">
           <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
             <PaintbrushIcon className="h-6 w-6" />
           </div>
@@ -107,10 +106,9 @@ const Toolbox = ({
         <div className="flex-1 min-h-2 block w-full"></div>
         {/* This empty div will push the button to the bottom */}
         <button
-          className="w-full bg-blue-500 text-center rounded-lg font-bold pangram-sans flex items-center justify-center gap-2 py-1.5 mt-auto"
+          className="w-full bg-gray-900 text-center rounded-lg font-bold pangram-sans flex items-center justify-center gap-2 py-1.5 mt-auto"
           onClick={() => {
-            // clear();
-            console.log(getRLE(grid));
+            clear();
           }}
         >
           <TrashIcon className="h-5 w-5" />
