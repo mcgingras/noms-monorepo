@@ -8,7 +8,7 @@ const InfoIcon = ({ className }: { className?: string }) => {
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      <g clip-path="url(#clip0_2945_27090)">
+      <g clipPath="url(#clip0_2945_27090)">
         <path
           d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z"
           stroke="currentColor"

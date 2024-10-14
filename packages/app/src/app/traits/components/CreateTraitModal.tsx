@@ -1,5 +1,16 @@
-import Modal from "@/components/Modal";
-import { Input } from "@headlessui/react";
+import RenderingNom from "@/components/RenderingNom";
+import { useTraitEditorContext } from "@/stores/traitEditor/context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/SelectInput";
+import { Dialog, DialogContent } from "@/components/Dialog";
+
+const MODULE_TYPES = ["free", "paid", "whitelist", "capped"];
+const TRAIT_TYPES = ["head", "body", "accessory", "glasses", "other"];
 
 const CreateTraitModal = ({
   isOpen,
@@ -8,15 +19,20 @@ const CreateTraitModal = ({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) => {
+  const layers = useTraitEditorContext((state) => state.layers);
+  const customLayer = layers.find((layer) => layer.trait.id === "custom");
   return (
-    <Modal open={isOpen} setIsOpen={setIsOpen}>
-      <div className="flex flex-row gap-x-4 w-[800px]">
-        <div className="w-1/2">
-          <h2 className="pangram-sans font-bold text-lg">New trait</h2>
-          <div className="w-full aspect-square bg-gray-200 rounded-md"></div>
-        </div>
-        <div className="w-1/2">
-          <div className="flex flex-col gap-y-4">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="w-[800px] bg-white">
+        <div className="flex flex-row gap-x-4">
+          <div className="w-1/2">
+            <h2 className="pangram-sans font-bold text-lg">New trait</h2>
+            <div className="w-full aspect-square bg-gray-200 rounded-md">
+              <RenderingNom layers={[customLayer!]} />
+            </div>
+          </div>
+
+          <div className="w-1/2 flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1">
               <h3 className="text-sm pangram-sans font-medium">Name</h3>
               <input
@@ -33,30 +49,42 @@ const CreateTraitModal = ({
             </div>
             <div className="flex flex-col gap-y-1">
               <h3 className="text-sm pangram-sans">Mint criteria</h3>
-              <select className="w-full bg-gray-200 rounded-md p-2">
-                <option value="free">Free mint</option>
-                <option value="paid">Paid mint</option>
-                <option value="whitelist">Whitelist mint</option>
-                <option value="capped">Capped mint</option>
-              </select>
+              <Select defaultValue={"free"}>
+                <SelectTrigger className="w-full bg-gray-200 text-black border-none">
+                  <SelectValue placeholder="Select a mint criteria" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-200 text-black border-none">
+                  {MODULE_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-col gap-y-1">
               <h3 className="text-sm pangram-sans">Type</h3>
-              <select className="w-full bg-gray-200 rounded-md p-2">
-                <option value="free">Head</option>
-                <option value="paid">Body</option>
-                <option value="whitelist">Accessory</option>
-                <option value="capped">Glasses</option>
-                <option value="capped">Other</option>
-              </select>
+              <Select defaultValue={"head"}>
+                <SelectTrigger className="w-full bg-gray-200 text-black border-none">
+                  <SelectValue placeholder="Select a trait type" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-200 text-black border-none">
+                  {TRAIT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            <div className="flex-1" />
             <button className="bg-blue-500 text-white rounded-md p-2 pangram-sans font-bold">
               Create trait
             </button>
           </div>
         </div>
-      </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

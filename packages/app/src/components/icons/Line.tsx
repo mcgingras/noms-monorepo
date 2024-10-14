@@ -14,8 +14,8 @@ const LineIcon = ({ className }: { className?: string }) => {
       <path
         d="M22.125 1.2168L2.125 21.2168"
         stroke="currentColor"
-        stroke-width="2.32708"
-        stroke-linecap="round"
+        strokeWidth="2.32708"
+        strokeLinecap="round"
       />
     </svg>
   );

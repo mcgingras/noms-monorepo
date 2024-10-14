@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 // r stands for rotate
 const Nom = ({
@@ -22,7 +23,7 @@ const Nom = ({
         ? "bg-red-600 text-red-300"
         : "bg-green-600 text-green-300";
   return (
-    <div
+    <motion.div
       className="absolute"
       style={{ top: y, left: x, transform: `rotate(${r}deg)` }}
     >
@@ -31,7 +32,7 @@ const Nom = ({
       >
         noms
       </div>
-    </div>
+    </motion.div>
   );
 };
 

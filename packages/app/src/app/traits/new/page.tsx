@@ -40,10 +40,12 @@ const NewTraitPage = () => {
         <section className="pt-12 flex flex-row space-x-2 h-full w-full">
           <NomAndLayerStack noms={noms?.items || []} />
           <div className="bg-[#151515] h-full w-full flex flex-row p-1 rounded-[24px]">
-            <div className="bg-gray-900 h-full flex-1 rounded-[20px] flex flex-col p-4 overflow-hidden">
+            <div className="bg-gray-900 h-full flex-1 rounded-[20px] flex flex-col p-4 overflow-hidden relative">
               <div className="flex flex-1">
                 <DOMEditor {...editorMethods} />
               </div>
+              {/* block to save space for color selector */}
+              <div className="h-[60px]" />
               <ColorSelector {...editorMethods} />
             </div>
             <div className="w-[220px]">
