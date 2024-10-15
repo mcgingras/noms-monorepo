@@ -6,6 +6,7 @@ import NomDeploy from "../../contracts/broadcast/Nom.s.sol/1337/run-latest.json"
 
 const txs = NomDeploy.transactions;
 const easelAddress = getAddress(txs[1]!.contractAddress);
+const nomTraitsAddress = getAddress(txs[2]!.contractAddress);
 
 // Can check that the transfer is coming from the 0x0 address to know that it's a mint
 // Otherwise it's an address to address transfer, in which we update the owner.
@@ -83,6 +84,17 @@ ponder.on(
   }
 );
 
+ponder.on("ERC1155Contract:MintModuleSet", async ({ event, context }) => {
+  const { Trait } = context.db;
+
+  await Trait.update({
+    id: event.args.traitId,
+    data: {
+      mintModuleAddress: event.args.module,
+    },
+  });
+});
+
 /* TRAIT 1155 */
 ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
   const { client } = context;
@@ -95,6 +107,12 @@ ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
     args: [[event.args.rleBytes]],
   });
 
+  const defaultMintModuleAddress = await client.readContract({
+    abi: nomTraitsAbi,
+    address: nomTraitsAddress,
+    functionName: "defaultMintModule",
+  });
+
   const b64 = btoa(svg);
 
   const t = await Trait.create({
@@ -105,6 +123,8 @@ ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
       svg: b64,
       type: event.args.name.substring(0, event.args.name.indexOf("-")),
       creator: event.args.creator,
+      // All traits start with the default mint module
+      mintModuleAddress: defaultMintModuleAddress,
       description: event.args.description,
     },
   });

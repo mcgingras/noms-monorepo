@@ -28,6 +28,7 @@ export default createSchema((p) => ({
     type: p.string(),
     creator: p.string(),
     description: p.string(),
+    mintModuleAddress: p.string(),
     // svg (as base64 string)
     svg: p.string(),
     // relations

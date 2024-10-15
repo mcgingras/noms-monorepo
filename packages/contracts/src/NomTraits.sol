@@ -99,6 +99,17 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
       emit TraitRegistered(_traitIdCount, rleBytes, name, traitType, description, creator);
     }
 
+    // function registerTraitWithMintModule(bytes memory rleBytes, string memory name, string memory traitType, string memory description, address creator, address mintModule) public {
+    //   _traitIdCount = _traitIdCount + 1;
+    //   _traits[_traitIdCount] = Trait({
+    //       name: name,
+    //       rleBytes: rleBytes,
+    //       creator: creator,
+    //       mintModule: mintModule
+    //   });
+    //   emit TraitRegistered(_traitIdCount, rleBytes, name, traitType, description, creator, mintModule);
+    // }
+
 
     function registerBatchTraits(
         bytes[] memory rleBytes,

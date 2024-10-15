@@ -9,8 +9,8 @@ import {
 } from "@/components/SelectInput";
 import { Dialog, DialogContent } from "@/components/Dialog";
 
-const MODULE_TYPES = ["free", "paid", "whitelist", "capped"];
-const TRAIT_TYPES = ["head", "body", "accessory", "glasses", "other"];
+const MODULE_TYPES = ["Free", "Paid", "Whitelist", "Capped"];
+const TRAIT_TYPES = ["Head", "Body", "Accessory", "Glasses", "Other"];
 
 const CreateTraitModal = ({
   isOpen,
@@ -34,49 +34,62 @@ const CreateTraitModal = ({
 
           <div className="w-1/2 flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1">
-              <h3 className="text-sm pangram-sans font-medium">Name</h3>
+              <h3 className="text-sm pangram-sans-compact font-bold">Name</h3>
               <input
                 type="text"
-                className="w-full bg-gray-200 rounded-md p-2"
+                className="w-full bg-gray-200 rounded-md p-2 pangram-sans-compact font-bold"
               />
             </div>
             <div className="flex flex-col gap-y-1">
-              <h3 className="text-sm pangram-sans">Description</h3>
+              <h3 className="text-sm pangram-sans-compact font-bold">
+                Description
+              </h3>
               <input
                 type="textarea"
-                className="w-full bg-gray-200 rounded-md p-2"
+                className="w-full bg-gray-200 rounded-md p-2 pangram-sans-compact font-bold"
               />
             </div>
             <div className="flex flex-col gap-y-1">
-              <h3 className="text-sm pangram-sans">Mint criteria</h3>
-              <Select defaultValue={"free"}>
-                <SelectTrigger className="w-full bg-gray-200 text-black border-none">
-                  <SelectValue placeholder="Select a mint criteria" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-200 text-black border-none">
-                  {MODULE_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-y-1">
-              <h3 className="text-sm pangram-sans">Type</h3>
+              <h3 className="text-sm pangram-sans-compact font-bold">Type</h3>
               <Select defaultValue={"head"}>
                 <SelectTrigger className="w-full bg-gray-200 text-black border-none">
                   <SelectValue placeholder="Select a trait type" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-200 text-black border-none">
                   {TRAIT_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
+                    <SelectItem
+                      key={type}
+                      value={type}
+                      className="text-black focus:bg-gray-300 focus:text-black"
+                    >
                       {type}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex flex-col gap-y-1">
+              <h3 className="text-sm pangram-sans-compact font-bold">
+                Mint criteria
+              </h3>
+              <Select defaultValue={"free"}>
+                <SelectTrigger className="w-full bg-gray-200 text-black border-none">
+                  <SelectValue placeholder="Select a mint criteria" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-200 text-black border-none">
+                  {MODULE_TYPES.map((type) => (
+                    <SelectItem
+                      key={type}
+                      value={type}
+                      className="text-black focus:bg-gray-300 focus:text-black"
+                    >
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex-1" />
             <button className="bg-blue-500 text-white rounded-md p-2 pangram-sans font-bold">
               Create trait
