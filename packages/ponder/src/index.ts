@@ -121,7 +121,7 @@ ponder.on("ERC1155Contract:TraitRegistered", async ({ event, context }) => {
       name: event.args.name,
       rleBytes: event.args.rleBytes,
       svg: b64,
-      type: event.args.name.substring(0, event.args.name.indexOf("-")),
+      type: event.args.traitType,
       creator: event.args.creator,
       // All traits start with the default mint module
       mintModuleAddress: defaultMintModuleAddress,

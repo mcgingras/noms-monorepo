@@ -1,21 +1,14 @@
 "use client";
 
-type Trait = {
-  id: bigint;
-  rleBytes: `0x${string}`;
-  name: string;
-  type: "body" | "glasses" | "accessory" | "head" | "bg";
-  svg: string;
-};
-
+import { Trait } from "@/types/trait";
 const TraitGridUI = ({
   traits,
   selectedTrait,
   setSelectedTrait,
 }: {
   traits: Trait[];
-  selectedTrait: Trait;
-  setSelectedTrait: (trait: Trait) => void;
+  selectedTrait: Trait | null;
+  setSelectedTrait: (trait: Trait | null) => void;
 }) => {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2 content-start">
@@ -23,7 +16,7 @@ const TraitGridUI = ({
         <div
           key={trait.id}
           className={`aspect-square flex-shrink-0 rounded-lg p-1 bg-gray-900 cursor-pointer border-2 ${
-            selectedTrait.id.toString() === trait.id.toString()
+            selectedTrait?.id.toString() === trait.id.toString()
               ? "border-[#FDCB3F] "
               : "border-transparent"
           }`}

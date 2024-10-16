@@ -1,27 +1,24 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-export const getTraitsInfinite = async ({
-  type = "all",
-  searchQuery = "",
+const getNomsInfinite = async ({
   limit = 60,
   pageParam = null,
 }: {
-  type: string;
-  searchQuery: string;
   limit: number;
   pageParam: string | null;
 }) => {
   const url = process.env.NEXT_PUBLIC_GRAPHQL_URL!;
 
   const query = `
-              query GetTraits($type: String!, $searchQuery: String!, $limit: Int!, $after: String) {
-                  traits(where: { type_contains: $type, name_contains: $searchQuery }, limit: $limit, after: $after) {
+              query GetNoms($limit: Int!, $after: String) {
+                  noms(limit: $limit, after: $after) {
                       items {
-                      id
-                      name
-                      rleBytes
-                      type
-                      svg
+                        id
+                        tokenId
+                        owner
+                        created
+                        deployed
+                        fullSVG
                       }
                       pageInfo {
                           hasPreviousPage
@@ -41,8 +38,6 @@ export const getTraitsInfinite = async ({
     body: JSON.stringify({
       query,
       variables: {
-        type: type === "all" ? "" : type,
-        searchQuery,
         limit,
         after: pageParam,
       },
@@ -52,18 +47,18 @@ export const getTraitsInfinite = async ({
   try {
     const data = await fetch(url, graphqlRequest);
     const json = await data.json();
-    return json.data.traits;
+    return json.data.noms;
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
 
-const getTraitCount = async () => {
+const getNomCount = async () => {
   const url = process.env.NEXT_PUBLIC_GRAPHQL_URL!;
 
   try {
-    const data = await fetch(`${url}/api/traits/count`);
+    const data = await fetch(`${url}/api/noms/count`);
     const json = await data.json();
     return json[0].count;
   } catch (error) {
@@ -72,13 +67,7 @@ const getTraitCount = async () => {
   }
 };
 
-export const useTraits = ({
-  typeFilter = "",
-  searchQuery = "",
-}: {
-  typeFilter: string;
-  searchQuery: string;
-}) => {
+export const useNoms = () => {
   const {
     data,
     isLoading,
@@ -91,11 +80,9 @@ export const useTraits = ({
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["traits", typeFilter, searchQuery],
+    queryKey: ["noms"],
     queryFn: ({ pageParam = null }) =>
-      getTraitsInfinite({
-        type: typeFilter,
-        searchQuery,
+      getNomsInfinite({
         limit: 60,
         pageParam: pageParam ?? null,
       }),
@@ -107,18 +94,18 @@ export const useTraits = ({
     },
   });
 
-  const { data: traitCount, isLoading: isLoadingTraitCount } = useQuery({
-    queryKey: ["traitCount"],
-    queryFn: () => getTraitCount(),
+  const { data: nomCount, isLoading: isLoadingNomCount } = useQuery({
+    queryKey: ["nomCount"],
+    queryFn: () => getNomCount(),
   });
 
   return {
     data: {
-      traits: data?.pages.flatMap((page) => page.items) ?? [],
-      count: traitCount,
-      totalPages: Math.ceil(traitCount / 60),
+      noms: data?.pages.flatMap((page) => page.items) ?? [],
+      count: nomCount,
+      totalPages: Math.ceil(nomCount / 60),
     },
-    isLoading: isLoading || isLoadingTraitCount,
+    isLoading: isLoading || isLoadingNomCount,
     error,
     hasNextPage,
     fetchNextPage,
@@ -127,6 +114,5 @@ export const useTraits = ({
     isFetching,
     isFetchingNextPage,
     status,
-    traitCount,
   };
 };

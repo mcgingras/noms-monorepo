@@ -6,30 +6,43 @@ import AnimatedTabsVertical from "./components/AnimatedTabsVertical";
 import Searchbar from "@/components/Searchbar";
 import TraitGridUI from "./components/TraitGridUI";
 import TraitDetails from "./components/TraitDetails";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { getTraits } from "@/actions/getTraits";
+import { useTraitsPaginated } from "@/actions/useTraitsPaginated";
+import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
+import ArrowRightIcon from "@/components/icons/ArrowRIghtIcon";
+import { Trait } from "@/types/trait";
 
 const TraitsPage = ({ searchParams }: { searchParams: any }) => {
-  const { data } = useSuspenseQuery({
-    queryKey: ["traits-query", searchParams.type || "all"],
-    queryFn: async () => {
-      const traits = await getTraits(searchParams.type || "all", "");
-      return { traits };
-    },
+  const [page, setPage] = useState(0);
+  const type = searchParams.type || "all";
+  const searchQuery = searchParams.searchQuery || "";
+  const creator = searchParams.creator || "";
+  const {
+    data,
+    isLoading,
+    handleNext,
+    handlePrevious,
+    hasNextPage,
+    hasPreviousPage,
+  } = useTraitsPaginated({
+    typeFilter: type,
+    searchQuery: searchQuery,
+    creator: creator,
   });
 
-  const { traits } = data;
-  const [selectedTrait, setSelectedTrait] = useState(traits[0]);
+  const [selectedTrait, setSelectedTrait] = useState<Trait | null>(null);
 
   useEffect(() => {
-    setSelectedTrait(traits[0]);
-  }, [traits]);
+    setSelectedTrait(data?.traits?.items?.[0]);
+  }, [data.traits]);
 
   return (
     <main className="h-[calc(100vh-66px)] w-full flex flex-col">
       <section className="flex-grow flex flex-col overflow-hidden">
-        <div className="pt-12 pb-4 flex flex-row">
+        <div className="pt-12 pb-4 flex flex-row space-x-2">
           <TraitTab />
+          <span className="pangram-sans font-bold text-sm bg-[#262626] px-2 py-1 rounded-xl self-end">
+            {data.count} traits
+          </span>
         </div>
         <div className="flex-grow flex flex-row space-x-2 overflow-hidden">
           <AnimatedTabsVertical />
@@ -37,14 +50,43 @@ const TraitsPage = ({ searchParams }: { searchParams: any }) => {
             <div className="flex flex-row justify-between items-center">
               <Searchbar />
               <div className="flex flex-row items-center space-x-2">
-                <p className="pangram-sans">Page 1 of 9</p>
-                <span className="bg-gray-900 h-6 w-6 rounded-full block"></span>
+                <div className="pangram-sans text-sm font-semibold">
+                  page {page + 1} of {data.totalPages}
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (hasPreviousPage) {
+                      handlePrevious();
+                      setPage(page - 1);
+                    }
+                  }}
+                  className={`${hasPreviousPage ? "bg-gray-900" : "bg-gray-1000"} rounded-full p-2 transition-all`}
+                >
+                  <ArrowLeftIcon
+                    className={`w-4 h-4 ${hasPreviousPage ? "opacity-100" : "opacity-30"} transition-all`}
+                  />
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (hasNextPage) {
+                      handleNext();
+                      setPage(page + 1);
+                    }
+                  }}
+                  className={`${hasNextPage ? "bg-gray-900" : "bg-gray-1000"} rounded-full p-2 transition-all`}
+                >
+                  <ArrowRightIcon
+                    className={`w-4 h-4 ${hasNextPage ? "opacity-100" : "opacity-30"} transition-all`}
+                  />
+                </button>
               </div>
             </div>
             <div className="flex-grow grid grid-cols-[1fr,auto] gap-2 overflow-hidden">
               <div className="overflow-y-auto">
                 <TraitGridUI
-                  traits={traits}
+                  traits={data?.traits?.items ?? []}
                   setSelectedTrait={setSelectedTrait}
                   selectedTrait={selectedTrait}
                 />

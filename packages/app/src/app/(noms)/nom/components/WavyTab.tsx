@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 const WavyTab = ({
   size,
   onClick,
@@ -8,17 +6,9 @@ const WavyTab = ({
   onClick: () => void;
 }) => {
   return (
-    <motion.div
-      className={`absolute top-1/2 flex flex-row -rotate-90 z-50 transform -translate-y-1/2 cursor-pointer ${
-        size === "small" ? "right-[-12px]" : "right-[840px]"
-      }`}
+    <div
+      className="absolute top-1/2 flex flex-row -rotate-90 z-50 transform -translate-y-1/2 cursor-pointer left-[-69px]"
       onClick={onClick}
-      initial={{ right: size === "small" ? "-12px" : "840px" }}
-      animate={{ right: size === "small" ? "-12px" : "840px" }}
-      transition={{
-        duration: 0.5,
-        ease: [0.16, 1, 0.3, 1], // Custom bezier curve
-      }}
     >
       <svg
         width="41"
@@ -47,7 +37,7 @@ const WavyTab = ({
           fill="#151515"
         />
       </svg>
-    </motion.div>
+    </div>
   );
 };
 

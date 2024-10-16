@@ -5,7 +5,10 @@ export type Trait = {
   name: string;
   type: string;
   svg: string;
+  description: string;
+  creator: string;
   rleBytes: string;
+  mintModuleAddress: string;
 };
 
 export type NomTrait = {

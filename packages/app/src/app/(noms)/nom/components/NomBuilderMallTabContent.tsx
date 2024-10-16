@@ -4,17 +4,11 @@ import TraitCard from "@/components/TraitCard";
 import TraitViewer from "@/components/TraitViewer";
 import ShirtIcon from "@/components/icons/Shirt";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
-import { LayerChangeType } from "@/types/layer";
 import { Trait } from "@/types/trait";
 import { useTraits } from "@/actions/useTraits";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
-import {
-  isTraitInStack,
-  hooklessIsTraitInStack,
-  hooklessIsTraitStaged,
-  hooklessIsTraitEquipped,
-} from "@/lib/utils";
+import { hooklessIsTraitStaged, hooklessIsTraitEquipped } from "@/lib/utils";
 import ClockIcon from "@/components/icons/Clock";
 import RareIcon from "@/components/icons/Rare";
 import OwnedIcon from "@/components/icons/Owned";
@@ -60,7 +54,6 @@ const AddToCartAction = ({ trait }: { trait: Trait }) => {
 
 const MallTabTraitDetails = ({ trait }: { trait: Trait }) => {
   const nomId = useNomBuilderContext((state) => state.nomId);
-  const isInStack = isTraitInStack(trait);
 
   return (
     <div className="group-hover:opacity-100 opacity-0 transition-all absolute top-0 left-0 w-full h-full bg-black bg-opacity-10">
@@ -121,7 +114,7 @@ const NomBuilderMallTabContent = () => {
   const layers = useNomBuilderContext((state) => state.layers);
   const typeQuery = useNomBuilderContext((state) => state.typeQuery);
   const {
-    data: traits,
+    data,
     error,
     isLoading,
     isFetching,
@@ -144,13 +137,13 @@ const NomBuilderMallTabContent = () => {
   return (
     <>
       <div className="w-full bg-gray-900 p-2 rounded-lg my-2 flex-1 overflow-y-scroll">
-        {traits.length === 0 && (
+        {data.traits.length === 0 && (
           <div className="flex flex-row justify-center items-center h-full">
             <p className="pangram-sans text-gray-400">No traits found</p>
           </div>
         )}
         <div className="flex flex-row flex-wrap gap-4">
-          {traits.map((trait: Trait) => {
+          {data.traits.map((trait: Trait) => {
             const isStaged = hooklessIsTraitStaged(layers, trait);
             const isEquipped = hooklessIsTraitEquipped(layers, trait);
             return (
@@ -169,15 +162,8 @@ const NomBuilderMallTabContent = () => {
         </div>
         {hasNextPage && (
           <div ref={ref} className="w-full py-4 flex justify-center">
-            {isFetching ? (
+            {isFetching && (
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300"></div>
-            ) : (
-              <button
-                onClick={() => fetchNextPage()}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Load More
-              </button>
             )}
           </div>
         )}

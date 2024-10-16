@@ -89,7 +89,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
      * @param description The description of the trait.
      * @param creator The creator of the trait.
      */
-    function registerTrait(bytes memory rleBytes, string memory name, string memory traitType, string memory description, address creator) public {
+    function registerTrait(bytes memory rleBytes, string memory name, string memory traitType, string memory description, address creator) public returns (uint256) {
       _traitIdCount = _traitIdCount + 1;
       _traits[_traitIdCount] = Trait({
           name: name,
@@ -97,19 +97,13 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
           creator: creator
       });
       emit TraitRegistered(_traitIdCount, rleBytes, name, traitType, description, creator);
+      return _traitIdCount;
     }
 
-    // function registerTraitWithMintModule(bytes memory rleBytes, string memory name, string memory traitType, string memory description, address creator, address mintModule) public {
-    //   _traitIdCount = _traitIdCount + 1;
-    //   _traits[_traitIdCount] = Trait({
-    //       name: name,
-    //       rleBytes: rleBytes,
-    //       creator: creator,
-    //       mintModule: mintModule
-    //   });
-    //   emit TraitRegistered(_traitIdCount, rleBytes, name, traitType, description, creator, mintModule);
-    // }
-
+    function registerTraitWithMintModule(bytes memory rleBytes, string memory name, string memory traitType, string memory description, address creator, address mintModule) public {
+        uint256 traitId = registerTrait(rleBytes, name, traitType, description, creator);
+        setTraitMintModule(traitId, mintModule);
+    }
 
     function registerBatchTraits(
         bytes[] memory rleBytes,
@@ -214,7 +208,7 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
     function setTraitMintModule(
         uint256 traitId,
         address module
-    ) external {
+    ) public {
         require(_traits[traitId].rleBytes.length > 0, "Trait does not exist");
         require(msg.sender == owner() || msg.sender == _traits[traitId].creator, "Not authorized to set mint module");
         traitMintModules[traitId] = module;

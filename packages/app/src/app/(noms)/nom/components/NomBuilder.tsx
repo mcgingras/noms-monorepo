@@ -4,7 +4,6 @@ import { useState } from "react";
 import LayerStack from "./LayerStack";
 import NomBuilderCanvas from "./NomBuilderCanvas";
 import NomPreview from "../../../../components/NomPreview";
-import WavyTab from "./WavyTab";
 import NomBuilderTraitPalette from "./NomBuilderTraitPalette";
 
 const NomBuilder = () => {
@@ -20,8 +19,7 @@ const NomBuilder = () => {
         <LayerStack />
         <NomBuilderCanvas>
           <NomPreview size={size} />
-          <WavyTab size={size} onClick={toggleSize} />
-          <NomBuilderTraitPalette size={size} />
+          <NomBuilderTraitPalette size={size} toggleSize={toggleSize} />
         </NomBuilderCanvas>
       </section>
     </main>

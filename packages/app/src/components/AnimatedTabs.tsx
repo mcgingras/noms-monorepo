@@ -45,7 +45,7 @@ function AnimatedTabs() {
           <p className="relative z-10">{tab.label}</p>
           {activeTab === tab.id && (
             <motion.span
-              layoutId="bubble"
+              layoutId="mall"
               className="absolute inset-0 z-0 bg-[#FDCB3F]"
               style={{ borderRadius: 9999 }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}

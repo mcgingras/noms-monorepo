@@ -168,10 +168,10 @@ export const createNomBuilderStore = (nom: Nom | null) => {
           ...newlyOwnedTraitsAsNomTraits,
         ];
 
-        const updatedInitialLayers = updatedOwnedTraits
-          .filter((t: NomTrait) => t.equipped)
-          .map((t: NomTrait) => ({
-            trait: t.trait,
+        const updatedInitialLayers = existingLayers
+          .filter((l: Layer) => l.type !== LayerChangeType.UNEQUIP)
+          .map((l: Layer) => ({
+            trait: l.trait,
             equipped: true,
             owned: true,
             type: LayerChangeType.FIXED,

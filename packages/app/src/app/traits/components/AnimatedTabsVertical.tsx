@@ -1,6 +1,8 @@
 "use client";
 
 import AnimatedTabsVerticalHeadless from "@/components/AnimatedTabsVerticalHeadless";
+import { useState } from "react";
+import { useAddSearchParam } from "@/hooks/useAddSearchParam";
 
 let tabs = [
   { id: "all", label: "Everything" },
@@ -13,13 +15,21 @@ let tabs = [
 ];
 
 function AnimatedTabsVertical() {
-  //   const setTypeQuery = useNomBuilderContext((state) => state.setTypeQuery);
+  const addSearchParam = useAddSearchParam();
+  const [activeTab, setActiveTab] = useState("all");
   const onTabChange = (tab: string) => {
-    // setTypeQuery(tab);
-    console.log(tab);
+    addSearchParam("type", tab);
+    setActiveTab(tab);
   };
 
-  return <AnimatedTabsVerticalHeadless tabs={tabs} onTabChange={onTabChange} />;
+  return (
+    <AnimatedTabsVerticalHeadless
+      tabs={tabs}
+      onTabChange={onTabChange}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+    />
+  );
 }
 
 export default AnimatedTabsVertical;
