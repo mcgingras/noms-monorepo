@@ -9,6 +9,8 @@ const getTraitById = async (tokenId: number) => {
             name
             svg
             type
+            description
+            creator
           }
         }
       }
@@ -28,7 +30,6 @@ const getTraitById = async (tokenId: number) => {
   });
 
   const data = await response.json();
-  console.log("data", data);
   return data.data.traits.items[0];
 };
 

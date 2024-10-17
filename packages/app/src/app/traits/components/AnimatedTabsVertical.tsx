@@ -24,6 +24,7 @@ function AnimatedTabsVertical() {
 
   return (
     <AnimatedTabsVerticalHeadless
+      layoutKey="tabsVerticalTraitsPage"
       tabs={tabs}
       onTabChange={onTabChange}
       activeTab={activeTab}

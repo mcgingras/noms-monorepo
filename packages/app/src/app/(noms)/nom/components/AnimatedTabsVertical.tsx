@@ -22,6 +22,7 @@ function AnimatedTabsVertical() {
 
   return (
     <AnimatedTabsVerticalHeadless
+      layoutKey="tabsVerticalNomsPage"
       tabs={tabs}
       onTabChange={onTabChange}
       activeTab={typeQuery || "all"}

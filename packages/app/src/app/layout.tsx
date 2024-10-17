@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className="bg-black">
         <MobilePlaceholder>
           {/* <PageTransitionLoader /> */}
-          <PageTransitionLoaderTwo />
+          {/* <PageTransitionLoaderTwo /> */}
           <OnChainProvider>
             <div className="flex flex-col min-h-screen max-h-screen p-4 text-white">
               <Navigation />

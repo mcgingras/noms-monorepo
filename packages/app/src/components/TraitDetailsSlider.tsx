@@ -38,8 +38,6 @@ const TraitDetailsSlider = () => {
     enabled: !!selectedTraitId,
   });
 
-  console.log(trait);
-
   return (
     <>
       {/* makes the underlayer unclickable */}

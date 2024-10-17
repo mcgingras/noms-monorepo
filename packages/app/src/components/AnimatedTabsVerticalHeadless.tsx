@@ -5,11 +5,13 @@ import { useState } from "react";
 import SoftArrow from "@/components/icons/SoftArrow";
 
 function AnimatedTabsVerticalHeadless({
+  layoutKey,
   tabs,
   onTabChange,
   activeTab,
   setActiveTab,
 }: {
+  layoutKey: string;
   tabs: { id: string; label: string }[];
   onTabChange: (tab: string) => void;
   activeTab: string;
@@ -64,7 +66,7 @@ function AnimatedTabsVerticalHeadless({
             <p className="relative z-10">{tab.label}</p>
             {activeTab === tab.id && (
               <motion.span
-                layoutId="tabsVerticalBubble"
+                layoutId={layoutKey}
                 className="absolute inset-0 z-0 bg-[#FDCB3F]"
                 style={{ borderRadius: 4 }}
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}

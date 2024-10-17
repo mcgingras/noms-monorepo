@@ -1,56 +1,33 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-  useAccount,
-  useReadContract,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
-import { localhost } from "viem/chains";
-import { NOM_ADDRESS, TRAIT_ADDRESS } from "@/lib/constants";
-import { nomAbi, nomTraitsAbi } from "../../../ponder/foundry/abis";
+import { useAccount } from "wagmi";
 import { useNomBuilderContext } from "@/stores/nomBuilder/context";
-import { LayerChangeType } from "@/types/layer";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-
-const NOM_CONTRACT = {
-  address: NOM_ADDRESS,
-  abi: nomAbi,
-} as const;
-
-const TRAIT_CONTRACT = {
-  address: TRAIT_ADDRESS,
-  abi: nomTraitsAbi,
-} as const;
+import useWriteUpdateNomEOA from "@/hooks/useWriteUpdateNomEOA";
+import useWriteCreateNewNom from "@/hooks/useWriteCreateNewNom";
 
 const SaveNomButton = () => {
   const router = useRouter();
   const { address } = useAccount();
   const nomId = useNomBuilderContext((state) => state.nomId);
   const layers = useNomBuilderContext((state) => state.layers);
+  const orderedLayers = [...layers].reverse();
   const saveAndResetState = useNomBuilderContext(
     (state) => state.saveAndResetState
   );
 
   const {
-    writeContract: createNom,
-    data: createNomData,
+    action: createNomAction,
     error: createNomError,
+    receipt: createNomReceipt,
+    isLoading: isCreateNomReceiptLoading,
     isPending: isCreateNomPending,
-  } = useWriteContract();
-
-  if (createNomError) {
-    console.error(createNomError);
-    toast.error("Error creating nom");
-  }
-
-  const { data: createNomReceipt, isLoading: isCreateNomReceiptLoading } =
-    useWaitForTransactionReceipt({
-      hash: createNomData,
-      confirmations: 2,
-    });
+  } = useWriteCreateNewNom({
+    address,
+    orderedLayers,
+  });
 
   useEffect(() => {
     if (createNomReceipt) {
@@ -61,104 +38,44 @@ const SaveNomButton = () => {
   }, [createNomReceipt]);
 
   const {
-    writeContractAsync: saveNomAsync,
-    data: saveNomData,
-    error: saveNomError,
-    isPending: isSaveNomPending,
-  } = useWriteContract();
-
-  const {
-    writeContractAsync: mintTraitsAsync,
-    data: mintTraitsData,
-    error: mintTraitsError,
-    isPending: isMintTraitsPending,
-  } = useWriteContract();
-
-  const { data: saveNomReceipt, isLoading: isSaveNomReceiptLoading } =
-    useWaitForTransactionReceipt({
-      hash: saveNomData,
-      confirmations: 2,
-    });
+    action: updateNomAction,
+    error: updateNomError,
+    receipt: updateNomReceipt,
+    isLoading: isUpdateNomLoading,
+    isPending: isUpdateNomPending,
+  } = useWriteUpdateNomEOA({
+    nomId,
+    orderedLayers,
+  });
 
   useEffect(() => {
-    if (saveNomReceipt) {
+    if (updateNomReceipt) {
       saveAndResetState();
     }
-  }, [saveNomReceipt]);
+  }, [updateNomReceipt]);
 
-  // classic error here is being on the wrong chain :p
-  const { data: tba, error: readNomTBAError } = useReadContract({
-    ...NOM_CONTRACT,
-    functionName: "getTBAForTokenId",
-    args: [BigInt(nomId || 0)],
-    query: { enabled: !!nomId },
-  });
+  useEffect(() => {
+    if (createNomError || updateNomError) {
+      console.error(createNomError);
+      toast.error("Error saving nom");
+    }
+  }, [createNomError, updateNomError]);
 
   return (
     <button
       className="bg-[#2B83F6] w-full rounded-lg flex justify-between items-center px-2 py-2"
       onClick={async () => {
-        const orderedLayers = [...layers].reverse();
-        if (!address) {
-          toast.error("Please connect your wallet");
-          return;
-        }
-
         if (!!nomId) {
-          if (!tba) {
-            toast.error("Nom TBA not found");
-            return;
-          }
-          const unownedTraitLayers = orderedLayers.filter(
-            (layer) => !layer.owned
-          );
-
-          if (unownedTraitLayers.length > 0) {
-            await mintTraitsAsync({
-              chain: localhost,
-              ...TRAIT_CONTRACT,
-              functionName: "batchMintViaModules",
-              args: [
-                tba,
-                unownedTraitLayers.map((layer) => BigInt(layer.trait.id)),
-                unownedTraitLayers.map((_layer) => BigInt(1)),
-                unownedTraitLayers.map((_layer) => BigInt(0)),
-              ],
-            });
-          }
-
-          const equippedTraitLayers = orderedLayers.filter(
-            (layer) => layer.type !== LayerChangeType.UNEQUIP
-          );
-
-          await saveNomAsync({
-            chain: localhost,
-            ...TRAIT_CONTRACT,
-            functionName: "setEquipped",
-            args: [
-              BigInt(nomId as string),
-              equippedTraitLayers.map((layer) => BigInt(layer.trait.id)),
-            ],
-          });
+          updateNomAction();
         } else {
-          createNom({
-            chain: localhost,
-            ...NOM_CONTRACT,
-            functionName: "mintAndInitialize",
-            args: [
-              address,
-              orderedLayers.map((layer) => BigInt(layer.trait.id)),
-              orderedLayers.map((_) => BigInt(1)),
-              orderedLayers.map((_) => BigInt(0)),
-            ],
-          });
+          createNomAction();
         }
       }}
     >
       <span className="pangram-sans font-bold">
-        {isCreateNomPending || isSaveNomPending || isMintTraitsPending
+        {isCreateNomPending || isUpdateNomPending
           ? "Signing tx..."
-          : isCreateNomReceiptLoading || isSaveNomReceiptLoading
+          : isCreateNomReceiptLoading || isUpdateNomLoading
             ? "Pending..."
             : "Save changes"}
       </span>

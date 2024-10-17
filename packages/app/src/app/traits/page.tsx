@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TraitTab from "./components/TraitTab";
 import AnimatedTabsVertical from "./components/AnimatedTabsVertical";
 import Searchbar from "@/components/Searchbar";
 import TraitGridUI from "./components/TraitGridUI";
 import TraitDetails from "./components/TraitDetails";
 import { useTraitsPaginated } from "@/actions/useTraitsPaginated";
-import ArrowLeftIcon from "@/components/icons/ArrowLeftIcon";
-import ArrowRightIcon from "@/components/icons/ArrowRIghtIcon";
-import { Trait } from "@/types/trait";
+import { motion, AnimatePresence } from "framer-motion";
+import Pagination from "@/components/Pagination";
 
 const TraitsPage = ({ searchParams }: { searchParams: any }) => {
   const [page, setPage] = useState(0);
   const type = searchParams.type || "all";
   const searchQuery = searchParams.searchQuery || "";
   const creator = searchParams.creator || "";
+  const selectedTraitId = searchParams.traitId || "";
   const {
     data,
     isLoading,
@@ -28,12 +28,6 @@ const TraitsPage = ({ searchParams }: { searchParams: any }) => {
     searchQuery: searchQuery,
     creator: creator,
   });
-
-  const [selectedTrait, setSelectedTrait] = useState<Trait | null>(null);
-
-  useEffect(() => {
-    setSelectedTrait(data?.traits?.items?.[0]);
-  }, [data.traits]);
 
   return (
     <main className="h-[calc(100vh-66px)] w-full flex flex-col">
@@ -49,55 +43,39 @@ const TraitsPage = ({ searchParams }: { searchParams: any }) => {
           <div className="flex-1 flex flex-col space-y-2 overflow-hidden">
             <div className="flex flex-row justify-between items-center">
               <Searchbar />
-              <div className="flex flex-row items-center space-x-2">
-                <div className="pangram-sans text-sm font-semibold">
-                  page {page + 1} of {data.totalPages}
-                </div>
-
-                <button
-                  onClick={() => {
-                    if (hasPreviousPage) {
-                      handlePrevious();
-                      setPage(page - 1);
-                    }
-                  }}
-                  className={`${hasPreviousPage ? "bg-gray-900" : "bg-gray-1000"} rounded-full p-2 transition-all`}
-                >
-                  <ArrowLeftIcon
-                    className={`w-4 h-4 ${hasPreviousPage ? "opacity-100" : "opacity-30"} transition-all`}
-                  />
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (hasNextPage) {
-                      handleNext();
-                      setPage(page + 1);
-                    }
-                  }}
-                  className={`${hasNextPage ? "bg-gray-900" : "bg-gray-1000"} rounded-full p-2 transition-all`}
-                >
-                  <ArrowRightIcon
-                    className={`w-4 h-4 ${hasNextPage ? "opacity-100" : "opacity-30"} transition-all`}
-                  />
-                </button>
-              </div>
+              <Pagination
+                count={data.count}
+                currentPage={page}
+                totalPages={data.totalPages}
+                hasPreviousPage={hasPreviousPage}
+                hasNextPage={hasNextPage}
+                handlePrevious={handlePrevious}
+                handleNext={handleNext}
+                setPage={setPage}
+              />
             </div>
-            <div className="flex-grow grid grid-cols-[1fr,auto] gap-2 overflow-hidden">
+            <div className="flex-grow grid grid-cols-[1fr,auto] overflow-hidden">
               <div className="overflow-y-auto">
                 <TraitGridUI
                   traits={data?.traits?.items ?? []}
-                  setSelectedTrait={setSelectedTrait}
-                  selectedTrait={selectedTrait}
+                  selectedTraitId={selectedTraitId}
+                  isLoading={isLoading}
                 />
-              </div>
-              <div className="w-[375px] bg-gray-900 rounded-lg overflow-y-auto">
-                {selectedTrait && (
-                  <TraitDetails selectedTrait={selectedTrait} />
-                )}
               </div>
             </div>
           </div>
+          <AnimatePresence>
+            {selectedTraitId && (
+              <motion.div
+                className="w-[500px] bg-gray-900 rounded-lg overflow-y-auto"
+                initial={{ x: 500 }}
+                animate={{ x: 0 }}
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              >
+                <TraitDetails selectedTraitId={selectedTraitId} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
     </main>

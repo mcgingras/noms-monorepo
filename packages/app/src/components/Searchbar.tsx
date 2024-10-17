@@ -18,7 +18,7 @@ const Searchbar = () => {
       <input
         type="text"
         placeholder="Search..."
-        className="bg-gray-900 rounded-full px-8 py-2"
+        className="bg-gray-900 rounded-full px-8 py-2 focus:outline-none pangram-sans font-semibold"
         onChange={(e) => setSearchQuery(e.target.value)}
       />
     </div>
