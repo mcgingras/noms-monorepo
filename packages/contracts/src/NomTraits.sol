@@ -452,6 +452,8 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         super.safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
+    // need to do the same with burn too, right?
+
     /**
      * @notice Checks and unequips a trait if it will bring the balance to 0.
      * @dev Checks and unequips a trait if it will bring the balance to 0.

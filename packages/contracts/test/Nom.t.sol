@@ -306,6 +306,83 @@ contract NomTest is Test {
 
     }
 
+    function test_transferGuard() public {
+        uint256 traitId1 = 1;
+        uint256 traitId2 = 44;
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = traitId1;
+        tokenIds[1] = traitId2;
+        uint256[] memory quantities = new uint256[](2);
+        quantities[0] = 1;
+        quantities[1] = 1;
+
+        // address of traits means anyone can mint
+        traits.setTraitMintModule(1, address(traits));
+        traits.setTraitMintModule(44, address(traits));
+
+        uint256[] memory prices = new uint256[](2);
+        prices[0] = 0 ether;
+        prices[1] = 0 ether;
+
+        vm.prank(user1);
+        uint256 nomId = nom.mintAndInitialize(user1, tokenIds, quantities, prices);
+        address tba = Nom(nom).getTBAForTokenId(nomId);
+
+
+        uint256[] memory equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 2, "Should be 2 equipped");
+        assertEq(equipped[0], traitId1, "Trait 1 should be equipped");
+        assertEq(equipped[1], traitId2, "Trait 2 should be equipped");
+
+        // transfer a trait when you only have a single trait, it should unequip
+        vm.prank(tba);
+        NomTraits(traits).safeTransferFrom(tba, user2, traitId1, 1, "");
+        equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 1, "Should be 1 equipped");
+        assertEq(equipped[0], traitId2, "Trait 2 should be equipped");
+
+        // minting an unequipping trait doesn't change anything
+        uint256 traitId3 = 2;
+        traits.setTraitMintModule(traitId3, address(traits));
+        NomTraits(traits).mintTo(tba, traitId3, 1);
+        equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 1, "Should be 1 equipped");
+        assertEq(equipped[0], traitId2, "Trait 2 should be equipped");
+        vm.prank(tba);
+        NomTraits(traits).safeTransferFrom(tba, user2, traitId3, 1, "");
+        equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 1, "Should be 1 equipped");
+        assertEq(equipped[0], traitId2, "Trait 2 should be equipped");
+
+
+        // nom owns multiple of a trait, if we transfer one of them, it should not unequip
+        uint256 traitId4 = 3;
+        traits.setTraitMintModule(traitId4, address(traits));
+        NomTraits(traits).mintTo(tba, traitId4, 2);
+        uint256[] memory newTraitsToEquip = new uint256[](2);
+        newTraitsToEquip[0] = traitId2;
+        newTraitsToEquip[1] = traitId4;
+        vm.prank(user1);
+        traits.setEquipped(nomId, newTraitsToEquip);
+        equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 2, "Should be 2 equipped");
+        assertEq(equipped[0], traitId2, "Trait 2 should be equipped");
+        assertEq(equipped[1], traitId4, "Trait 4 should be equipped");
+
+        vm.prank(tba);
+        NomTraits(traits).safeTransferFrom(tba, user2, traitId4, 1, "");
+        equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 2, "Should be 2 equipped");
+        assertEq(equipped[0], traitId2, "Trait 2 should be equipped");
+        assertEq(equipped[1], traitId4, "Trait 4 should be equipped");
+
+        vm.prank(tba);
+        NomTraits(traits).safeTransferFrom(tba, user2, traitId4, 1, "");
+        equipped = NomTraits(traits).getEquippedTokenIds(nomId);
+        assertEq(equipped.length, 1, "Should be 1 equipped");
+        assertEq(equipped[0], traitId2, "Trait 2 should be equipped");
+    }
+
     // function test_mintTraitFromWrongModule() public {
     //     uint256 traitId = 1;
     //     vm.prank(user1);
