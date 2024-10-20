@@ -22,4 +22,5 @@ interface INomTraits {
     function mintViaModule(address recipient, uint256 traitId, uint256 quantity, uint256 price) payable external returns (bool);
     function batchMintViaModules(address recipient, uint256[] memory traitIds, uint256[] memory quantities, uint256[] memory prices) payable external returns (bool);
     function setTraitMintModule(uint256 traitId, address module) external;
+    function getCreatorForTrait(uint256 traitId) external view returns (address);
 }

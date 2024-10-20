@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import getTraitById from "@/actions/getTraitById";
+import getTraitStatsById from "@/actions/getTraitStatsById";
 import CloseIcon from "@/components/icons/CloseIcon";
 import { useAddSearchParam } from "@/hooks/useAddSearchParam";
+import EthereumIcon from "@/components/icons/Ethereum";
+import AvatarAddress from "@/components/AvatarAddress";
+import { motion } from "framer-motion";
 
 const StatCard = ({ title, value }: { title: string; value: string }) => {
   return (
@@ -21,10 +25,40 @@ const TraitDetails = ({ selectedTraitId }: { selectedTraitId: any }) => {
     queryFn: () => getTraitById(selectedTraitId),
   });
 
+  const { data: traitStats } = useQuery({
+    queryKey: ["traitStats", selectedTraitId],
+    queryFn: () => getTraitStatsById(selectedTraitId),
+  });
+
+  if (isLoading) {
+    return <div className="p-4 flex flex-col h-full"></div>;
+  }
+
   return (
-    <div className="p-4 flex flex-col h-full">
+    <motion.div
+      className="p-4 flex flex-col h-full"
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -10, opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
       <div className="flex flex-row justify-between">
-        <h2 className="text-xl pangram-sans-compact font-bold">{data?.name}</h2>
+        <div className="flex flex-col gap-y-2">
+          <h2 className="text-2xl pangram-sans-compact font-bold">
+            {data.name}
+          </h2>
+          <div className="flex flex-row gap-x-2">
+            <div className="flex flex-row gap-x-1 items-center">
+              <EthereumIcon className="w-4 h-4 text-white" />
+              <span className="text-lg pangram-sans-compact font-bold">
+                Free
+              </span>
+            </div>
+            <button className="text-sm pangram-sans-compact font-bold text-white bg-blue-500 px-2 py-1 rounded-lg">
+              Buy
+            </button>
+          </div>
+        </div>
         <span
           className="bg-[#111] flex items-center justify-center rounded-full cursor-pointer h-8 w-8"
           onClick={() => addSearchParam("traitId", "")}
@@ -32,7 +66,7 @@ const TraitDetails = ({ selectedTraitId }: { selectedTraitId: any }) => {
           <CloseIcon className="w-4 h-4 text-white" />
         </span>
       </div>
-      <div className="w-full h-[250px] mt-4 bg-gray-1000 rounded-lg p-2">
+      <div className="w-full min-h-[200px] h-[200px] mt-4 bg-gray-1000 rounded-lg p-2">
         {!isLoading && (
           <img
             src={`data:image/svg+xml;base64,${data?.svg}`}
@@ -44,7 +78,7 @@ const TraitDetails = ({ selectedTraitId }: { selectedTraitId: any }) => {
       <div className="mt-4 grid grid-cols-3 gap-x-2">
         <div className="flex flex-col">
           <h3 className="text-sm pangram-sans-compact font-bold">Creator</h3>
-          <p>John Doe</p>
+          {data?.creator && <AvatarAddress address={data?.creator} />}
         </div>
         <div className="flex flex-col">
           <h3 className="text-sm pangram-sans-compact font-bold">Collection</h3>
@@ -58,9 +92,9 @@ const TraitDetails = ({ selectedTraitId }: { selectedTraitId: any }) => {
         </div>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-x-2">
-        <StatCard title="Bought" value="1000" />
-        <StatCard title="Wearing" value="1000" />
-        <StatCard title="Wearing" value="1000" />
+        <StatCard title="Supply" value="TBD" />
+        <StatCard title="Bought" value={traitStats?.bought} />
+        <StatCard title="Wearing" value={traitStats?.wearing} />
       </div>
       <div className="mt-6 flex flex-col flex-1 overflow-hidden relative">
         <h3 className="text-sm pangram-sans-compact font-bold text-[#7C7C7C]">
@@ -71,7 +105,7 @@ const TraitDetails = ({ selectedTraitId }: { selectedTraitId: any }) => {
         </p>
         <div className="absolute bottom-0 left-0 right-2 h-12 bg-gradient-to-t from-[#222] to-transparent pointer-events-none"></div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

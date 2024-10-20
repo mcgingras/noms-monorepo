@@ -2,18 +2,19 @@
 
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Layer, LayerChangeType } from "@/types/layer";
+import { Trait } from "@/types/trait";
 
 const HeadlessLayerItem = ({
   layer,
   index,
-  action,
+  actions,
 }: {
   layer: Layer;
   index: number;
-  action?: {
-    onClick: () => void;
+  actions?: {
+    onClick: (layer: Layer) => void;
     icon: React.ReactNode;
-  };
+  }[];
 }) => {
   return (
     <Draggable draggableId={`${layer.trait.id}-${index}`} index={index}>
@@ -42,13 +43,17 @@ const HeadlessLayerItem = ({
             <h4 className="pangram-sans font-bold flex-1 truncate overflow-hidden text-ellipsis">
               {layer.trait.name}
             </h4>
-            {action && (
-              <span
-                className="group-hover:visible invisible cursor-pointer"
-                onClick={action.onClick}
-              >
-                {action.icon}
-              </span>
+            {actions && (
+              <div className="flex flex-row gap-x-2">
+                {actions.map((action) => (
+                  <span
+                    className="group-hover:visible invisible cursor-pointer"
+                    onClick={() => action.onClick(layer)}
+                  >
+                    {action.icon}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -61,15 +66,15 @@ const HeadlessLayerStack = ({
   title,
   layers,
   setLayers,
-  action,
+  actions,
 }: {
   title: string;
   layers: Layer[];
   setLayers: (layers: Layer[]) => void;
-  action?: {
-    onClick: () => void;
+  actions?: {
+    onClick: (layer: Layer) => void;
     icon: React.ReactNode;
-  };
+  }[];
 }) => {
   const onDragEnd = (result: any) => {
     if (!result.destination) {
@@ -106,7 +111,7 @@ const HeadlessLayerStack = ({
                       key={`${layer.trait.id}-${idx}`}
                       index={idx}
                       layer={layer}
-                      action={action}
+                      actions={actions}
                     />
                   ))}
                   {provided.placeholder}

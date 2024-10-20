@@ -13,7 +13,7 @@ contract PaidMintModule is IMintModule {
     }
 
     function setMintPrice(uint256 traitId, uint256 price) external {
-        // Add appropriate access control here
+        require(nomTraits.getCreatorForTrait(traitId) == msg.sender, "PaidMintModule: Only the creator can set the mint price");
         mintPrice[traitId] = price;
     }
 

@@ -2,7 +2,6 @@
 
 import { ConnectKitButton, Avatar } from "connectkit";
 import { useDisconnect } from "wagmi";
-// import { truncateEthAddress } from "@/lib/utils";
 
 const CustomConnectKit = () => {
   const { disconnect } = useDisconnect();

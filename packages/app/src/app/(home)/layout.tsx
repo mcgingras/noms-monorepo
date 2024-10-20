@@ -24,7 +24,7 @@ const NomViewLayout = ({
   return (
     <main className="h-[calc(100vh-66px)] w-full">
       <section className="pt-12 flex flex-row space-x-2 h-full w-full">
-        <div className="flex-[0_1_500px] min-w-0 only:flex-grow">
+        <div className="flex-[0_1_460px] min-w-0 only:flex-grow">
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-2">
               <NomTab />

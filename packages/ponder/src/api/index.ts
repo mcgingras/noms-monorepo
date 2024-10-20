@@ -33,3 +33,18 @@ ponder.get("/api/traits/count", async (c) => {
     );
   return c.json(count);
 });
+
+ponder.get("/api/traits/stats/:traitId", async (c) => {
+  const { NomTrait } = c.tables;
+  const traitId = c.req.param("traitId");
+
+  const nomTraits = await c.db
+    .select()
+    .from(NomTrait)
+    .where(eq(NomTrait.traitId, BigInt(traitId)));
+
+  const bought = nomTraits.filter((t) => t.quantity > 0).length;
+  const wearing = nomTraits.filter((t) => t.equipped).length;
+
+  return c.json({ bought, wearing });
+});

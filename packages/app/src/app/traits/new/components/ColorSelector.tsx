@@ -44,30 +44,32 @@ const ColorSelector = ({
   }, [showMore]);
 
   return (
-    <div className="absolute bottom-0 left-0 w-full bg-gray-800 rounded-lg flex flex-col px-2">
+    <div className="absolute bottom-2.5 left-2 w-[calc(100%-16px)] bg-[#373737] rounded-xl flex flex-col px-2 z-50 shadow-2xl">
       <AnimatePresence initial={false}>
         <motion.div
           ref={expandedContentRef}
           className="flex flex-row gap-2 flex-wrap p-2 overflow-hidden"
-          initial={{ height: 0, paddingTop: 0, paddingBottom: 0 }}
+          initial={{ height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0 }}
           animate={{
             height: showMore ? contentHeight + 32 : 0,
             paddingTop: showMore ? 16 : 0,
             paddingBottom: showMore ? 16 : 0,
+            opacity: showMore ? 1 : 0,
           }}
-          exit={{ height: 0, paddingTop: 0, paddingBottom: 0 }}
+          exit={{ height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0 }}
           transition={{
-            duration: showMore ? 0.5 : 0.3,
-            ease: [0.16, 1, 0.3, 1],
+            duration: 0.3,
+            ease: [0.04, 0.62, 0.23, 0.98],
+            opacity: { duration: 0.2 },
           }}
         >
-          {colors.slice(11, 240).map((color) => (
+          {colors.slice(0, 240).map((color) => (
             <div
               onClick={() => {
                 setColor(color);
               }}
               key={color}
-              className={`w-[20px] h-[20px] rounded-full cursor-pointer ${
+              className={`w-[20px] h-[20px] rounded-full cursor-pointer ring-0 hover:ring-offset-2 hover:ring-2 hover:ring-offset-gray-800 hover:ring-white transition-all ${
                 currentColor === color
                   ? "ring-offset-2 ring-2 ring-offset-gray-800 ring-white"
                   : ""
@@ -77,19 +79,21 @@ const ColorSelector = ({
           ))}
         </motion.div>
       </AnimatePresence>
-      <div className="flex flex-row space-x-4 p-2 bg-gray-800 items-center">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] gap-4 p-2 bg-[#373737] items-center">
         {colors.slice(1, 20).map((color) => (
           <div
             onClick={() => {
               setColor(color);
             }}
             key={color}
-            className={`w-[40px] h-[40px] rounded-full cursor-pointer ${
+            className={`w-full aspect-square rounded-full cursor-pointer ring-0 hover:ring-offset-2 hover:ring-2 hover:ring-offset-gray-800 hover:ring-white transition-all ${
               currentColor === color
                 ? "ring-offset-2 ring-2 ring-offset-gray-800 ring-white"
                 : ""
             }`}
-            style={{ backgroundColor: color }}
+            style={{
+              backgroundColor: color,
+            }}
           ></div>
         ))}
         <span

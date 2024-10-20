@@ -5,6 +5,7 @@ import TraitsIcon from "./icons/Traits";
 import HomeIcon from "./icons/Home";
 import ActiveNavItem from "./ActiveNavItem";
 import Link from "next/link";
+import PlusSquareIcon from "./icons/PlusSquare";
 
 const Navigation = () => {
   return (
@@ -55,8 +56,11 @@ const Navigation = () => {
       )}
       <div className="flex flex-row items-center space-x-2">
         <Link href="/traits/new">
-          <button className="bg-[#2B83F6] text-white px-2 py-1.5 rounded-lg pangram-sans-compact font-bold text-sm">
-            New trait
+          <button className="bg-[#2B83F6] px-2 py-1.5 rounded-[6px] flex flex-row items-center space-x-1">
+            <PlusSquareIcon className="w-4 h-4 text-white mb-[2px]" />
+            <span className="font-bold pangram-sans-compact text-white text-sm">
+              New trait
+            </span>
           </button>
         </Link>
         <div className="">

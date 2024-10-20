@@ -31,7 +31,7 @@ const NomIdPage = ({
   return (
     <div className="flex-1 min-w-0 flex flex-row space-x-2">
       <div className="flex-grow basis-0 bg-gradient-to-t from-[#222] h-full rounded-lg flex items-center justify-center min-w-[300px]">
-        <div className="w-3/4 bg-transparent aspect-square relative">
+        <div className="w-3/4 bg-transparent aspect-square relative border border-dashed border-gray-900 rounded-lg">
           <Image
             src={`data:image/svg+xml;base64,${nom.fullSVG}`}
             alt="Rendered nom"

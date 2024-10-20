@@ -9,6 +9,8 @@ export const ACCOUNT_IMPL_ADDRESS = getAddress(Nomtxs[0]!.contractAddress);
 export const EASEL_ADDRESS = getAddress(Nomtxs[1]!.contractAddress);
 export const TRAIT_ADDRESS = getAddress(Nomtxs[2]!.contractAddress);
 export const NOM_ADDRESS = getAddress(Nomtxs[3]!.contractAddress);
+export const PAID_MINT_MODULE_ADDRESS = getAddress(Nomtxs[4]!.contractAddress);
+export const FREE_MINT_MODULE_ADDRESS = getAddress(Nomtxs[5]!.contractAddress);
 export const ERC6551_REGISTRY_ADDRESS = getAddress(
   Extrastxs[1]!.contractAddress
 );

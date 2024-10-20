@@ -406,6 +406,83 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
       return array;
     }
 
+    /// ------------------------
+    /// Transfer guards
+    /// ------------------------
+
+    /**
+     * @notice Safe transfer from.
+     * @dev Safe transfer from.
+     * @param from The address of the sender.
+     * @param to The address of the recipient.
+     * @param id The ID of the token to transfer.
+     * @param amount The amount of the token to transfer.
+     * @param data The data to transfer.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) public virtual override {
+        _checkAndUnequipIfNeeded(from, id, amount);
+        super.safeTransferFrom(from, to, id, amount, data);
+    }
+
+    /**
+     * @notice Safe batch transfer from.
+     * @dev Safe batch transfer from.
+     * @param from The address of the sender.
+     * @param to The address of the recipient.
+     * @param ids The IDs of the tokens to transfer.
+     * @param amounts The amounts of the tokens to transfer.
+     * @param data The data to transfer.
+     */
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public virtual override {
+        for (uint256 i = 0; i < ids.length; i++) {
+            _checkAndUnequipIfNeeded(from, ids[i], amounts[i]);
+        }
+        super.safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
+    /**
+     * @notice Checks and unequips a trait if it will bring the balance to 0.
+     * @dev Checks and unequips a trait if it will bring the balance to 0.
+     * @param nomTBA The address of the nom.
+     * @param traitId The ID of the trait to transfer.
+     * @param amount The amount of the trait to transfer.
+     */
+    function _checkAndUnequipIfNeeded(address nomTBA, uint256 traitId, uint256 amount) internal {
+        uint256 balance = balanceOf(nomTBA, traitId);
+        if (balance == amount) {
+            // This transfer will bring the balance to 0, so we need to unequip the trait
+            if (nomTBA != address(0) && isTokenIdEquipped(INom(nomContractAddress).getTokenIdForTBA(nomTBA), traitId)) {
+                // The trait is equipped, so we need to unequip it
+                uint256[] memory equippedTokens = getEquippedTokenIds(INom(nomContractAddress).getTokenIdForTBA(nomTBA));
+                uint256[] memory newEquippedTokens = new uint256[](equippedTokens.length - 1);
+                uint256 index = 0;
+                for (uint256 i = 0; i < equippedTokens.length; i++) {
+                    if (equippedTokens[i] !=traitId) {
+                        newEquippedTokens[index] = equippedTokens[i];
+                        index++;
+                    }
+                }
+                setEquipped(INom(nomContractAddress).getTokenIdForTBA(nomTBA), newEquippedTokens);
+            }
+        }
+    }
+
+    /// ------------------------
+    /// Modifiers / authorization
+    /// ------------------------
+
     /// The caller is either
     /// 1. the EOA, owner of the nom
     /// 2. the TBA, account bound to the nom
@@ -426,9 +503,14 @@ contract NomTraits is ERC1155, INomTraits, Ownable {
         _;
     }
 
-    /// ------------------------
-    /// Future updates
-    /// ------------------------
 
-    /// equipGuard on transfer
+    /**
+     * @notice Gets the creator of a trait.
+     * @dev Gets the creator of a trait.
+     * @param traitId The ID of the trait.
+     * @return address The creator of the trait.
+     */
+    function getCreatorForTrait(uint256 traitId) public view returns (address) {
+        return _traits[traitId].creator;
+    }
 }

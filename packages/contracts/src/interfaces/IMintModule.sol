@@ -9,3 +9,6 @@ interface IMintModule {
 // need to add a function to act as a signature so we can make sure
 // the contract confirms to this standard before allowing some to set it as
 // the mint module
+
+// also need to make sure someone isn't rugging someone else
+// like -- mintTo, but I'm going to give myself full access of your wallet

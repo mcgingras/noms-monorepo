@@ -75,15 +75,8 @@ contract NomTest is Test {
     function test_MintTrait() public {
         // Set up paid mint module
         uint256 traitId = 1;
-        uint256 price = 0.1 ether;
-        paidMintModule.setMintPrice(traitId, price);
-        traits.setTraitMintModule(traitId, address(paidMintModule));
-
-        // Mint the trait
-        vm.deal(user1, 1 ether); // Give user1 some ETH
         vm.prank(user1);
-        paidMintModule.mintTo{value: price}(user1, traitId, 1);
-
+        paidMintModule.mintTo(user1, traitId, 1);
         assertEq(traits.balanceOf(user1, traitId), 1, "User should have 1 of the minted trait");
     }
 
@@ -93,18 +86,11 @@ contract NomTest is Test {
         uint256 nomId = nom.mint();
 
         uint256 traitId = 1;
-        uint256 price = 0.1 ether;
-        paidMintModule.setMintPrice(traitId, price);
-        traits.setTraitMintModule(traitId, address(paidMintModule));
-
         // Get the TBA address for the Nom
         address tba = Nom(nom).getTBAForTokenId(nomId);
 
-        // we want to mint to the TBA
-        vm.deal(user1, 1 ether);
         vm.prank(user1);
-        paidMintModule.mintTo{value: price}(tba, traitId, 1);
-
+        paidMintModule.mintTo(tba, traitId, 1);
 
         // Equip the trait
         uint256[] memory tokenIds = new uint256[](1);
@@ -119,17 +105,11 @@ contract NomTest is Test {
     function test_TokenURI() public {
         vm.prank(user1);
         uint256 nomId = nom.mint();
-
-        uint256 traitId = 1;
-        uint256 price = 0.1 ether;
-        paidMintModule.setMintPrice(traitId, price);
-        traits.setTraitMintModule(traitId, address(paidMintModule));
-
         address tba = Nom(nom).getTBAForTokenId(nomId);
 
-        vm.deal(user1, 1 ether);
+        uint256 traitId = 1;
         vm.prank(user1);
-        paidMintModule.mintTo{value: price}(tba, traitId, 1);
+        paidMintModule.mintTo(tba, traitId, 1);
 
         uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = traitId;
@@ -145,23 +125,15 @@ contract NomTest is Test {
         // Mint a Nom
         vm.prank(user1);
         uint256 nomId = nom.mint();
+        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         uint256 traitId1 = 1;
         uint256 traitId2 = 44;
-        uint256 price = 0.1 ether;
-        paidMintModule.setMintPrice(traitId1, price);
-        paidMintModule.setMintPrice(traitId2, price);
-        traits.setTraitMintModule(traitId1, address(paidMintModule));
-        traits.setTraitMintModule(traitId2, address(paidMintModule));
-
-        // Get the TBA address for the Nom
-        address tba = Nom(nom).getTBAForTokenId(nomId);
 
         // we want to mint to the TBA
-        vm.deal(user1, 1 ether);
         vm.prank(user1);
-        paidMintModule.mintTo{value: price}(tba, traitId1, 1);
-        paidMintModule.mintTo{value: price}(tba, traitId2, 1);
+        paidMintModule.mintTo(tba, traitId1, 1);
+        paidMintModule.mintTo(tba, traitId2, 1);
 
         // Equip the traits
         uint256[] memory tokenIds = new uint256[](2);
@@ -183,19 +155,11 @@ contract NomTest is Test {
         // Mint a Nom
         vm.prank(user1);
         uint256 nomId = nom.mint();
-
-        uint256 traitId = 1;
-        uint256 price = 0.1 ether;
-        paidMintModule.setMintPrice(traitId, price);
-        traits.setTraitMintModule(traitId, address(paidMintModule));
-
-        // Get the TBA address for the Nom
         address tba = Nom(nom).getTBAForTokenId(nomId);
 
-        // we want to mint to the TBA
-        vm.deal(user1, 1 ether);
+        uint256 traitId = 1;
         vm.prank(user1);
-        paidMintModule.mintTo{value: price}(tba, traitId, 1);
+        paidMintModule.mintTo(tba, traitId, 1);
 
         // Equip the trait
         uint256[] memory tokenIds = new uint256[](1);
@@ -307,6 +271,7 @@ contract NomTest is Test {
 
         uint256 traitId3 = 2;
         uint256 price = 0.1 ether;
+        vm.prank(0x2573C60a6D127755aA2DC85e342F7da2378a0Cc5);
         paidMintModule.setMintPrice(traitId3, price);
         traits.setTraitMintModule(traitId3, address(paidMintModule));
 

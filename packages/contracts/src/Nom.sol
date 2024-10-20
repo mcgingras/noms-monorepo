@@ -6,11 +6,12 @@ import { INomTraits } from "./interfaces/INomTraits.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { IERC6551Registry } from "erc6551/ERC6551Registry.sol";
 import { INomTraits } from "./interfaces/INomTraits.sol";
+import { INom } from "./interfaces/INom.sol";
 
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Nom is ERC721 {
+contract Nom is ERC721, INom {
     using Strings for uint256;
     address public easel;
     uint256 public tokenIdCount;
@@ -18,7 +19,7 @@ contract Nom is ERC721 {
     address public erc6551RegistryAddress;
     address public erc6551AccountImplementation;
     bytes32 salt = 0x7f1e5a8f3d3a1e4c7b3e9c2d6f5a8d7c1b3e5f7a9d2c4b6e8f0a2c4d6e8f0a2c;
-
+    mapping(address => uint256) public tbaToTokenId;
 
     constructor(address _traitContractAddress, address _easel, address _registryAddress, address _accountImplementation) ERC721("Noms", "NOM") {
         traitContractAddress = _traitContractAddress;
@@ -40,6 +41,8 @@ contract Nom is ERC721 {
         tokenIdCount++;
         uint256 nextTokenId = tokenIdCount;
         super._mint(to, nextTokenId);
+        address tba = getTBAForTokenId(nextTokenId);
+        tbaToTokenId[tba] = nextTokenId;
         return nextTokenId;
     }
 
@@ -47,7 +50,7 @@ contract Nom is ERC721 {
      * @notice Mints a new nom.
      * @dev Mints a new nom.
      */
-    function mint() public payable returns (uint256) {
+    function mint() public returns (uint256) {
         return _mint(msg.sender);
     }
 
@@ -56,7 +59,7 @@ contract Nom is ERC721 {
      * @dev Mints a new nom to a specific address.
      * @param to The address to mint the nom to.
      */
-    function mintTo(address to) public payable returns (uint256) {
+    function mintTo(address to) public returns (uint256) {
         return _mint(to);
     }
 
@@ -100,7 +103,7 @@ contract Nom is ERC721 {
      * @param tokenId The ID of the token.
      * @return string memory The token URI.
      */
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view override(ERC721, INom) returns (string memory) {
         uint256[] memory tokens = INomTraits(traitContractAddress).getEquippedTokenIds(tokenId);
 
         bytes[] memory traitParts = new bytes[](tokens.length);
@@ -145,5 +148,15 @@ contract Nom is ERC721 {
             address(this),
             tokenId
         );
+    }
+
+    /**
+     * @notice Gets the token ID for a TBA.
+     * @dev Gets the token ID for a TBA.
+     * @param tba The address of the TBA.
+     * @return uint256 The token ID for the TBA.
+     */
+    function getTokenIdForTBA(address tba) public view returns (uint256) {
+        return tbaToTokenId[tba];
     }
 }

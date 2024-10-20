@@ -41,14 +41,6 @@ export const hooklessIsTraitEquipped = (layers: Layer[], trait: Trait) => {
   return layers.some((layer) => layer.trait.id === trait.id && layer.equipped);
 };
 
-export const toRLEByte = () => {
-  // pass
-  // example of RLE encoding
-  // some sort of body trait
-  // palette index, bounds [top, right, bottom, left] (4bytes) [pixel length (1 byte) color (1 byte)][]
-  // 0x0015171f090e0d0e0d0e0d0e0d020d01000b0d020d01000b0d020d01000b0d020d01000b0d020d01000b0d020d01000b0d020d01000b0d
-  // 1. get the bounding box (top, right, bottom, left)
-  // 2. start at top left of the bb and draw each row from top to bottom
-  // 2a. two pieces of data: 1. the length in pixels, 2. the color (transparent is 0)
-  // 3. As a final step, the bounds and pixel data are concatenated, and a 'color palette index' is prepended to the string.
+export const truncateAddress = (address: `0x${string}`, length = 6) => {
+  return `${address.slice(0, length)}...${address.slice(-length)}`;
 };

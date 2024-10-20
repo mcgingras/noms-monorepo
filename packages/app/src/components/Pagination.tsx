@@ -21,7 +21,7 @@ export const Pagination = ({
   setPage: (page: number) => void;
 }) => {
   return (
-    <div className="flex flex-row items-center space-x-2">
+    <div className="flex flex-row items-center space-x-2 self-end">
       <div className="pangram-sans text-sm font-semibold">
         page {count > 0 ? currentPage + 1 : 0} of {totalPages}
       </div>

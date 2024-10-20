@@ -66,15 +66,9 @@ contract TraitDeployer is Script {
         string memory filePath = string.concat(vm.projectRoot(), "/script/data/", FILE_NAME);
         string memory jsonContent = vm.readFile(filePath);
 
-
-        console2.log("here 1 ");
         string memory path = string(abi.encodePacked(".images.", category));
-        console2.log("here 2 ");
         bytes memory parsedData = vm.parseJson(jsonContent, path);
-        console2.log("here 3 ");
-        console2.logBytes(parsedData);
         JSONTrait[] memory traits = abi.decode(parsedData, (JSONTrait[]));
-        console2.log("here 4 ");
 
         uint256 traitCount = traits.length;
         console2.log("Total traits for category", category, ":", traitCount);

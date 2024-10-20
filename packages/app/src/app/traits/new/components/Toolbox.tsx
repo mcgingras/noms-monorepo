@@ -44,7 +44,8 @@ const Toolbox = ({
       <div className="w-full aspect-square bg-gray-900 mt-1 ml-[2px] rounded-lg">
         <RenderingNom layers={layers} />
       </div>
-      <div className="flex-1 rounded-lg mt-2 flex flex-col">
+      <h3 className="text-white text-lg oziksoft mt-2">Tools</h3>
+      <div className="flex-1 rounded-lg mt-1 flex flex-col">
         <div className="grid grid-cols-3 gap-x-4 p-2 bg-gray-900 rounded-lg">
           <div
             className="rounded-lg aspect-square flex items-center justify-center hover:bg-gray-1000 transition-colors"
@@ -72,41 +73,41 @@ const Toolbox = ({
           </div>
         </div>
         <div className="grid grid-cols-2 px-8 rounded-lg mt-2 gap-2">
-          <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
-            <PaintbrushIcon className="h-6 w-6" />
+          <div className="rounded-lg aspect-square flex items-center justify-center transition-colors">
+            <PaintbrushIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
-          <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
-            <EraserIcon className="h-6 w-6" />
+          <div className="rounded-lg aspect-square flex items-center justify-center transition-colors">
+            <EraserIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
-          <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
-            <PaintbucketIcon className="h-6 w-6" />
+          <div className="rounded-lg aspect-square flex items-center justify-center transition-colors">
+            <PaintbucketIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
-          <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
-            <LineIcon className="h-6 w-6" />
+          <div className="rounded-lg aspect-square flex items-center justify-center transition-colors">
+            <LineIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
-          <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
-            <CircleIcon className="h-6 w-6" />
+          <div className="rounded-lg aspect-square flex items-center justify-center transition-colors">
+            <CircleIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
-          <div className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors">
-            <SquareIcon className="h-6 w-6" />
+          <div className="rounded-lg aspect-square flex items-center justify-center transition-colors">
+            <SquareIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
           <div
-            className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors"
+            className="rounded-lg aspect-square flex items-center justify-center transition-colors"
             onClick={undo}
           >
-            <UndoIcon className="h-6 w-6" />
+            <UndoIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
           <div
-            className="rounded-lg aspect-square flex items-center justify-center bg-gray-900 hover:bg-gray-1000 transition-colors"
+            className="rounded-lg aspect-square flex items-center justify-center transition-colors"
             onClick={redo}
           >
-            <RedoIcon className="h-6 w-6" />
+            <RedoIcon className="h-8 w-8 text-[#B7B7B7] hover:text-white cursor-pointer transition-all" />
           </div>
         </div>
         <div className="flex-1 min-h-2 block w-full"></div>
         {/* This empty div will push the button to the bottom */}
         <button
-          className="w-full bg-gray-900 text-center rounded-lg font-bold pangram-sans flex items-center justify-center gap-2 py-1.5 mt-auto"
+          className="w-full bg-gray-900 text-center rounded-lg font-bold pangram-sans flex items-center justify-center gap-2 py-2 mt-auto ring-0 ring-offset-0 ring-gray-900 hover:ring-2 transition-all"
           onClick={() => {
             clear();
           }}

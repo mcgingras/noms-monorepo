@@ -1,3 +1,5 @@
+"use client";
+
 import RenderingNom from "@/components/RenderingNom";
 import { useTraitEditorContext } from "@/stores/traitEditor/context";
 import {
@@ -13,12 +15,23 @@ import {
   useWaitForTransactionReceipt,
   useAccount,
 } from "wagmi";
-import { TRAIT_ADDRESS } from "@/lib/constants";
+import {
+  TRAIT_ADDRESS,
+  FREE_MINT_MODULE_ADDRESS,
+  PAID_MINT_MODULE_ADDRESS,
+} from "@/lib/constants";
 import { nomTraitsAbi } from "../../../../../ponder/foundry/abis";
 import { useForm, Controller } from "react-hook-form";
 
 const MODULE_TYPES = ["Free", "Paid", "Whitelist", "Capped"];
 const TRAIT_TYPES = ["Head", "Body", "Accessory", "Glasses", "Other"];
+
+const moduleAddresses = {
+  Free: FREE_MINT_MODULE_ADDRESS,
+  Paid: PAID_MINT_MODULE_ADDRESS,
+  Whitelist: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+  Fixed: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+};
 
 const CreateTraitModal = ({
   isOpen,
@@ -27,26 +40,25 @@ const CreateTraitModal = ({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) => {
-  const { data, writeContract } = useWriteContract();
+  const { data, writeContract, isPending } = useWriteContract();
   const { isLoading, isSuccess } = useWaitForTransactionReceipt({
     hash: data,
   });
   const { address } = useAccount();
-
   const { register, handleSubmit, control } = useForm();
 
   const onSubmit = async (data: any) => {
     writeContract({
       address: TRAIT_ADDRESS,
       abi: nomTraitsAbi,
-      functionName: "registerTrait",
-      // functionName: "registerTraitWithMintModule",
+      functionName: "registerTraitWithMintModule",
       args: [
         customLayer!.trait.rleBytes as `0x${string}`,
         data.name,
         data.type,
         data.description,
         address!,
+        moduleAddresses[data.mintCriteria as keyof typeof moduleAddresses],
       ],
     });
   };
@@ -154,7 +166,11 @@ const CreateTraitModal = ({
                 className="bg-blue-500 text-white rounded-md p-2 pangram-sans font-bold"
                 type="submit"
               >
-                Create trait
+                {isPending
+                  ? "Transaction pending..."
+                  : isLoading
+                    ? "Creating trait..."
+                    : "Create trait"}
               </button>
             </div>
           </div>
